@@ -33,12 +33,12 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadComponent: () => import('./features/auth/login/login/login.component').then(m => m.LoginComponent),
+        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         title: 'Cinephoria - Connexion'
       },
       {
         path: 'register',
-        loadComponent: () => import('./features/auth/login/login/login.component').then(m => m.LoginComponent),
+        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         title: 'Cinephoria - Inscription'
       },
       {
@@ -57,7 +57,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/user/dashboard/user-dashboard/user-dashboard.component').then(m => m.UserDashboardComponent),
+        loadComponent: () => import('./features/user/dashboard/user-dashboard.component').then(m => m.UserDashboardComponent),
         title: 'Cinephoria - Mon Espace'
       },
       {
@@ -92,7 +92,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/management/dashboard/management-dashboard/management-dashboard.component').then(m => m.ManagementDashboardComponent),
+        loadComponent: () => import('./features/management/dashboard/management-dashboard.component').then(m => m.ManagementDashboardComponent),
         title: 'Cinephoria - Tableau de Bord Employé'
       },
       {
@@ -137,7 +137,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/management/dashboard/management-dashboard/management-dashboard.component').then(m => m.ManagementDashboardComponent),
+        loadComponent: () => import('./features/management/dashboard/management-dashboard.component').then(m => m.ManagementDashboardComponent),
         title: 'Cinephoria - Tableau de Bord Admin'
       },
       {
@@ -186,7 +186,7 @@ export const routes: Routes = [
   // Route 404
   {
     path: '**',
-    loadComponent: () => import('./features/public/not-found/not-found/not-found.component').then(m => m.NotFoundComponent),
+    loadComponent: () => import('./features/public/not-found/not-found.component').then(m => m.NotFoundComponent),
     title: 'Cinephoria - Page Non Trouvée'
   }
 ];
