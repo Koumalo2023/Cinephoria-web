@@ -1,0 +1,24 @@
+<div class="textarea-container">
+  <textarea
+    [class]="textareaClasses"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [required]="required"
+    [rows]="rows"
+    [maxLength]="maxLength"
+    [value]="value"
+    (input)="onInputChange($event)"
+    (blur)="onTouched()"
+  ></textarea>
+
+  <!-- Indicateur de limite de caractères -->
+  <div
+    *ngIf="maxLength"
+    class="textarea__counter"
+    [class.textarea__counter--near-limit]="isNearLimit && !isOverLimit"
+    [class.textarea__counter--over-limit]="isOverLimit"
+  >
+    {{ remainingCharacters }} / {{ maxLength }}
+  </div>
+</div>

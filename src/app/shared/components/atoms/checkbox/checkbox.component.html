@@ -1,1 +1,23 @@
-<p>checkbox works!</p>
+<label
+  [class]="checkboxClasses"
+  (click)="toggle()"
+  (keydown)="onKeydown($event)"
+  tabindex="0"
+  class="checkbox-wrapper">
+  
+  <span class="checkbox__input">
+    <span class="checkbox__control">
+      <span *ngIf="value && !indeterminate" class="checkbox__checkmark">
+        <i class="fas fa-check"></i>
+      </span>
+      <span *ngIf="indeterminate" class="checkbox__indeterminate">
+        <i class="fas fa-minus"></i>
+      </span>
+    </span>
+  </span>
+  
+  <span *ngIf="label" class="checkbox__label">
+    {{ label }}
+    <span *ngIf="required" class="checkbox__required">*</span>
+  </span>
+</label>

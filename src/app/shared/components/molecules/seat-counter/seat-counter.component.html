@@ -1,1 +1,110 @@
-<p>seat-counter works!</p>
+<div class="seat-counter" [class.compact]="compact">
+  <!-- En-tête du compteur -->
+  <div class="counter-header">
+    <h3 class="counter-title">Résumé de sélection</h3>
+    
+    <div class="counter-stats">
+      <app-badge 
+        [variant]="progressVariant" 
+        size="small">
+        {{ seatCount.total }} / {{ maxSeats }} sièges
+      </app-badge>
+      
+      <span class="total-price" *ngIf="seatCount.total > 0">
+        {{ totalPrice }}€
+      </span>
+    </div>
+  </div>
+
+  <!-- Barre de progression -->
+  <div class="progress-section">
+    <div class="progress-info">
+      <span class="progress-label">Progression</span>
+      <span class="progress-text">
+        {{ remainingSeats }} siège{{ remainingSeats !== 1 ? 's' : '' }} restant{{ remainingSeats !== 1 ? 's' : '' }}
+      </span>
+    </div>
+    
+    <div class="progress-bar">
+      <div 
+        class="progress-fill"
+        [class]="'progress-' + progressVariant"
+        [style.width.%]="progressPercentage">
+      </div>
+    </div>
+  </div>
+
+  <!-- Détails des sièges sélectionnés -->
+  <div class="seat-details" *ngIf="showDetails && seatCount.total > 0">
+    <h4 class="details-title">Détails des sièges</h4>
+    
+    <div class="seat-types">
+      <div
+        *ngFor="let item of getSeatTypes()"
+        class="seat-type-item">
+        
+        <div class="type-visual">
+          <div
+            class="type-color"
+            [style.background-color]="getSeatTypeColor(item.type)">
+            <app-icon
+              [name]="getSeatTypeIcon(item.type)"
+              size="small">
+            </app-icon>
+          </div>
+        </div>
+
+        <div class="type-info">
+          <span class="type-label">{{ getSeatTypeLabel(item.type) }}</span>
+          <span class="type-count">{{ item.count }} × {{ getSeatTypePrice(item.type) }}€</span>
+        </div>
+
+        <div class="type-total">
+          {{ item.count * getSeatTypePrice(item.type) }}€
+        </div>
+      </div>
+    </div>
+
+    <!-- Résumé compact -->
+    <div class="compact-summary" *ngIf="compact">
+      <span class="summary-text">{{ getSummaryText() }}</span>
+      <span class="summary-price">{{ totalPrice }}€</span>
+    </div>
+  </div>
+
+  <!-- Message d'information -->
+  <div class="counter-info" *ngIf="seatCount.total === 0">
+    <div class="info-message">
+      <app-icon name="info" size="small" variant="muted"></app-icon>
+      <span>Sélectionnez des sièges pour continuer</span>
+    </div>
+  </div>
+
+  <div class="counter-info" *ngIf="isMaxReached">
+    <div class="info-message info-warning">
+      <app-icon name="warning" size="small" variant="warning"></app-icon>
+      <span>Limite de {{ maxSeats }} sièges atteinte</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="counter-actions" *ngIf="showActions">
+    <app-button 
+      variant="ghost" 
+      size="small"
+      (clicked)="onClearSelection()"
+      [disabled]="seatCount.total === 0">
+      <app-icon name="trash" size="small"></app-icon>
+      Effacer
+    </app-button>
+    
+    <app-button 
+      variant="primary" 
+      size="small"
+      (clicked)="onProceedToCheckout()"
+      [disabled]="!canProceed">
+      <app-icon name="shopping-cart" size="small"></app-icon>
+      Procéder au paiement
+    </app-button>
+  </div>
+</div>

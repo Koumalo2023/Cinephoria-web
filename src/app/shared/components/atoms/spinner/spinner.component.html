@@ -1,1 +1,9 @@
-<p>spinner works!</p>
+<div class="spinner-wrapper">
+  <div [class]="spinnerClasses" class="spinner__loader">
+    <div class="spinner__circle"></div>
+  </div>
+  
+  <span *ngIf="label" class="spinner__label">
+    {{ label }}
+  </span>
+</div>

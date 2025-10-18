@@ -1,1 +1,18 @@
-<p>avatar works!</p>
+<div [class]="avatarClasses" class="avatar-wrapper">
+  <div class="avatar__content">
+    <img
+      *ngIf="hasImage"
+      [src]="src"
+      [alt]="alt"
+      (error)="onImageError($event)"
+      class="avatar__image">
+    
+    <div
+      *ngIf="!hasImage || fallbackText"
+      class="avatar__fallback">
+      {{ initials }}
+    </div>
+  </div>
+  
+  <span *ngIf="showStatus" class="avatar__status"></span>
+</div>

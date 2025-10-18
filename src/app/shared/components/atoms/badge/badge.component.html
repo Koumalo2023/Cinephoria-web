@@ -1,1 +1,15 @@
-<p>badge works!</p>
+<span
+  *ngIf="shouldShowBadge"
+  [class]="badgeClasses"
+  class="badge-wrapper">
+  
+  <span *ngIf="dot" class="badge__dot"></span>
+  
+  <span *ngIf="hasCount" class="badge__count">
+    {{ displayCount }}
+  </span>
+  
+  <span *ngIf="!dot && !hasCount" class="badge__content">
+    <ng-content></ng-content>
+  </span>
+</span>

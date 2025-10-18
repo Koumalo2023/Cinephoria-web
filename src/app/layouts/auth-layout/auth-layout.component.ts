@@ -1,258 +1,290 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+// Composant d'authentification
+import { AuthFormComponent } from '../../shared/components/organisms/auth-form/auth-form.component';
+import { AuthMode, AuthFormConfig } from '../../shared/components/organisms/auth-form/auth-form.component';
+import { LoginUserDto, RegisterUserDto, RequestPasswordResetDto } from '../../core/interfaces/core.interfaces';
 
 @Component({
   selector: 'app-auth-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
-    <div class="auth-layout">
-      <!-- Header -->
-      <header class="auth-header">
-        <div class="auth-header-container">
-          <a routerLink="/" class="auth-logo">
-            <h1>Cinephoria</h1>
-          </a>
-          <nav class="auth-nav">
-            <a routerLink="/" class="auth-nav-link">Retour à l'accueil</a>
-          </nav>
-        </div>
-      </header>
-
-      <!-- Main Content -->
-      <main class="auth-content">
-        <div class="auth-container">
-          <div class="auth-background">
-            <div class="auth-overlay">
-              <div class="auth-card">
-                <div class="auth-card-header">
-                  <h2 class="auth-title">{{ getPageTitle() }}</h2>
-                  <p class="auth-subtitle">Accédez à votre espace Cinephoria</p>
-                </div>
-                
-                <div class="auth-card-body">
-                  <router-outlet></router-outlet>
-                </div>
-                
-                <div class="auth-card-footer">
-                  <div class="auth-links">
-                    <a routerLink="/auth/login" *ngIf="!isLoginPage()" class="auth-link">
-                      Déjà un compte ? Se connecter
-                    </a>
-                    <a routerLink="/auth/register" *ngIf="!isRegisterPage()" class="auth-link">
-                      Pas encore de compte ? S'inscrire
-                    </a>
-                    <a routerLink="/" class="auth-link">
-                      ← Retour à l'accueil
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <!-- Footer -->
-      <footer class="auth-footer">
-        <div class="auth-footer-container">
-          <p>&copy; 2024 Cinephoria. Tous droits réservés.</p>
-        </div>
-      </footer>
-    </div>
-  `,
-  styles: [`
-    .auth-layout {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .auth-header {
-      background: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      padding: 1rem 0;
-    }
-
-    .auth-header-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .auth-logo {
-      color: #667eea;
-      text-decoration: none;
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    .auth-logo h1 {
-      margin: 0;
-    }
-
-    .auth-nav-link {
-      color: #667eea;
-      text-decoration: none;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-    }
-
-    .auth-nav-link:hover {
-      background-color: rgba(102, 126, 234, 0.1);
-    }
-
-    .auth-content {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .auth-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    .auth-background {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-
-    .auth-overlay {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .auth-card {
-      min-width: 400px;
-      max-width: 500px;
-      padding: 2rem;
-    }
-
-    .auth-card-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .auth-title {
-      color: #2d3748;
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem 0;
-    }
-
-    .auth-subtitle {
-      color: #718096;
-      font-size: 1rem;
-      margin: 0;
-    }
-
-    .auth-card-body {
-      margin-bottom: 2rem;
-    }
-
-    .auth-card-footer {
-      border-top: 1px solid #e2e8f0;
-      padding-top: 1.5rem;
-    }
-
-    .auth-links {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      text-align: center;
-    }
-
-    .auth-link {
-      color: #667eea;
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: color 0.3s ease;
-    }
-
-    .auth-link:hover {
-      color: #764ba2;
-      text-decoration: underline;
-    }
-
-    .auth-footer {
-      background: white;
-      border-top: 1px solid #e2e8f0;
-      padding: 1rem 0;
-    }
-
-    .auth-footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      text-align: center;
-      color: #718096;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .auth-header-container {
-        padding: 0 1rem;
-      }
-
-      .auth-background {
-        padding: 1rem;
-      }
-
-      .auth-card {
-        min-width: unset;
-        width: 100%;
-        padding: 1.5rem;
-      }
-
-      .auth-title {
-        font-size: 1.5rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .auth-card {
-        padding: 1rem;
-      }
-
-      .auth-header-container {
-        flex-direction: column;
-        gap: 1rem;
-      }
-    }
-  `]
+  imports: [
+    CommonModule,
+    RouterModule,
+    AuthFormComponent
+  ],
+  templateUrl: './auth-layout.component.html',
+  styleUrls: ['./auth-layout.component.scss']
 })
-export class AuthLayoutComponent {
-  getPageTitle(): string {
-    const currentPath = window.location.pathname;
-    if (currentPath.includes('/register')) {
-      return 'Créer un compte';
-    } else if (currentPath.includes('/login')) {
-      return 'Se connecter';
+export class AuthLayoutComponent implements OnInit {
+  // Configuration du layout d'authentification
+  currentYear: number = new Date().getFullYear();
+  
+  // Mode d'authentification actuel
+  currentMode: AuthMode = 'login';
+  
+  // Configuration du formulaire d'authentification
+  authFormConfig: AuthFormConfig = {
+    mode: 'login',
+    title: 'Connexion à votre compte',
+    subtitle: 'Connectez-vous pour accéder à votre espace personnel',
+    showRememberMe: true,
+    showSocialLogin: true,
+    showForgotPassword: true,
+    showSignUpLink: true,
+    showLoginLink: true,
+    requireEmailVerification: false,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
+    allowedProviders: ['email', 'google', 'facebook', 'apple']
+  };
+
+  // État du composant
+  loading: boolean = false;
+  errorMessage: string = '';
+  successMessage: string = '';
+  
+  // Messages et textes pour les pages d'authentification
+  authMessages = {
+    welcome: "Rejoignez la communauté Cinephoria",
+    description: "Accédez à votre espace personnel pour gérer vos réservations, découvrir des films et profiter d'offres exclusives",
+    benefits: [
+      "Réservation rapide et sécurisée",
+      "Historique de vos séances",
+      "Recommandations personnalisées",
+      "Offres spéciales membres"
+    ]
+  };
+
+  // Données pour le carrousel (simulées)
+  authCarousel = [
+    {
+      id: 1,
+      title: "Découvrez les derniers films",
+      description: "Accédez en avant-première aux bandes-annonces et aux sorties",
+      image: "/assets/auth/carousel-1.jpg",
+      icon: "🎬"
+    },
+    {
+      id: 2,
+      title: "Réservation simplifiée",
+      description: "Choisissez vos places en quelques clics, sans attente",
+      image: "/assets/auth/carousel-2.jpg",
+      icon: "⚡"
+    },
+    {
+      id: 3,
+      title: "Expérience personnalisée",
+      description: "Recevez des recommandations basées sur vos préférences",
+      image: "/assets/auth/carousel-3.jpg",
+      icon: "❤️"
     }
-    return 'Authentification';
+  ];
+
+  currentSlide: number = 0;
+
+  ngOnInit(): void {
+    // Initialisation du layout d'authentification
+    console.log('Auth Layout initialisé');
+    
+    // Configuration initiale basée sur l'URL ou le mode par défaut
+    this.initializeAuthMode();
+    
+    // Démarrage du carrousel automatique
+    this.startCarousel();
   }
 
+  // Initialisation du mode d'authentification
+  private initializeAuthMode(): void {
+    // En production, on détecterait le mode depuis la route
+    // Pour l'instant, on utilise le mode par défaut
+    this.updateFormConfig();
+  }
+
+  // Mise à jour de la configuration du formulaire
+  private updateFormConfig(): void {
+    switch (this.currentMode) {
+      case 'login':
+        this.authFormConfig = {
+          ...this.authFormConfig,
+          mode: 'login',
+          title: 'Connexion à votre compte',
+          subtitle: 'Connectez-vous pour accéder à votre espace personnel',
+          showSignUpLink: true,
+          showLoginLink: false
+        };
+        break;
+        
+      case 'register':
+        this.authFormConfig = {
+          ...this.authFormConfig,
+          mode: 'register',
+          title: 'Créer votre compte',
+          subtitle: 'Rejoignez la communauté Cinephoria en quelques secondes',
+          showSignUpLink: false,
+          showLoginLink: true
+        };
+        break;
+        
+      case 'forgot-password':
+        this.authFormConfig = {
+          ...this.authFormConfig,
+          mode: 'forgot-password',
+          title: 'Mot de passe oublié',
+          subtitle: 'Entrez votre email pour recevoir un lien de réinitialisation',
+          showSocialLogin: false,
+          showSignUpLink: false,
+          showLoginLink: true
+        };
+        break;
+    }
+  }
+
+  // Démarrage du carrousel automatique
+  private startCarousel(): void {
+    setInterval(() => {
+      this.nextSlide();
+    }, 5000); // Change de slide toutes les 5 secondes
+  }
+
+  // Passage au slide suivant
+  nextSlide(): void {
+    this.currentSlide = (this.currentSlide + 1) % this.authCarousel.length;
+  }
+
+  // Passage au slide précédent
+  prevSlide(): void {
+    this.currentSlide = (this.currentSlide - 1 + this.authCarousel.length) % this.authCarousel.length;
+  }
+
+  // Aller à un slide spécifique
+  goToSlide(index: number): void {
+    this.currentSlide = index;
+  }
+
+  // Obtenir la classe CSS pour un indicateur de slide
+  getSlideIndicatorClass(index: number): string {
+    return index === this.currentSlide ? 'indicator active' : 'indicator';
+  }
+
+  // Obtenir la classe CSS pour un slide
+  getSlideClass(index: number): string {
+    return index === this.currentSlide ? 'slide active' : 'slide';
+  }
+
+  // Vérifier si on est sur la page de connexion
   isLoginPage(): boolean {
-    return window.location.pathname.includes('/login');
+    // Simulation - en production, on vérifierait la route actuelle
+    return true;
   }
 
+  // Vérifier si on est sur la page d'inscription
   isRegisterPage(): boolean {
-    return window.location.pathname.includes('/register');
+    // Simulation - en production, on vérifierait la route actuelle
+    return false;
+  }
+
+  // Gestion des événements d'authentification
+  onAuthSubmit(authData: LoginUserDto | RegisterUserDto): void {
+    console.log('Données d\'authentification soumises:', authData);
+    this.loading = true;
+    this.errorMessage = '';
+    
+    // Simulation de l'authentification
+    setTimeout(() => {
+      this.loading = false;
+      
+      if (this.currentMode === 'login') {
+        const loginData = authData as LoginUserDto;
+        if (loginData.email === 'demo@cinephoria.com' && loginData.password === 'password123') {
+          this.successMessage = 'Connexion réussie !';
+          console.log('Utilisateur connecté avec succès');
+          // Redirection vers la page d'accueil
+        } else {
+          this.errorMessage = 'Email ou mot de passe incorrect';
+        }
+      } else if (this.currentMode === 'register') {
+        this.successMessage = 'Compte créé avec succès ! Un email de confirmation a été envoyé.';
+        console.log('Nouvel utilisateur inscrit');
+        // Redirection vers la page de confirmation
+      }
+    }, 2000);
+  }
+
+  // Authentification via fournisseur externe
+  onProviderAuth(provider: string): void {
+    console.log(`Authentification via ${provider}`);
+    this.loading = true;
+    this.errorMessage = '';
+    
+    // Simulation de l'authentification sociale
+    setTimeout(() => {
+      this.loading = false;
+      this.successMessage = `Connexion réussie avec ${provider} !`;
+      console.log(`Utilisateur authentifié via ${provider}`);
+    }, 1500);
+  }
+
+  // Changement de mode d'authentification
+  onModeChange(newMode: AuthMode): void {
+    console.log(`Changement de mode: ${this.currentMode} -> ${newMode}`);
+    this.currentMode = newMode;
+    this.updateFormConfig();
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  // Réinitialisation du mot de passe
+  onPasswordReset(resetData: RequestPasswordResetDto): void {
+    console.log('Demande de réinitialisation de mot de passe:', resetData);
+    this.loading = true;
+    
+    setTimeout(() => {
+      this.loading = false;
+      this.successMessage = 'Un lien de réinitialisation a été envoyé à votre adresse email.';
+      console.log('Email de réinitialisation envoyé');
+    }, 1500);
+  }
+
+  // Obtenir le titre de la page
+  getPageTitle(): string {
+    return this.authFormConfig.title;
+  }
+
+  // Obtenir le sous-titre de la page
+  getPageSubtitle(): string {
+    return this.authFormConfig.subtitle || '';
+  }
+
+  // Obtenir le texte du lien alternatif
+  getAlternateLinkText(): string {
+    if (this.currentMode === 'login') {
+      return "Vous n'avez pas de compte ?";
+    } else if (this.currentMode === 'register') {
+      return "Vous avez déjà un compte ?";
+    }
+    return "";
+  }
+
+  // Obtenir le texte du lien alternatif
+  getAlternateLinkAction(): string {
+    if (this.currentMode === 'login') {
+      return "S'inscrire";
+    } else if (this.currentMode === 'register') {
+      return "Se connecter";
+    }
+    return "";
+  }
+
+  // Obtenir la route du lien alternatif
+  getAlternateLinkRoute(): string[] {
+    if (this.currentMode === 'login') {
+      return ['/register'];
+    } else if (this.currentMode === 'register') {
+      return ['/login'];
+    }
+    return ['/'];
   }
 }

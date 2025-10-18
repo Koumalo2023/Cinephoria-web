@@ -1,1 +1,481 @@
-<p>movie-details-page works!</p>
+<div class="{{ getContainerClasses() }}">
+  <!-- En-tête de la page avec l'image de fond -->
+  <header class="movie-header" [style.backgroundImage]="'url(' + movieData?.movie?.backdropUrl + ')'">
+    <div class="movie-header__overlay"></div>
+    <div class="movie-header__content">
+      <div class="movie-poster-section">
+        <img 
+          [src]="movieData?.movie?.posterUrls || movieData?.movie?.posterUrl"
+          [alt]="movieData?.movie?.title"
+          class="movie-poster">
+        
+        <!-- Actions rapides -->
+        <div class="movie-actions">
+          <app-button
+            [variant]="'primary'"
+            [size]="'large'"
+            [fullWidth]="true"
+            (click)="onTrailerPlay()"
+            [disabled]="!movieData?.movie?.trailerUrl">
+            <app-icon name="play" size="small"></app-icon>
+            Bande-annonce
+          </app-button>
+
+          <div class="action-buttons">
+            <app-button
+              [variant]="movieData?.isFavorite ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="onFavoriteToggle()">
+              <app-icon 
+                [name]="movieData?.isFavorite ? 'heart-solid' : 'heart'" 
+                size="small">
+              </app-icon>
+            </app-button>
+
+            <app-button
+              [variant]="movieData?.isInWatchlist ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="onWatchlistToggle()">
+              <app-icon 
+                [name]="movieData?.isInWatchlist ? 'bookmark-solid' : 'bookmark'" 
+                size="small">
+              </app-icon>
+            </app-button>
+
+            <app-button
+              [variant]="movieData?.isWatched ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="onWatchedToggle()">
+              <app-icon 
+                [name]="movieData?.isWatched ? 'eye-solid' : 'eye'" 
+                size="small">
+              </app-icon>
+            </app-button>
+
+            <app-button
+              [variant]="'secondary'"
+              [size]="'small'"
+              (click)="onShare()">
+              <app-icon name="share" size="small"></app-icon>
+            </app-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="movie-info-section">
+        <div class="movie-title-section">
+          <h1 class="movie-title">{{ movieData?.movie?.title }}</h1>
+          @if (movieData?.movie?.originalTitle && movieData?.movie?.originalTitle !== movieData?.movie?.title) {
+            <h2 class="movie-original-title">{{ movieData?.movie?.originalTitle }}</h2>
+          }
+          
+          <div class="movie-meta">
+            <span class="movie-year">{{ movieData?.movie?.releaseDate | date:'yyyy' }}</span>
+            <span class="movie-duration">{{ movieData?.movie?.duration }}</span>
+            <span class="movie-rating">{{ movieData?.movie?.averageRating?.toFixed(1) || 0 }}/10</span>
+            <app-badge [variant]="'secondary'">{{ movieData?.movie?.genre }}</app-badge>
+          </div>
+        </div>
+
+        <!-- Note moyenne -->
+        <div class="movie-rating-section">
+          <div class="average-rating">
+            <div class="rating-score {{ getRatingColor(movieData?.movie?.averageRating || 0) }}">
+              {{ movieData?.movie?.averageRating?.toFixed(1) || 0 }}
+            </div>
+            <div class="rating-details">
+              <div class="rating-stars">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <span class="star {{ star <= (movieData?.movie?.averageRating || 0) / 2 ? 'filled' : '' }}">★</span>
+                }
+              </div>
+              <span class="rating-count">{{ movieData?.reviews?.length || 0 }} votes</span>
+            </div>
+          </div>
+
+          <!-- Note utilisateur -->
+          <div class="user-rating">
+            <h3>Votre note</h3>
+            <div class="user-rating-stars">
+              @for (star of [1,2,3,4,5]; track star) {
+                <span
+                  class="star {{ star <= (movieData?.userRating || 0) ? 'filled' : '' }}"
+                  (click)="onRatingSubmit(star)">
+                  ★
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Synopsis -->
+        <div class="movie-synopsis">
+          <h3>Synopsis</h3>
+          <p>{{ movieData?.movie?.description }}</p>
+        </div>
+
+        <!-- Informations détaillées -->
+        <div class="movie-details-grid">
+          @let directors = movieData?.movie?.director;
+          @if (directors && directors.length > 0) {
+            <div class="detail-item">
+              <span class="detail-label">Réalisateur</span>
+              <span class="detail-value">{{ directors.join(', ') }}</span>
+            </div>
+          }
+          
+          @if (movieData?.movie?.releaseDate) {
+            <div class="detail-item">
+              <span class="detail-label">Date de sortie</span>
+              <span class="detail-value">{{ formatDate(movieData?.movie?.releaseDate?.toString() || '') }}</span>
+            </div>
+          }
+          
+          @if (movieData?.movie?.budget) {
+            <div class="detail-item">
+              <span class="detail-label">Budget</span>
+              <span class="detail-value">{{ formatCurrency(movieData?.movie?.budget || 0) }}</span>
+            </div>
+          }
+          
+          @if (movieData?.movie?.revenue) {
+            <div class="detail-item">
+              <span class="detail-label">Recettes</span>
+              <span class="detail-value">{{ formatCurrency(movieData?.movie?.revenue || 0) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation par onglets -->
+  <nav class="movie-tabs">
+    @for (tab of tabs; track tab.id) {
+      <button
+        class="{{ getTabClasses(tab.id) }}"
+        (click)="onTabChange(tab.id)">
+        <app-icon [name]="tab.icon" size="small"></app-icon>
+        <span class="tab-label">{{ tab.label }}</span>
+        @if (tab.badge && tab.badge > 0) {
+          <app-badge [variant]="'primary'" [size]="'small'">
+            {{ tab.badge }}
+          </app-badge>
+        }
+      </button>
+    }
+  </nav>
+
+  <!-- Contenu principal -->
+  <main class="movie-content">
+    <!-- État de chargement -->
+    @if (loading) {
+      <div class="movie-loading">
+        <app-icon name="spinner" size="large" class="spinning"></app-icon>
+        <p>Chargement des détails du film...</p>
+      </div>
+    }
+
+    <!-- État d'erreur -->
+    @else if (error) {
+      <div class="movie-error">
+        <app-icon name="warning" size="large"></app-icon>
+        <h3>Erreur de chargement</h3>
+        <p>{{ error }}</p>
+        <app-button
+          [variant]="'primary'"
+          (click)="clearError()">
+          Réessayer
+        </app-button>
+      </div>
+    }
+
+    <!-- Contenu des onglets -->
+    @else if (movieData) {
+      <div class="tab-content">
+        <!-- Onglet Vue d'ensemble -->
+        @if (activeTab === 'overview') {
+          <div class="overview-content">
+            <!-- Distribution principale -->
+            <section class="cast-section">
+              <h2 class="section-title">Distribution</h2>
+              <div class="cast-grid">
+                @for (castMember of mainCast; track castMember.id) {
+                  <div 
+                    class="cast-member"
+                    (click)="onCastMemberClick(castMember)">
+                    <img 
+                      [src]="castMember.profilePath" 
+                      [alt]="castMember.name"
+                      class="cast-photo">
+                    <div class="cast-info">
+                      <h4 class="cast-name">{{ castMember.name }}</h4>
+                      <p class="cast-character">{{ castMember.character }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+
+            <!-- Équipe technique -->
+            <section class="crew-section">
+              <h2 class="section-title">Équipe technique</h2>
+              <div class="crew-grid">
+                @if (directors && directors.length > 0) {
+                  <div class="crew-category">
+                    <h3>Réalisateur{{ directors.length > 1 ? 's' : '' }}</h3>
+                    @for (director of directors; track director) {
+                      <p class="crew-member">{{ director }}</p>
+                    }
+                  </div>
+                }
+                
+                @let writersList = writers;
+                @if (writersList && writersList.length > 0) {
+                  <div class="crew-category">
+                    <h3>Scénariste{{ writersList.length > 1 ? 's' : '' }}</h3>
+                    @for (writer of writersList; track writer.id) {
+                      <p class="crew-member">{{ writer.name }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+        }
+
+        <!-- Onglet Séances -->
+        @if (activeTab === 'showtimes') {
+          <div class="showtimes-content">
+            <!-- Filtres -->
+            <div class="showtimes-filters">
+              <div class="filter-group">
+                <label class="filter-label">Date</label>
+                <select 
+                  class="filter-select"
+                  [value]="selectedDate"
+                  (change)="onDateChange($any($event.target).value)">
+                  @for (date of availableDates; track date) {
+                    <option [value]="date">{{ formatDate(date) }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Cinéma</label>
+                <select 
+                  class="filter-select"
+                  [value]="selectedTheater || ''"
+                  (change)="onTheaterChange($any($event.target).value)">
+                  <option value="">Tous les cinémas</option>
+                  @for (theater of availableTheaters; track theater) {
+                    <option [value]="theater">{{ theater }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Format</label>
+                <select 
+                  class="filter-select"
+                  [value]="selectedFormat || ''"
+                  (change)="onFormatChange($any($event.target).value)">
+                  <option value="">Tous les formats</option>
+                  @for (format of availableFormats; track format) {
+                    <option [value]="format">{{ format }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- Liste des séances -->
+            <div class="showtimes-list">
+              @for (theater of filteredTheaters; track theater.theaterId) {
+                <div class="theater-showtimes">
+                  <div class="theater-info">
+                    <h3>{{ theater.name }}</h3>
+                    <p>Capacité: {{ theater.capacity }} places</p>
+                    <div class="theater-facilities">
+                      @if (theater.hasThreeD) {
+                        <span class="facility">3D</span>
+                      }
+                      @if (theater.hasFourDX) {
+                        <span class="facility">4DX</span>
+                      }
+                      @if (theater.hasDolbyAtmos) {
+                        <span class="facility">Dolby Atmos</span>
+                      }
+                    </div>
+                  </div>
+                  
+                  <div class="showtimes-grid">
+                    @for (showtime of getShowtimesForTheater(theater.theaterId); track showtime.showtimeId) {
+                      <div class="showtime-item" (click)="onShowtimeSelect(showtime)">
+                        <span class="showtime-time">{{ getShowtimeTime(showtime.startTime) }}</span>
+                        <span class="showtime-format">{{ showtime.quality }}D</span>
+                        <span class="showtime-price">{{ showtime.price }}€</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+              
+              @if (filteredTheaters.length === 0) {
+                <div class="no-showtimes">
+                  <app-icon name="calendar" size="xl"></app-icon>
+                  <h3>Aucune séance disponible</h3>
+                  <p>Aucune séance ne correspond à vos critères de recherche.</p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Onglet Avis -->
+        @if (activeTab === 'reviews') {
+          <div class="reviews-content">
+            <!-- Résumé des notes -->
+            <section class="reviews-summary">
+              <h2 class="section-title">Avis des spectateurs</h2>
+              <div class="rating-distribution">
+                <div class="distribution-chart">
+                  @for (item of ratingDistribution; track item.rating) {
+                    <div class="distribution-bar">
+                      <span class="bar-rating">{{ item.rating }}</span>
+                      <app-progress-bar
+                        [value]="item.percentage"
+                        [max]="100"
+                        [size]="'small'">
+                      </app-progress-bar>
+                      <span class="bar-count">{{ item.count }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </section>
+
+            <!-- Liste des avis -->
+            <section class="reviews-list">
+              @for (review of movieData.reviews; track review.id) {
+                <div class="review-item">
+                  <div class="review-header">
+                    <div class="reviewer-info">
+                      <img 
+                        [src]="review.userAvatar" 
+                        [alt]="review.userName"
+                        class="reviewer-avatar">
+                      <div class="reviewer-details">
+                        <h4 class="reviewer-name">{{ review.userName }}</h4>
+                        @if (review.isVerified) {
+                          <app-badge [variant]="'success'" [size]="'small'">
+                            Vérifié
+                          </app-badge>
+                        }
+                      </div>
+                    </div>
+                    <div class="review-meta">
+                      <div class="review-stars">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <span class="star {{ star <= review.rating ? 'filled' : '' }}">★</span>
+                        }
+                      </div>
+                      <span class="review-date">{{ formatDate(review.date) }}</span>
+                    </div>
+                  </div>
+                  
+                  <h3 class="review-title">{{ review.title }}</h3>
+                  <p class="review-content">{{ review.content }}</p>
+                  
+                  <div class="review-actions">
+                    <app-button
+                      [variant]="'ghost'"
+                      [size]="'small'">
+                      <app-icon name="thumbs-up" size="small"></app-icon>
+                      Utile ({{ review.helpful }})
+                    </app-button>
+                  </div>
+                </div>
+              }
+              
+              @if (movieData.reviews.length === 0) {
+                <div class="no-reviews">
+                  <app-icon name="star" size="xl"></app-icon>
+                  <h3>Aucun avis pour le moment</h3>
+                  <p>Soyez le premier à donner votre avis sur ce film !</p>
+                </div>
+              }
+            </section>
+          </div>
+        }
+
+        <!-- Onglet Casting -->
+        @if (activeTab === 'cast') {
+          <div class="cast-content">
+            <section class="full-cast-section">
+              <h2 class="section-title">Casting complet</h2>
+              <div class="cast-grid cast-grid--full">
+                @for (castMember of movieData.cast; track castMember.id) {
+                  <div 
+                    class="cast-member"
+                    (click)="onCastMemberClick(castMember)">
+                    <img 
+                      [src]="castMember.profilePath" 
+                      [alt]="castMember.name"
+                      class="cast-photo">
+                    <div class="cast-info">
+                      <h4 class="cast-name">{{ castMember.name }}</h4>
+                      <p class="cast-character">{{ castMember.character }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+        }
+
+        <!-- Onglet Films similaires -->
+        @if (activeTab === 'similar') {
+          <div class="similar-content">
+            <section class="similar-movies-section">
+              <h2 class="section-title">Films similaires</h2>
+              <div class="similar-movies-grid">
+                @for (movie of movieData.similarMovies; track movie.id) {
+                  <div class="similar-movie-card" (click)="onSimilarMovieClick(movie)">
+                    <img [src]="movie.posterUrl" [alt]="movie.title" class="movie-poster">
+                    <div class="movie-info">
+                      <h4 class="movie-title">{{ movie.title }}</h4>
+                      <p class="movie-year">{{ movie.year }}</p>
+                      <div class="movie-rating">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <span class="star {{ star <= movie.rating ? 'filled' : '' }}">★</span>
+                        }
+                        <span class="rating-value">{{ movie.rating.toFixed(1) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              
+              @if (movieData.similarMovies.length === 0) {
+                <div class="no-similar">
+                  <app-icon name="film" size="xl"></app-icon>
+                  <h3>Aucun film similaire trouvé</h3>
+                  <p>Découvrez d'autres films dans les mêmes genres.</p>
+                </div>
+              }
+            </section>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- État vide -->
+    @else {
+      <div class="movie-empty">
+        <app-icon name="film" size="xl"></app-icon>
+        <h3>Aucune donnée de film disponible</h3>
+        <p>Impossible de charger les détails du film</p>
+      </div>
+    }
+  </main>
+</div>

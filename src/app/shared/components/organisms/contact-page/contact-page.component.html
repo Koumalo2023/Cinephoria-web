@@ -1,1 +1,287 @@
-<p>contact-page works!</p>
+<div class="contact-page">
+  <!-- En-tête -->
+  <header class="contact-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">
+          <app-icon name="mail" size="large"></app-icon>
+          Contactez-nous
+        </h1>
+        <p class="subtitle">Nous sommes là pour répondre à toutes vos questions</p>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-item">
+          <div class="stat-value">24h</div>
+          <div class="stat-label">Délai de réponse</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">98%</div>
+          <div class="stat-label">Satisfaction client</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">7j/7</div>
+          <div class="stat-label">Support disponible</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu principal -->
+  <main class="contact-content">
+    <div class="content-grid">
+      <!-- Formulaire de contact -->
+      <section class="contact-form-section">
+        <div class="section-header">
+          <h2 class="section-title">Envoyez-nous un message</h2>
+          <p class="section-description">
+            Remplissez le formulaire ci-dessous et notre équipe vous répondra dans les plus brefs délais.
+          </p>
+        </div>
+
+        <!-- Message de succès -->
+        <div *ngIf="isSubmitted" class="success-message">
+          <div class="message-content">
+            <app-icon name="check-circle" size="large" class="success-icon"></app-icon>
+            <div class="message-text">
+              <h3>Message envoyé avec succès !</h3>
+              <p>Nous avons bien reçu votre message et nous vous répondrons dans les 24 heures.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulaire -->
+        <form *ngIf="!isSubmitted" [formGroup]="contactForm" class="contact-form">
+          <div class="form-row">
+            <app-input
+              label="Nom complet"
+              formControlName="name"
+              placeholder="Votre nom et prénom"
+              [required]="true"
+              [errorMessage]="name?.invalid && name?.touched ? 'Le nom est requis (min. 2 caractères)' : ''">
+            </app-input>
+
+            <app-input
+              label="Email"
+              formControlName="email"
+              type="email"
+              placeholder="votre@email.com"
+              [required]="true"
+              [errorMessage]="email?.invalid && email?.touched ? 'Email invalide' : ''">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              label="Sujet"
+              formControlName="subject"
+              placeholder="Objet de votre message"
+              [required]="true"
+              [errorMessage]="subject?.invalid && subject?.touched ? 'Le sujet est requis (min. 5 caractères)' : ''">
+            </app-input>
+
+            <app-select
+              label="Catégorie"
+              formControlName="category"
+              placeholder="Sélectionnez une catégorie"
+              [required]="true">
+            </app-select>
+          </div>
+
+          <div class="form-row">
+            <app-select
+              label="Priorité"
+              formControlName="priority"
+              placeholder="Sélectionnez une priorité"
+              [required]="true">
+            </app-select>
+          </div>
+
+          <div class="form-row">
+            <app-textarea
+              label="Message"
+              formControlName="message"
+              placeholder="Décrivez votre demande en détail..."
+              [rows]="6"
+              [required]="true"
+              [required]="true">
+            </app-textarea>
+          </div>
+
+          <div class="form-consent">
+            <app-checkbox
+              label="J'accepte que mes données personnelles soient utilisées pour traiter ma demande"
+              formControlName="consent"
+              [required]="true"
+              [required]="true">
+            </app-checkbox>
+          </div>
+
+          <div class="form-actions">
+            <app-button 
+              variant="primary" 
+              (clicked)="onSubmit()"
+              [disabled]="!contactForm.valid || isSubmitting"
+              [loading]="isSubmitting">
+              <app-icon name="send"></app-icon>
+              {{ isSubmitting ? 'Envoi en cours...' : 'Envoyer le message' }}
+            </app-button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Informations de contact -->
+      <aside class="contact-info-section">
+        <!-- Coordonnées -->
+        <div class="info-card">
+          <h3 class="card-title">Nos coordonnées</h3>
+          <div class="contact-methods">
+            <div *ngFor="let info of contactInfos" class="contact-method">
+              <div class="method-icon">
+                <app-icon [name]="info.icon"></app-icon>
+              </div>
+              <div class="method-details">
+                <div class="method-label">{{ info.label }}</div>
+                <div class="method-value">{{ info.value }}</div>
+                <div class="method-description">{{ info.description }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Équipe de support -->
+        <div class="info-card">
+          <h3 class="card-title">Notre équipe</h3>
+          <p class="card-description">
+            Notre équipe dédiée est là pour vous accompagner dans toutes vos démarches.
+          </p>
+          
+          <div class="team-list">
+            <div *ngFor="let member of supportTeam" class="team-member">
+              <div class="member-avatar">
+                <img [src]="member.avatar" [alt]="member.name" class="avatar-image">
+              </div>
+              <div class="member-info">
+                <h4 class="member-name">{{ member.name }}</h4>
+                <p class="member-role">{{ member.role }}</p>
+                <div class="member-contact">
+                  <div class="contact-item">
+                    <app-icon name="mail" size="small"></app-icon>
+                    {{ member.email }}
+                  </div>
+                  <div class="contact-item">
+                    <app-icon name="phone" size="small"></app-icon>
+                    {{ member.phone }}
+                  </div>
+                </div>
+                <div class="member-specialties">
+                  <app-chip 
+                    *ngFor="let specialty of member.specialties" 
+                    {{ specialty }}
+                    size="small">
+                  </app-chip>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <div class="section-header">
+        <h2 class="section-title">Questions fréquentes</h2>
+        <p class="section-description">
+          Trouvez rapidement des réponses aux questions les plus courantes.
+        </p>
+      </div>
+
+      <div class="faq-categories">
+        <div class="category-filters">
+          <app-button 
+            *ngFor="let category of faqCategories"
+            variant="ghost"
+            [class.active]="true">
+            {{ category }}
+          </app-button>
+        </div>
+
+        <div class="faq-list">
+          <div *ngFor="let item of faqItems" class="faq-item">
+            <div class="faq-question">
+              <h3 class="question-text">{{ item.question }}</h3>
+              <app-icon name="chevron-down" class="toggle-icon"></app-icon>
+            </div>
+            <div class="faq-answer">
+              <p>{{ item.answer }}</p>
+            </div>
+            <div class="faq-category">
+              <app-badge [variant]="'secondary'">{{ item.category }}</app-badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Carte et horaires -->
+    <section class="location-section">
+      <div class="section-header">
+        <h2 class="section-title">Nous trouver</h2>
+        <p class="section-description">
+          Venez nous rencontrer dans nos locaux ou découvrez nos cinémas.
+        </p>
+      </div>
+
+      <div class="location-content">
+        <div class="map-container">
+          <div class="map-placeholder">
+            <app-icon name="map" size="large"></app-icon>
+            <p>Carte interactive</p>
+            <small>Intégration Google Maps ou OpenStreetMap</small>
+          </div>
+        </div>
+
+        <div class="location-info">
+          <h3>Horaires d'ouverture</h3>
+          <div class="opening-hours">
+            <div class="hour-item">
+              <span class="day">Lundi - Vendredi</span>
+              <span class="hours">9h00 - 18h00</span>
+            </div>
+            <div class="hour-item">
+              <span class="day">Samedi</span>
+              <span class="hours">10h00 - 17h00</span>
+            </div>
+            <div class="hour-item">
+              <span class="day">Dimanche</span>
+              <span class="hours">Fermé</span>
+            </div>
+          </div>
+
+          <div class="location-features">
+            <h4>Sur place</h4>
+            <div class="features-list">
+              <div class="feature-item">
+                <app-icon name="check-circle" class="success"></app-icon>
+                <span>Accès PMR</span>
+              </div>
+              <div class="feature-item">
+                <app-icon name="check-circle" class="success"></app-icon>
+                <span>Parking gratuit</span>
+              </div>
+              <div class="feature-item">
+                <app-icon name="check-circle" class="success"></app-icon>
+                <span>WiFi public</span>
+              </div>
+              <div class="feature-item">
+                <app-icon name="check-circle" class="success"></app-icon>
+                <span>Espace détente</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

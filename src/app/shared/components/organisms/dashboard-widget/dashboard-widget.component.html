@@ -1,1 +1,269 @@
-<p>dashboard-widget works!</p>
+<div class="{{ getWidgetClasses() }}">
+  <!-- En-tête du widget -->
+  @if (config.showHeader) {
+    <header class="widget-header">
+      <div class="widget-header__title">
+        <app-icon [name]="getDynamicIcon()" size="small"></app-icon>
+        <div class="title-content">
+          <h3 class="widget-title">{{ getDynamicTitle() }}</h3>
+          @if (config.subtitle) {
+            <p class="widget-subtitle">{{ config.subtitle }}</p>
+          }
+        </div>
+      </div>
+
+      <!-- Actions du widget -->
+      @if (config.showActions) {
+        <div class="widget-actions">
+          @if (config.refreshable) {
+            <app-button
+              [variant]="'ghost'"
+              [size]="'small'"
+              (click)="onRefresh()"
+              [loading]="loading">
+              <app-icon name="refresh" size="small"></app-icon>
+            </app-button>
+          }
+
+          @if (config.collapsible) {
+            <app-button
+              [variant]="'ghost'"
+              [size]="'small'"
+              (click)="onToggleCollapse()">
+              <app-icon 
+                [name]="collapsed ? 'chevron-down' : 'chevron-up'" 
+                size="small">
+              </app-icon>
+            </app-button>
+          }
+
+          <app-button
+            [variant]="'ghost'"
+            [size]="'small'"
+            (click)="onConfigure()">
+            <app-icon name="cog" size="small"></app-icon>
+          </app-button>
+
+          <app-button
+            [variant]="'ghost'"
+            [size]="'small'"
+            (click)="onRemove()">
+            <app-icon name="x" size="small"></app-icon>
+          </app-button>
+        </div>
+      }
+    </header>
+  }
+
+  <!-- Contenu du widget -->
+  @if (!collapsed) {
+    <main class="widget-content">
+      <!-- État de chargement -->
+      @if (loading) {
+        <div class="widget-loading">
+          <app-icon name="spinner" size="large" class="spinning"></app-icon>
+          <p>Chargement...</p>
+        </div>
+      }
+
+      <!-- État d'erreur -->
+      @else if (error) {
+        <div class="widget-error">
+          <app-icon name="warning" size="medium"></app-icon>
+          <p class="error-message">{{ error }}</p>
+          <app-button
+            [variant]="'primary'"
+            [size]="'small'"
+            (click)="onRefresh()">
+            Réessayer
+          </app-button>
+        </div>
+      }
+
+      <!-- Contenu selon le type de widget -->
+      @else {
+        <!-- Widget de statistiques -->
+        @if (isStatsWidget()) {
+          <div class="stats-content">
+            @for (stat of stats; track stat.label) {
+              <div class="{{ getStatClasses(stat) }}">
+                <div class="stat-icon">
+                  @if (stat.icon) {
+                    <app-icon [name]="stat.icon" size="medium"></app-icon>
+                  }
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value">{{ formatValue(stat.value) }}</span>
+                  <span class="stat-label">{{ stat.label }}</span>
+                </div>
+                @if (stat.change !== undefined) {
+                  <div class="stat-change">
+                    <app-icon 
+                      [name]="stat.trend === 'up' ? 'trending-up' : stat.trend === 'down' ? 'trending-down' : 'minus'" 
+                      size="small">
+                    </app-icon>
+                    <span class="change-value">{{ formatChange(stat.change) }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (stats.length === 0) {
+              <div class="widget-empty">
+                <app-icon name="chart-bar" size="large"></app-icon>
+                <p>Aucune statistique disponible</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Widget d'activité récente -->
+        @else if (isActivityWidget()) {
+          <div class="activity-content">
+            @for (activity of filteredActivities; track activity.id) {
+              <div 
+                class="{{ getActivityClasses(activity) }}"
+                (click)="onActivityClick(activity)">
+                <div class="activity-icon">
+                  <app-icon [name]="activity.icon" size="small"></app-icon>
+                </div>
+                <div class="activity-details">
+                  <h4 class="activity-title">{{ activity.title }}</h4>
+                  <p class="activity-description">{{ activity.description }}</p>
+                  <span class="activity-time">{{ formatTimestamp(activity.timestamp) }}</span>
+                </div>
+              </div>
+            }
+            @if (filteredActivities.length === 0) {
+              <div class="widget-empty">
+                <app-icon name="clock" size="large"></app-icon>
+                <p>Aucune activité récente</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Widget d'actions rapides -->
+        @else if (isActionsWidget()) {
+          <div class="actions-content">
+            <div class="quick-actions-grid">
+              @for (action of filteredQuickActions; track action.label) {
+                <button
+                  class="{{ getActionClasses(action) }}"
+                  (click)="onQuickAction(action)"
+                  [disabled]="action.disabled">
+                  <app-icon [name]="action.icon" size="medium"></app-icon>
+                  <span class="action-label">{{ action.label }}</span>
+                  <span class="action-description">{{ action.description }}</span>
+                </button>
+              }
+            </div>
+            @if (filteredQuickActions.length === 0) {
+              <div class="widget-empty">
+                <app-icon name="bolt" size="large"></app-icon>
+                <p>Aucune action disponible</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Widgets de films -->
+        @else if (isMoviesWidget()) {
+          <div class="movies-content">
+            <div class="movies-grid">
+              @for (movie of filteredMovies; track movie.id) {
+                <app-film-card
+                  [film]="movie"
+                  [size]="config.size === 'small' ? 'small' : 'medium'"
+                  [showActions]="false"
+                  (filmClick)="onMovieClick(movie)">
+                </app-film-card>
+              }
+            </div>
+            @if (filteredMovies.length === 0) {
+              <div class="widget-empty">
+                <app-icon name="film" size="large"></app-icon>
+                <p>Aucun film disponible</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Widget de progression fidélité -->
+        @else if (isLoyaltyWidget()) {
+          <div class="loyalty-content">
+            <div class="loyalty-stats">
+              <div class="loyalty-level">
+                <app-icon name="trophy" size="large"></app-icon>
+                <div class="level-info">
+                  <span class="level-name">Niveau Or</span>
+                  <span class="level-progress">75% complété</span>
+                </div>
+              </div>
+              <app-progress-bar
+                [value]="75"
+                [max]="100"
+                [size]="'medium'">
+              </app-progress-bar>
+              <div class="points-info">
+                <span class="points-current">750 points</span>
+                <span class="points-next">250 points jusqu'au niveau suivant</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Widget de résumé des réservations -->
+        @else if (isReservationWidget()) {
+          <div class="reservation-content">
+            <div class="reservation-summary">
+              <div class="reservation-item">
+                <app-icon name="ticket" size="medium"></app-icon>
+                <div class="reservation-details">
+                  <span class="reservation-count">3 réservations</span>
+                  <span class="reservation-period">Ce mois-ci</span>
+                </div>
+              </div>
+              <div class="reservation-item">
+                <app-icon name="calendar" size="medium"></app-icon>
+                <div class="reservation-details">
+                  <span class="reservation-next">Prochaine séance</span>
+                  <span class="reservation-date">Demain, 20:00</span>
+                </div>
+              </div>
+            </div>
+            <div class="reservation-actions">
+              <app-button
+                [variant]="'primary'"
+                [size]="'small'"
+                [fullWidth]="true">
+                Voir toutes les réservations
+              </app-button>
+            </div>
+          </div>
+        }
+
+        <!-- Widget par défaut -->
+        @else {
+          <div class="default-content">
+            <div class="widget-empty">
+              <app-icon name="widget" size="large"></app-icon>
+              <p>Contenu du widget non configuré</p>
+            </div>
+          </div>
+        }
+      }
+    </main>
+  }
+
+  <!-- Pied de page optionnel -->
+  @if (config.showHeader && !collapsed && (isActivityWidget() || isMoviesWidget())) {
+    <footer class="widget-footer">
+      <app-button
+        [variant]="'ghost'"
+        [size]="'small'">
+        Voir tout
+        <app-icon name="chevron-right" size="small"></app-icon>
+      </app-button>
+    </footer>
+  }
+</div>

@@ -1,1 +1,26 @@
-<p>rating-input works!</p>
+<div class="rating-input-wrapper">
+  <div *ngIf="showLabel" class="rating-input__label">
+    {{ label }}
+  </div>
+  
+  <div [class]="ratingClasses" class="rating-input__stars">
+    <button
+      *ngFor="let star of stars"
+      type="button"
+      class="rating-input__star"
+      [class.rating-input__star--active]="getStarState(star) !== 'empty'"
+      (click)="setRating(star)"
+      (mouseenter)="setHoverValue(star)"
+      (mouseleave)="clearHover()"
+      [disabled]="!isInteractive"
+      [attr.aria-label]="'Noter ' + star + ' étoile(s)'"
+      [attr.aria-pressed]="value >= star">
+      
+      <i [class]="getStarIcon(star)" class="rating-input__star-icon"></i>
+    </button>
+  </div>
+  
+  <div *ngIf="showValue" class="rating-input__value">
+    {{ displayValue }}
+  </div>
+</div>

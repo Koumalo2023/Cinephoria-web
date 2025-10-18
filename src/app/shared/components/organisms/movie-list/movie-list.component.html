@@ -1,1 +1,145 @@
-<p>movie-list works!</p>
+<div class="movie-list">
+  <!-- En-tête avec contrôles -->
+  <div class="movie-list-header">
+    <div class="header-left">
+      <h2 class="list-title">Catalogue de films</h2>
+      <span class="movie-count" *ngIf="!loading">
+        {{ config.totalItems }} film{{ config.totalItems > 1 ? 's' : '' }}
+      </span>
+    </div>
+    <div class="header-right">
+      <!-- Bouton de changement de vue -->
+      <app-button
+        variant="ghost"
+        size="small"
+        (clicked)="toggleViewMode()"
+        class="view-toggle-button">
+        <app-icon [name]="getViewModeIcon()"></app-icon>
+        <span class="view-label">{{ getViewModeLabel() }}</span>
+      </app-button>
+
+      <!-- Options de tri -->
+      <app-movie-sort-options
+        *ngIf="showSort"
+        [currentSort]="{ field: config.sortBy, direction: config.sortDirection }"
+        (sortChange)="onSortChange($event)"
+        class="sort-options">
+      </app-movie-sort-options>
+    </div>
+  </div>
+
+  <!-- Panneau de filtres -->
+  <div class="filters-section" *ngIf="showFilters">
+    <app-movie-filter-panel
+      (filterChange)="onFilterChange($event)"
+      class="filter-panel">
+    </app-movie-filter-panel>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="movie-list-content">
+    <!-- État de chargement -->
+    <div class="loading-state" *ngIf="loading">
+      <app-spinner size="large"></app-spinner>
+      <p class="loading-text">Chargement des films...</p>
+    </div>
+
+    <!-- État vide -->
+    <div class="empty-state" *ngIf="isEmpty">
+      <div class="empty-icon">
+        <app-icon name="film" size="large"></app-icon>
+      </div>
+      <h3 class="empty-title">Aucun film trouvé</h3>
+      <p class="empty-description">
+        Aucun film ne correspond à vos critères de recherche.
+      </p>
+      <app-button
+        variant="primary"
+        class="empty-action">
+        <app-icon name="refresh"></app-icon>
+        Réinitialiser les filtres
+      </app-button>
+    </div>
+
+    <!-- Grille de films -->
+    <div
+      class="movies-grid"
+      [class.grid-view]="gridView"
+      [class.list-view]="!gridView"
+      *ngIf="!loading && hasMovies">
+      
+      <div
+        *ngFor="let movie of displayedMovies"
+        class="movie-item"
+        (click)="onMovieClick(movie)">
+        
+        <app-film-card
+          [film]="convertToFilm(movie)"
+          [variant]="gridView ? 'default' : 'compact'"
+          class="film-card">
+        </app-film-card>
+
+        <!-- Informations supplémentaires en mode liste -->
+        <div class="movie-details" *ngIf="!gridView">
+          <div class="movie-info">
+            <h3 class="movie-title">{{ movie.title }}</h3>
+            <p class="movie-overview">{{ movie.overview }}</p>
+            <div class="movie-meta">
+              <span class="meta-item">
+                <app-icon name="calendar"></app-icon>
+                {{ movie.releaseDate | date:'yyyy' }}
+              </span>
+              <span class="meta-item">
+                <app-icon name="clock"></app-icon>
+                {{ formatDuration(movie.duration) }}
+              </span>
+              <span class="meta-item">
+                <app-icon name="tag"></app-icon>
+                {{ getMovieGenres(movie) }}
+              </span>
+            </div>
+          </div>
+          <div class="movie-actions">
+            <app-badge
+              [variant]="getMovieStatusVariant(movie)"
+              size="small"
+              class="status-badge">
+              {{ getMovieStatus(movie) }}
+            </app-badge>
+            <app-button
+              variant="primary"
+              size="small"
+              class="action-button">
+              <app-icon name="eye"></app-icon>
+              Voir détails
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-section" *ngIf="showPagination && totalPages > 1">
+    <app-pagination
+      [currentPage]="config.page"
+      [totalPages]="totalPages"
+      [pageSize]="config.pageSize"
+      [totalItems]="config.totalItems"
+      (pageChange)="onPageChange($event)"
+      class="pagination">
+    </app-pagination>
+  </div>
+
+  <!-- Pied de page avec statistiques -->
+  <div class="movie-list-footer" *ngIf="!loading && hasMovies">
+    <div class="footer-stats">
+      <span class="stat-item">
+        Page {{ config.page }} sur {{ totalPages }}
+      </span>
+      <span class="stat-item">
+        {{ displayedMovies.length }} film{{ displayedMovies.length > 1 ? 's' : '' }} affiché{{ displayedMovies.length > 1 ? 's' : '' }}
+      </span>
+    </div>
+  </div>
+</div>

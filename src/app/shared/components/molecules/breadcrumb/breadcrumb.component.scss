@@ -1,0 +1,322 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  // Variantes
+  &--default {
+    padding: var(--spacing-sm, 12px) 0;
+  }
+
+  &--minimal {
+    padding: var(--spacing-xs, 8px) 0;
+  }
+
+  &--compact {
+    padding: var(--spacing-xs, 8px) 0;
+  }
+
+  // Liste
+  &__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs, 8px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    &--small {
+      gap: 4px;
+    }
+
+    &--large {
+      gap: var(--spacing-sm, 12px);
+    }
+  }
+
+  // Élément
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+
+    &--small {
+      gap: 4px;
+    }
+
+    &--large {
+      gap: var(--spacing-sm, 12px);
+    }
+
+    &--active {
+      .breadcrumb__link {
+        color: var(--color-gray-900, #1a202c);
+        font-weight: var(--font-weight-semibold, 600);
+        cursor: default;
+
+        &:hover {
+          color: var(--color-gray-900, #1a202c);
+          text-decoration: none;
+        }
+      }
+    }
+  }
+
+  // Lien
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-600, #718096);
+    text-decoration: none;
+    transition: all var(--transition-fast, 150ms) ease-in-out;
+    border-radius: var(--border-radius-sm, 6px);
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+
+    &:hover {
+      color: var(--color-primary-600, #4f46e5);
+      background-color: var(--color-gray-50, #f9fafb);
+      text-decoration: underline;
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary-500, #6366f1);
+      outline-offset: 2px;
+    }
+
+    // Tailles
+    &--small {
+      font-size: var(--font-size-xs, 0.75rem);
+      padding: 6px 10px;
+      gap: 4px;
+    }
+
+    &--large {
+      font-size: var(--font-size-md, 1rem);
+      padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+      gap: var(--spacing-sm, 12px);
+    }
+
+    // États
+    &--active {
+      color: var(--color-gray-900, #1a202c);
+      font-weight: var(--font-weight-semibold, 600);
+      background-color: var(--color-gray-100, #f7fafc);
+      cursor: default;
+
+      &:hover {
+        color: var(--color-gray-900, #1a202c);
+        background-color: var(--color-gray-100, #f7fafc);
+        text-decoration: none;
+      }
+    }
+
+    &--disabled {
+      color: var(--color-gray-400, #cbd5e0);
+      cursor: not-allowed;
+
+      &:hover {
+        color: var(--color-gray-400, #cbd5e0);
+        background-color: transparent;
+        text-decoration: none;
+      }
+    }
+  }
+
+  // Icône
+  &__icon {
+    flex-shrink: 0;
+    color: currentColor;
+  }
+
+  // Label
+  &__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+    .breadcrumb--small & {
+      max-width: 150px;
+    }
+
+    .breadcrumb--large & {
+      max-width: 250px;
+    }
+
+    .breadcrumb--compact & {
+      max-width: 120px;
+    }
+  }
+
+  // Élément actuel
+  &__current {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-900, #1a202c);
+    font-weight: var(--font-weight-semibold, 600);
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+    border-radius: var(--border-radius-sm, 6px);
+    background-color: var(--color-gray-100, #f7fafc);
+
+    .breadcrumb--small & {
+      font-size: var(--font-size-xs, 0.75rem);
+      padding: 6px 10px;
+      gap: 4px;
+    }
+
+    .breadcrumb--large & {
+      font-size: var(--font-size-md, 1rem);
+      padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+      gap: var(--spacing-sm, 12px);
+    }
+  }
+
+  // Ellipsis
+  &__ellipsis {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-400, #cbd5e0);
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+
+    .breadcrumb--small & {
+      font-size: var(--font-size-xs, 0.75rem);
+      padding: 6px 10px;
+    }
+
+    .breadcrumb--large & {
+      font-size: var(--font-size-md, 1rem);
+      padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+    }
+  }
+
+  // Séparateur
+  &__separator {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-400, #cbd5e0);
+    margin: 0;
+
+    &--small {
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &--large {
+      font-size: var(--font-size-md, 1rem);
+    }
+
+    // Icône de séparateur personnalisée
+    &.breadcrumb__separator--custom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+
+      .breadcrumb--small & {
+        width: 12px;
+        height: 12px;
+      }
+
+      .breadcrumb--large & {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  // Variante minimal
+  .breadcrumb--minimal & {
+    &__link {
+      padding: 4px 8px;
+      background-color: transparent;
+
+      &:hover {
+        background-color: var(--color-gray-50, #f9fafb);
+      }
+    }
+
+    &__current {
+      padding: 4px 8px;
+      background-color: transparent;
+      font-weight: var(--font-weight-medium, 500);
+    }
+
+    &__ellipsis {
+      padding: 4px 8px;
+    }
+  }
+
+  // Variante compact
+  .breadcrumb--compact & {
+    &__link {
+      padding: 2px 6px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &__current {
+      padding: 2px 6px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &__ellipsis {
+      padding: 2px 6px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &__separator {
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    &__label {
+      max-width: 120px;
+
+      .breadcrumb--small & {
+        max-width: 80px;
+      }
+
+      .breadcrumb--large & {
+        max-width: 150px;
+      }
+    }
+
+    &__link,
+    &__current,
+    &__ellipsis {
+      padding: 6px 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    &__label {
+      max-width: 80px;
+
+      .breadcrumb--small & {
+        max-width: 60px;
+      }
+
+      .breadcrumb--large & {
+        max-width: 100px;
+      }
+    }
+
+    &__link,
+    &__current,
+    &__ellipsis {
+      padding: 4px 6px;
+    }
+
+    &__icon {
+      display: none;
+    }
+  }
+}

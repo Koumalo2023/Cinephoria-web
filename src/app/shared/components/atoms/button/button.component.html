@@ -1,1 +1,15 @@
-<p>button works!</p>
+<button
+  [class]="buttonClasses"
+  [type]="type"
+  [disabled]="disabled || loading"
+  (click)="onClick($event)"
+  class="btn">
+  
+  <span class="btn__content" [class.btn__content--hidden]="loading">
+    <ng-content></ng-content>
+  </span>
+  
+  <span class="btn__loader" *ngIf="loading">
+    <span class="btn__spinner"></span>
+  </span>
+</button>

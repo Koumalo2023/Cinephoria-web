@@ -1,1 +1,107 @@
-<p>film-card works!</p>
+<div [class]="cardClasses" (click)="onCardClick()">
+  <!-- Image du film -->
+  <div class="film-card__image">
+    <img
+      [src]="film.posterUrl"
+      [alt]="film.title"
+      class="film-card__poster"
+      loading="lazy"
+    />
+    
+    <!-- Overlay avec actions -->
+    <div class="film-card__overlay">
+      <!-- Actions rapides -->
+      <div class="film-card__actions">
+        <button
+          *ngIf="showActions"
+          class="film-card__action film-card__action--favorite"
+          [class.film-card__action--active]="film.isFavorite"
+          (click)="onFavoriteToggle($event)"
+          aria-label="Ajouter aux favoris"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.653 16.915l-.005-.003-.019-.01a20.759 20.759 0 01-1.162-.682 22.045 22.045 0 01-2.582-1.9C4.045 12.733 2 10.352 2 7.5a4.5 4.5 0 018-2.828A4.5 4.5 0 0118 7.5c0 2.852-2.044 5.233-3.885 6.82a22.049 22.049 0 01-3.744 2.582l-.019.01-.005.003h-.002a.739.739 0 01-.69.001l-.002-.001z"/>
+          </svg>
+        </button>
+
+        <button
+          *ngIf="showActions"
+          class="film-card__action film-card__action--watchlist"
+          [class.film-card__action--active]="film.isInWatchlist"
+          (click)="onWatchlistToggle($event)"
+          aria-label="Ajouter à la watchlist"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M5.25 3A2.25 2.25 0 003 5.25v9.5A2.25 2.25 0 005.25 17h9.5A2.25 2.25 0 0017 14.75v-9.5A2.25 2.25 0 0014.75 3h-9.5z"/>
+          </svg>
+        </button>
+
+        <button
+          *ngIf="showActions"
+          class="film-card__action film-card__action--watched"
+          [class.film-card__action--active]="film.isWatched"
+          (click)="onWatchedToggle($event)"
+          aria-label="Marquer comme vu"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Rating -->
+      <div *ngIf="showRating && film.rating" class="film-card__rating" [class]="ratingColor">
+        <span class="film-card__rating-value">{{ film.rating.toFixed(1) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu de la carte -->
+  <div class="film-card__content">
+    <!-- Titre -->
+    <h3 class="film-card__title">{{ film.title }}</h3>
+
+    <!-- Métadonnées -->
+    <div class="film-card__metadata">
+      <span *ngIf="showYear" class="film-card__year">{{ film.year }}</span>
+      
+      <span *ngIf="showDuration && film.duration" class="film-card__duration">
+        {{ formattedDuration }}
+      </span>
+    </div>
+
+    <!-- Genres -->
+    <div *ngIf="showGenres && film.genres?.length" class="film-card__genres">
+      <span *ngFor="let genre of film.genres.slice(0, 2)" class="film-card__genre">
+        {{ genre }}
+      </span>
+      <span *ngIf="film.genres.length > 2" class="film-card__genre-more">
+        +{{ film.genres.length - 2 }}
+      </span>
+    </div>
+
+    <!-- Description -->
+    <p *ngIf="showDescription && film.description" class="film-card__description">
+      {{ film.description }}
+    </p>
+
+    <!-- Réalisateur -->
+    <div *ngIf="film.director" class="film-card__director">
+      <span class="film-card__director-label">Réalisateur :</span>
+      <span class="film-card__director-name">{{ film.director }}</span>
+    </div>
+  </div>
+
+  <!-- Badges d'état -->
+  <div class="film-card__badges">
+    <span *ngIf="film.isWatched" class="film-card__badge film-card__badge--watched">
+      Vu
+    </span>
+    <span *ngIf="film.isFavorite" class="film-card__badge film-card__badge--favorite">
+      Favori
+    </span>
+    <span *ngIf="film.isInWatchlist" class="film-card__badge film-card__badge--watchlist">
+      Watchlist
+    </span>
+  </div>
+</div>

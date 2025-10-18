@@ -1,1 +1,69 @@
-<p>progress-indicator works!</p>
+<div [class]="containerClasses">
+  <!-- Barre de progression -->
+  <div class="progress-indicator__track">
+    <div 
+      class="progress-indicator__progress" 
+      [style.width.%]="progressPercentage"
+    ></div>
+  </div>
+
+  <!-- Étapes -->
+  <div class="progress-indicator__steps">
+    <div
+      *ngFor="let step of steps; let i = index"
+      [class]="getStepClasses(step, i)"
+      [attr.aria-current]="step.active ? 'step' : null"
+      [attr.aria-label]="step.label"
+      [attr.aria-disabled]="step.disabled"
+      (click)="onStepClick(step, i)"
+    >
+      <!-- Numéro de l'étape -->
+      <div class="progress-indicator__step-number">
+        <span *ngIf="!step.completed" class="progress-indicator__step-index">
+          {{ i + 1 }}
+        </span>
+        
+        <!-- Icône de validation pour les étapes complétées -->
+        <span *ngIf="step.completed" class="progress-indicator__step-check">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+            <path d="M10.28 3.28L4.5 9.06 1.72 6.28a.75.75 0 00-1.06 1.06l3.25 3.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06z"/>
+          </svg>
+        </span>
+      </div>
+
+      <!-- Contenu de l'étape -->
+      <div class="progress-indicator__step-content">
+        <!-- Label -->
+        <div *ngIf="showLabels" class="progress-indicator__step-label">
+          {{ step.label }}
+        </div>
+
+        <!-- Description -->
+        <div 
+          *ngIf="showDescriptions && step.description" 
+          class="progress-indicator__step-description"
+        >
+          {{ step.description }}
+        </div>
+      </div>
+
+      <!-- Connecteur entre les étapes -->
+      <div 
+        *ngIf="i < steps.length - 1" 
+        class="progress-indicator__step-connector"
+        [class.progress-indicator__step-connector--active]="i < currentStep"
+      ></div>
+    </div>
+  </div>
+
+  <!-- Indicateur de progression textuel -->
+  <div *ngIf="showLabels" class="progress-indicator__status">
+    <span class="progress-indicator__status-text">
+      Étape {{ currentStep + 1 }} sur {{ steps.length }}
+    </span>
+    
+    <span class="progress-indicator__status-percentage">
+      ({{ progressPercentage | number:'1.0-0' }}%)
+    </span>
+  </div>
+</div>

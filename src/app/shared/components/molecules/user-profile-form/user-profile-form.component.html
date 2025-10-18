@@ -1,1 +1,141 @@
-<p>user-profile-form works!</p>
+<div class="user-profile-form">
+  <div class="form-header">
+    <h2>Profil Utilisateur</h2>
+    <button 
+      type="button" 
+      class="btn-edit" 
+      (click)="toggleEdit()"
+      [class.editing]="isEditing">
+      {{ isEditing ? 'Annuler' : 'Modifier' }}
+    </button>
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+    <!-- Informations personnelles -->
+    <div class="form-section">
+      <h3>Informations Personnelles</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Prénom *</label>
+          <input 
+            id="firstName"
+            type="text" 
+            formControlName="firstName"
+            [readonly]="!isEditing"
+            [class.error]="getFieldError('firstName')"
+            placeholder="Votre prénom">
+          <div class="error-message" *ngIf="getFieldError('firstName')">
+            {{ getFieldError('firstName') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Nom *</label>
+          <input 
+            id="lastName"
+            type="text" 
+            formControlName="lastName"
+            [readonly]="!isEditing"
+            [class.error]="getFieldError('lastName')"
+            placeholder="Votre nom">
+          <div class="error-message" *ngIf="getFieldError('lastName')">
+            {{ getFieldError('lastName') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input 
+            id="email"
+            type="email" 
+            formControlName="email"
+            [readonly]="!isEditing"
+            [class.error]="getFieldError('email')"
+            placeholder="votre@email.com">
+          <div class="error-message" *ngIf="getFieldError('email')">
+            {{ getFieldError('email') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Téléphone</label>
+          <input 
+            id="phone"
+            type="tel" 
+            formControlName="phone"
+            [readonly]="!isEditing"
+            placeholder="+33 1 23 45 67 89">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="birthDate">Date de naissance</label>
+        <input 
+          id="birthDate"
+          type="date" 
+          formControlName="birthDate"
+          [readonly]="!isEditing">
+      </div>
+    </div>
+
+    <!-- Adresse -->
+    <div class="form-section">
+      <h3>Adresse</h3>
+      
+      <div class="form-group">
+        <label for="street">Rue</label>
+        <input 
+          id="street"
+          type="text" 
+          formControlName="street"
+          [readonly]="!isEditing"
+          placeholder="Numéro et nom de rue">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">Ville</label>
+          <input 
+            id="city"
+            type="text" 
+            formControlName="city"
+            [readonly]="!isEditing"
+            placeholder="Ville">
+        </div>
+
+        <div class="form-group">
+          <label for="postalCode">Code postal</label>
+          <input 
+            id="postalCode"
+            type="text" 
+            formControlName="postalCode"
+            [readonly]="!isEditing"
+            placeholder="75000">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="country">Pays</label>
+        <input 
+          id="country"
+          type="text" 
+          formControlName="country"
+          [readonly]="!isEditing"
+          placeholder="France">
+      </div>
+    </div>
+
+    <!-- Bouton de soumission -->
+    <div class="form-actions" *ngIf="isEditing">
+      <button 
+        type="submit" 
+        class="btn-save"
+        [disabled]="!profileForm.valid">
+        Enregistrer les modifications
+      </button>
+    </div>
+  </form>
+</div>

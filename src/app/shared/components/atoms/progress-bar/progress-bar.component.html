@@ -1,1 +1,20 @@
-<p>progress-bar works!</p>
+<div class="progress-bar-wrapper">
+  <div [class]="progressClasses" class="progress-bar__track">
+    <div
+      class="progress-bar__fill"
+      [style.width.%]="percentageValue"
+      role="progressbar"
+      [attr.aria-valuenow]="percentage"
+      [attr.aria-valuemin]="0"
+      [attr.aria-valuemax]="max">
+      
+      <span *ngIf="showLabel && labelPosition === 'inside'" class="progress-bar__label">
+        {{ displayValue }}
+      </span>
+    </div>
+  </div>
+  
+  <div *ngIf="showLabel && labelPosition === 'outside'" class="progress-bar__label-outside">
+    {{ displayValue }}
+  </div>
+</div>

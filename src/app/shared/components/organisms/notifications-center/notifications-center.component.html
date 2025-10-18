@@ -1,1 +1,325 @@
-<p>notifications-center works!</p>
+<div class="{{ getContainerClasses() }}">
+  <!-- En-tête du centre de notifications -->
+  <header class="notifications-header">
+    <div class="notifications-header__title">
+      <h2 class="notifications-title">
+        Notifications
+        @if (config.showUnreadCount && unreadCount > 0) {
+          <app-badge
+            [variant]="'primary'"
+            [size]="'small'"
+            class="unread-badge">
+            {{ unreadCount }}
+          </app-badge>
+        }
+      </h2>
+      <p class="notifications-subtitle">
+        Gestion de vos notifications et alertes
+      </p>
+    </div>
+
+    <div class="notifications-header__actions">
+      <!-- Actions principales -->
+      @if (config.allowMarkAllRead && notifications.length > 0) {
+        <app-button
+          [variant]="'secondary'"
+          [size]="'small'"
+          (click)="onMarkAllRead()"
+          [disabled]="loading">
+          <app-icon name="check-double" size="small"></app-icon>
+          Tout marquer comme lu
+        </app-button>
+      }
+
+      @if (config.showFilters) {
+        <app-button
+          [variant]="showFilters ? 'primary' : 'secondary'"
+          [size]="'small'"
+          (click)="toggleFilters()">
+          <app-icon name="filter" size="small"></app-icon>
+          Filtres
+        </app-button>
+      }
+
+      @if (config.showSettings) {
+        <app-button
+          [variant]="showSettings ? 'primary' : 'secondary'"
+          [size]="'small'"
+          (click)="toggleSettings()">
+          <app-icon name="cog" size="small"></app-icon>
+          Paramètres
+        </app-button>
+      }
+
+      <!-- Mode d'affichage -->
+      <div class="view-toggle">
+        <app-button
+          [variant]="viewMode === 'list' ? 'primary' : 'secondary'"
+          [size]="'small'"
+          (click)="switchViewMode('list')">
+          <app-icon name="list" size="small"></app-icon>
+        </app-button>
+        <app-button
+          [variant]="viewMode === 'grid' ? 'primary' : 'secondary'"
+          [size]="'small'"
+          (click)="switchViewMode('grid')">
+          <app-icon name="grid" size="small"></app-icon>
+        </app-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Panneau de filtres -->
+  @if (showFilters) {
+    <div class="filters-panel">
+      <div class="filters-panel__header">
+        <h3>Filtres</h3>
+        <app-button
+          [variant]="'ghost'"
+          [size]="'small'"
+          (click)="clearFilter()">
+          <app-icon name="x" size="small"></app-icon>
+          Effacer
+        </app-button>
+      </div>
+
+      <div class="filters-panel__content">
+        <!-- Recherche -->
+        <div class="filter-group">
+          <label class="filter-label">Recherche</label>
+          <app-input
+            type="text"
+            placeholder="Rechercher dans les notifications..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearch($event)">
+            <app-icon name="search" slot="prefix" size="small"></app-icon>
+          </app-input>
+        </div>
+
+        <!-- Filtre par statut -->
+        <div class="filter-group">
+          <label class="filter-label">Statut</label>
+          <div class="filter-options">
+            <app-button
+              [variant]="!currentFilter.status ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ status: undefined })">
+              Tous
+            </app-button>
+            <app-button
+              [variant]="currentFilter.status === 'unread' ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ status: 'unread' })">
+              Non lues
+            </app-button>
+            <app-button
+              [variant]="currentFilter.status === 'read' ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ status: 'read' })">
+              Lues
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Filtre par type -->
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <div class="filter-options">
+            <app-button
+              [variant]="!currentFilter.type ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ type: undefined })">
+              Tous
+            </app-button>
+            <app-button
+              [variant]="currentFilter.type === 'info' ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ type: 'info' })">
+              Info
+            </app-button>
+            <app-button
+              [variant]="currentFilter.type === 'warning' ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ type: 'warning' })">
+              Avertissement
+            </app-button>
+            <app-button
+              [variant]="currentFilter.type === 'error' ? 'primary' : 'secondary'"
+              [size]="'small'"
+              (click)="applyFilter({ type: 'error' })">
+              Erreur
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Filtre par priorité -->
+        @if (config.showCategories && categories.length > 0) {
+          <div class="filter-group">
+            <label class="filter-label">Catégorie</label>
+            <div class="filter-options">
+              <app-button
+                [variant]="!currentFilter.category ? 'primary' : 'secondary'"
+                [size]="'small'"
+                (click)="applyFilter({ category: undefined })">
+                Toutes
+              </app-button>
+              @for (category of categories; track category) {
+                <app-button
+                  [variant]="currentFilter.category === category ? 'primary' : 'secondary'"
+                  [size]="'small'"
+                  (click)="applyFilter({ category: category })">
+                  {{ category }}
+                </app-button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Contenu principal -->
+  <main class="notifications-content">
+    <!-- Barre d'actions en lot -->
+    @if (hasSelectedNotifications) {
+      <div class="batch-actions">
+        <div class="batch-actions__info">
+          <app-checkbox
+            [value]="isAllSelected()"
+            (valueChange)="onSelectAllChange($event)">
+            {{ selectedCount }} notification(s) sélectionnée(s)
+          </app-checkbox>
+        </div>
+        <div class="batch-actions__buttons">
+          <app-button
+            [variant]="'secondary'"
+            [size]="'small'"
+            (click)="onMarkSelectedRead()">
+            <app-icon name="check" size="small"></app-icon>
+            Marquer comme lu
+          </app-button>
+          @if (config.allowArchive) {
+            <app-button
+              [variant]="'secondary'"
+              [size]="'small'"
+              (click)="onArchiveSelected()">
+              <app-icon name="archive" size="small"></app-icon>
+              Archiver
+            </app-button>
+          }
+          @if (config.allowDelete) {
+            <app-button
+              [variant]="'danger'"
+              [size]="'small'"
+              (click)="onDeleteSelected()">
+              <app-icon name="trash" size="small"></app-icon>
+              Supprimer
+            </app-button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- État de chargement -->
+    @if (loading) {
+      <div class="notifications-state">
+        <div class="loading-spinner">
+          <app-icon name="spinner" size="large" class="spinning"></app-icon>
+        </div>
+        <p class="state-message">{{ loadingMessage }}</p>
+      </div>
+    }
+
+    <!-- État vide -->
+    @else if (filteredNotifications.length === 0) {
+      <div class="notifications-state">
+        <app-icon name="bell" size="xl" class="state-icon"></app-icon>
+        <p class="state-message">{{ emptyMessage }}</p>
+        @if (currentFilter.status || currentFilter.type || currentFilter.category || searchTerm) {
+          <app-button
+            [variant]="'primary'"
+            (click)="clearFilter()">
+            Effacer les filtres
+          </app-button>
+        }
+      </div>
+    }
+
+    <!-- Liste des notifications -->
+    @else {
+      <div class="notifications-list" [class]="'notifications-list--' + viewMode">
+        @if (config.groupByCategory) {
+          <!-- Affichage groupé par catégorie -->
+          @for (category of getCategories(); track category) {
+            <div class="notification-category">
+              <h3 class="category-title">{{ category }}</h3>
+              <div class="category-notifications">
+                @for (notification of groupedNotifications[category]; track notification.id) {
+                  <div class="notification-wrapper">
+                    @if (hasSelectedNotifications) {
+                      <div class="notification-selector">
+                        <app-checkbox
+                          [value]="isNotificationSelected(notification.id)"
+                          (valueChange)="onCheckboxChange(notification.id, $event)">
+                        </app-checkbox>
+                      </div>
+                    }
+                    <app-notification-item
+                      [notification]="convertNotification(notification)"
+                      [class]="getNotificationClasses(notification)"
+                      (read)="onNotificationRead(notification)"
+                      (close)="onNotificationDelete(notification)"
+                      (action)="onNotificationAction(notification)">
+                    </app-notification-item>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        } @else {
+          <!-- Affichage simple -->
+          @for (notification of filteredNotifications; track notification.id) {
+            <div class="notification-wrapper">
+              @if (hasSelectedNotifications) {
+                <div class="notification-selector">
+                  <app-checkbox
+                    [value]="isNotificationSelected(notification.id)"
+                    (valueChange)="onCheckboxChange(notification.id, $event)">
+                  </app-checkbox>
+                </div>
+              }
+              <app-notification-item
+                [notification]="convertNotification(notification)"
+                [class]="getNotificationClasses(notification)"
+                (read)="onNotificationRead(notification)"
+                (close)="onNotificationDelete(notification)"
+                (action)="onNotificationAction(notification)">
+              </app-notification-item>
+            </div>
+          }
+        }
+      </div>
+    }
+  </main>
+
+  <!-- Panneau des paramètres -->
+  @if (showSettings) {
+    <aside class="settings-panel">
+      <div class="settings-panel__header">
+        <h3>Paramètres des notifications</h3>
+        <app-button
+          [variant]="'ghost'"
+          [size]="'small'"
+          (click)="toggleSettings()">
+          <app-icon name="x" size="small"></app-icon>
+          Fermer
+        </app-button>
+      </div>
+      <div class="settings-panel__content">
+        <app-notification-settings
+          (settingsChanged)="settingsChanged.emit($event)">
+        </app-notification-settings>
+      </div>
+    </aside>
+  }
+</div>

@@ -1,4 +1,4 @@
-
+-*
 # Détails des Pages - Fonctionnalités, Actions et Composants
 
 ## 📋 Vue d'ensemble des Pages Optimisées

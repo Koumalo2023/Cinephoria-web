@@ -1,0 +1,222 @@
+.notification-settings {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  .settings-header {
+    margin-bottom: 2rem;
+    text-align: center;
+
+    h2 {
+      margin: 0 0 0.5rem 0;
+      color: #333;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .settings-description {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  }
+
+  .settings-form {
+    .notification-category {
+      margin-bottom: 2.5rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+
+      .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+
+        h3 {
+          margin: 0;
+          color: #495057;
+          font-size: 1.2rem;
+          font-weight: 600;
+        }
+
+        .category-actions {
+          display: flex;
+          gap: 0.5rem;
+
+          .btn-toggle-all {
+            padding: 0.4rem 0.8rem;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+              background: #545b62;
+              transform: translateY(-1px);
+            }
+          }
+        }
+      }
+
+      .notification-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: #007bff;
+          box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .toggle-label {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          cursor: pointer;
+          flex: 1;
+
+          input[type="checkbox"] {
+            display: none;
+
+            &:checked + .toggle-slider {
+              background: #28a745;
+              
+              &::before {
+                transform: translateX(20px);
+              }
+            }
+          }
+
+          .toggle-slider {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #6c757d;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+
+            &::before {
+              content: '';
+              position: absolute;
+              width: 20px;
+              height: 20px;
+              background: white;
+              border-radius: 50%;
+              top: 2px;
+              left: 2px;
+              transition: all 0.3s ease;
+            }
+          }
+
+          .toggle-text {
+            font-weight: 500;
+            color: #495057;
+            font-size: 1rem;
+          }
+        }
+
+        .notification-description {
+          margin: 0.25rem 0 0 66px;
+          color: #6c757d;
+          font-size: 0.85rem;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+
+  .settings-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #f0f0f0;
+
+    .settings-note {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      text-align: center;
+
+      strong {
+        color: #495057;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .notification-settings {
+    padding: 1rem;
+
+    .settings-form {
+      .notification-category {
+        padding: 1rem;
+
+        .category-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+
+          .category-actions {
+            width: 100%;
+            justify-content: flex-end;
+          }
+        }
+
+        .notification-item {
+          flex-direction: column;
+          align-items: flex-start;
+
+          .toggle-label {
+            width: 100%;
+          }
+
+          .notification-description {
+            margin-left: 66px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation pour les changements d'état
+.notification-item {
+  &.changed {
+    animation: highlightChange 0.6s ease;
+  }
+}
+
+@keyframes highlightChange {
+  0% {
+    background: #fff3cd;
+    border-color: #ffc107;
+  }
+  100% {
+    background: white;
+    border-color: #e9ecef;
+  }
+}

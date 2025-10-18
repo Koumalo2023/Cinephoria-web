@@ -1,1 +1,160 @@
-<p>filter-panel works!</p>
+<div [class]="containerClasses">
+  <!-- En-tête du panneau de filtres -->
+  <div *ngIf="showHeader" [class]="headerClasses">
+    <h3 class="filter-panel__title">
+      {{ filtersLabel }}
+    </h3>
+    
+    <!-- Bouton de basculement (si repliable) -->
+    <button
+      *ngIf="collapsible"
+      class="filter-panel__toggle"
+      (click)="toggleCollapsed()"
+      [attr.aria-expanded]="!collapsed"
+      aria-label="Basculer le panneau de filtres"
+    >
+      <app-icon
+        [name]="collapsed ? 'chevron-down' : 'chevron-up'"
+        size="xs"
+      ></app-icon>
+    </button>
+  </div>
+
+  <!-- Contenu du panneau de filtres -->
+  <div *ngIf="!collapsed" [class]="contentClasses">
+    <!-- Groupes de filtres -->
+    <div [class]="groupsClasses">
+      <div
+        *ngFor="let group of filterGroups"
+        [class]="getGroupClasses(group)"
+        [attr.aria-label]="getGroupAriaLabel(group)"
+      >
+        <!-- En-tête du groupe -->
+        <div class="filter-panel__group-header">
+          <h4 class="filter-panel__group-title">
+            {{ group.label }}
+            <span *ngIf="hasSelectedValues(group)" class="filter-panel__counter">
+              {{ getCounterText(group) }}
+            </span>
+          </h4>
+        </div>
+
+        <!-- Contenu du groupe selon le type -->
+        <div [class]="getOptionsClasses(group)">
+          <!-- Type: Checkbox/Radio -->
+          <div
+            *ngIf="(group.type === 'checkbox' || group.type === 'radio') && hasOptions(group)"
+            class="filter-panel__checkbox-options"
+          >
+            <app-checkbox
+              *ngFor="let option of group.options"
+              [label]="option.label + (option.count !== undefined ? ` (${option.count})` : '')"
+              [disabled]="!!option.disabled"
+              (valueChange)="onCheckboxChange(group, option, $event)"
+            ></app-checkbox>
+          </div>
+
+          <!-- Type: Select -->
+          <div *ngIf="group.type === 'select' && hasOptions(group)" class="filter-panel__select-option">
+            <app-select
+              [options]="group.options || []"
+              [placeholder]="group.placeholder || 'Sélectionner...'"
+              (valueChange)="onFilterChange(group, $event)"
+            ></app-select>
+          </div>
+
+          <!-- Type: Search -->
+          <div *ngIf="group.type === 'search'" class="filter-panel__search-option">
+            <app-input
+              type="search"
+              [placeholder]="group.placeholder || searchPlaceholder"
+              (valueChange)="onFilterChange(group, $event)"
+            ></app-input>
+          </div>
+
+          <!-- Type: Range -->
+          <div *ngIf="group.type === 'range'" class="filter-panel__range-options">
+            <div class="filter-panel__range-inputs">
+              <input
+                type="number"
+                [placeholder]="group.min?.toString() || 'Min'"
+                [min]="group.min"
+                [max]="group.max"
+                [step]="group.step || 1"
+                [value]="group.value?.min || ''"
+                (input)="onRangeInputChange(group, 'min', $event)"
+                class="filter-panel__range-input"
+              />
+              
+              <span class="filter-panel__range-separator">-</span>
+              
+              <input
+                type="number"
+                [placeholder]="group.max?.toString() || 'Max'"
+                [min]="group.min"
+                [max]="group.max"
+                [step]="group.step || 1"
+                [value]="group.value?.max || ''"
+                (input)="onRangeInputChange(group, 'max', $event)"
+                class="filter-panel__range-input"
+              />
+              
+              <span *ngIf="group.unit" class="filter-panel__range-unit">
+                {{ group.unit }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div *ngIf="showActions" [class]="actionsClasses">
+      <app-button
+        variant="primary"
+        size="small"
+        (click)="applyFilters()"
+      >
+        {{ applyLabel }}
+      </app-button>
+      
+      <app-button
+        variant="secondary"
+        size="small"
+        (click)="resetFilters()"
+      >
+        {{ resetLabel }}
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Filtres appliqués -->
+  <div
+    *ngIf="showAppliedFilters && hasAppliedFilters && !collapsed"
+    [class]="appliedFiltersClasses"
+  >
+    <div class="filter-panel__applied-header">
+      <h4 class="filter-panel__applied-title">
+        {{ appliedFiltersLabel }}
+      </h4>
+      
+      <button
+        class="filter-panel__clear-all"
+        (click)="clearAppliedFilters()"
+        aria-label="Effacer tous les filtres"
+      >
+        {{ clearLabel }}
+      </button>
+    </div>
+    
+    <div class="filter-panel__applied-chips">
+      <app-chip
+        *ngFor="let filter of appliedFilters"
+        [removable]="true"
+        (removed)="removeAppliedFilter(filter)"
+      >
+        {{ filter.label }}: {{ getFilterDisplayValue(filter) }}
+      </app-chip>
+    </div>
+  </div>
+</div>

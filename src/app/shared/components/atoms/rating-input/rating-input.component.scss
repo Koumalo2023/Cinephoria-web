@@ -1,0 +1,148 @@
+.rating-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.rating-input__label {
+  font-weight: 500;
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.rating-input__stars {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  
+  // Tailles
+  &.rating-input--small {
+    .rating-input__star {
+      width: 1.25rem;
+      height: 1.25rem;
+      
+      .rating-input__star-icon {
+        font-size: 0.875rem;
+      }
+    }
+  }
+  
+  &.rating-input--medium {
+    .rating-input__star {
+      width: 1.5rem;
+      height: 1.5rem;
+      
+      .rating-input__star-icon {
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  &.rating-input--large {
+    .rating-input__star {
+      width: 2rem;
+      height: 2rem;
+      
+      .rating-input__star-icon {
+        font-size: 1.25rem;
+      }
+    }
+  }
+  
+  // Variantes
+  &.rating-input--primary {
+    .rating-input__star--active {
+      .rating-input__star-icon {
+        color: var(--color-rating-primary);
+      }
+    }
+  }
+  
+  &.rating-input--secondary {
+    .rating-input__star--active {
+      .rating-input__star-icon {
+        color: var(--color-rating-secondary);
+      }
+    }
+  }
+  
+  &.rating-input--warning {
+    .rating-input__star--active {
+      .rating-input__star-icon {
+        color: var(--color-rating-warning);
+      }
+    }
+  }
+  
+  // États
+  &.rating-input--disabled,
+  &.rating-input--readonly {
+    .rating-input__star {
+      cursor: not-allowed;
+      
+      &:hover {
+        transform: none;
+      }
+    }
+  }
+}
+
+.rating-input__star {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.25rem;
+  padding: 0;
+  
+  &:hover:not(:disabled) {
+    transform: scale(1.1);
+    
+    .rating-input__star-icon {
+      color: var(--color-rating-hover);
+    }
+  }
+  
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.rating-input__star-icon {
+  color: var(--color-rating-empty);
+  transition: color 0.2s ease-in-out;
+  
+  .rating-input__star--active & {
+    color: var(--color-rating-primary);
+  }
+}
+
+.rating-input__value {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-text: #1f2937;
+  --color-text-muted: #6b7280;
+  
+  // Couleurs des évaluations
+  --color-rating-primary: #f59e0b;
+  --color-rating-secondary: #6b7280;
+  --color-rating-warning: #ef4444;
+  --color-rating-empty: #d1d5db;
+  --color-rating-hover: #fbbf24;
+}

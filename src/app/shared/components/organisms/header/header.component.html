@@ -1,1 +1,159 @@
-<p>header works!</p>
+<header class="header">
+  <!-- Barre de navigation principale -->
+  <nav class="navbar">
+    <!-- Logo et marque -->
+    <div class="navbar-brand">
+      <a routerLink="/" class="logo-link">
+        <div class="logo">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">Cinephoria</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Navigation desktop -->
+    <div class="navbar-nav desktop-nav" *ngIf="!isMobileMenuOpen">
+      <ng-container *ngFor="let item of navigationItems">
+        <a 
+          *ngIf="!item.children"
+          [routerLink]="item.routerLink" 
+          class="nav-link"
+          [class.active]="isActiveRoute(item.routerLink)"
+          [class.primary]="item.variant === 'primary'"
+          [class.secondary]="item.variant === 'secondary'">
+          <span class="nav-icon" *ngIf="item.icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+          <span class="nav-badge" *ngIf="item.badge && item.badge > 0">{{ item.badge }}</span>
+        </a>
+
+        <!-- Menu déroulant pour les éléments avec enfants -->
+        <div *ngIf="item.children" class="dropdown">
+          <button class="dropdown-toggle nav-link">
+            <span class="nav-icon" *ngIf="item.icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="dropdown-menu">
+            <a 
+              *ngFor="let child of item.children"
+              [routerLink]="child.routerLink" 
+              class="dropdown-item"
+              [class.active]="isActiveRoute(child.routerLink)">
+              <span class="nav-icon" *ngIf="child.icon">{{ child.icon }}</span>
+              {{ child.label }}
+            </a>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Actions utilisateur desktop -->
+    <div class="navbar-actions" *ngIf="!isMobileMenuOpen">
+      <!-- Utilisateur connecté -->
+      <div *ngIf="currentUser" class="user-menu">
+        <div class="user-info">
+          <div class="user-avatar">
+            {{ currentUser.firstName?.charAt(0) || 'U' }}
+          </div>
+          <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+        </div>
+        <div class="user-dropdown">
+          <a routerLink="/profile" class="dropdown-item">Mon profil</a>
+          <a routerLink="/reservations" class="dropdown-item">Mes réservations</a>
+          <a routerLink="/settings" class="dropdown-item">Paramètres</a>
+          <div class="dropdown-divider"></div>
+          <button (click)="logout()" class="dropdown-item logout">Déconnexion</button>
+        </div>
+      </div>
+
+      <!-- Utilisateur non connecté -->
+      <div *ngIf="!currentUser" class="auth-actions">
+        <a routerLink="/login" class="btn btn-secondary">Se connecter</a>
+        <a routerLink="/register" class="btn btn-primary">S'inscrire</a>
+      </div>
+    </div>
+
+    <!-- Bouton menu mobile -->
+    <button 
+      class="mobile-menu-toggle"
+      (click)="toggleMobileMenu()"
+      [class.active]="isMobileMenuOpen">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </nav>
+
+  <!-- Menu mobile -->
+  <div class="mobile-menu" [class.active]="isMobileMenuOpen">
+    <div class="mobile-menu-content">
+      <!-- Navigation mobile -->
+      <div class="mobile-nav">
+        <ng-container *ngFor="let item of navigationItems">
+          <a 
+            *ngIf="!item.children"
+            [routerLink]="item.routerLink" 
+            class="mobile-nav-link"
+            (click)="closeMobileMenu()"
+            [class.active]="isActiveRoute(item.routerLink)">
+            <span class="nav-icon" *ngIf="item.icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+            <span class="nav-badge" *ngIf="item.badge && item.badge > 0">{{ item.badge }}</span>
+          </a>
+
+          <!-- Menu déroulant mobile -->
+          <div *ngIf="item.children" class="mobile-dropdown">
+            <button class="mobile-dropdown-toggle" (click)="toggleMobileDropdown(item.label)">
+              <span class="nav-icon" *ngIf="item.icon">{{ item.icon }}</span>
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="dropdown-arrow">▼</span>
+            </button>
+            <div class="mobile-dropdown-menu" [class.active]="isMobileDropdownOpen(item.label)">
+              <a 
+                *ngFor="let child of item.children"
+                [routerLink]="child.routerLink" 
+                class="mobile-dropdown-item"
+                (click)="closeMobileMenu()"
+                [class.active]="isActiveRoute(child.routerLink)">
+                <span class="nav-icon" *ngIf="child.icon">{{ child.icon }}</span>
+                {{ child.label }}
+              </a>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Actions utilisateur mobile -->
+      <div class="mobile-user-actions">
+        <div *ngIf="currentUser" class="mobile-user-info">
+          <div class="user-avatar">
+            {{ currentUser.firstName?.charAt(0) || 'U' }}
+          </div>
+          <div class="user-details">
+            <div class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</div>
+            <div class="user-role">{{ getUserRoleLabel() }}</div>
+          </div>
+        </div>
+        
+        <div class="mobile-auth-actions" *ngIf="!currentUser">
+          <a routerLink="/login" class="btn btn-secondary" (click)="closeMobileMenu()">Se connecter</a>
+          <a routerLink="/register" class="btn btn-primary" (click)="closeMobileMenu()">S'inscrire</a>
+        </div>
+
+        <div *ngIf="currentUser" class="mobile-user-links">
+          <a routerLink="/profile" class="mobile-user-link" (click)="closeMobileMenu()">Mon profil</a>
+          <a routerLink="/reservations" class="mobile-user-link" (click)="closeMobileMenu()">Mes réservations</a>
+          <a routerLink="/settings" class="mobile-user-link" (click)="closeMobileMenu()">Paramètres</a>
+          <button (click)="logout(); closeMobileMenu()" class="mobile-user-link logout">Déconnexion</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay pour fermer le menu mobile -->
+  <div 
+    class="mobile-overlay" 
+    [class.active]="isMobileMenuOpen"
+    (click)="closeMobileMenu()">
+  </div>
+</header>

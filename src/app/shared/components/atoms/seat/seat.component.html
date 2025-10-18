@@ -1,1 +1,33 @@
-<p>seat works!</p>
+<div
+  [class]="seatClasses"
+  (click)="onSeatClick()"
+  (keydown)="onKeydown($event)"
+  [attr.title]="tooltipText"
+  tabindex="0"
+  class="seat-wrapper"
+  role="button"
+  [attr.aria-label]="tooltipText"
+  [attr.aria-disabled]="!isSelectable">
+  
+  <div class="seat__content">
+    <i [class]="seatIcon" class="seat__icon"></i>
+    
+    <span *ngIf="seatNumber" class="seat__number">
+      {{ seatNumber }}
+    </span>
+    
+    <span *ngIf="price > 0" class="seat__price">
+      {{ price }}€
+    </span>
+  </div>
+  
+  <div class="seat__overlay">
+    <span *ngIf="state === 'selected'" class="seat__checkmark">
+      <i class="fas fa-check"></i>
+    </span>
+    
+    <span *ngIf="state === 'occupied'" class="seat__occupied">
+      <i class="fas fa-times"></i>
+    </span>
+  </div>
+</div>

@@ -1,0 +1,246 @@
+.theater-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-color: #007bff;
+  }
+
+  &.available {
+    border-left: 4px solid #28a745;
+  }
+
+  &.unavailable {
+    border-left: 4px solid #dc3545;
+    opacity: 0.7;
+  }
+
+  .theater-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+
+    .theater-info {
+      flex: 1;
+
+      .theater-name {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+        font-size: 1.25rem;
+        font-weight: 600;
+        line-height: 1.3;
+      }
+
+      .theater-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .cinema-name {
+          color: #6c757d;
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    .theater-capacity {
+      text-align: center;
+      padding: 0.5rem 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      min-width: 80px;
+
+      .capacity-info {
+        .capacity-number {
+          display: block;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #007bff;
+          line-height: 1;
+        }
+
+        .capacity-label {
+          display: block;
+          font-size: 0.75rem;
+          color: #6c757d;
+          text-transform: uppercase;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+  }
+
+  .theater-details {
+    margin-bottom: 1.5rem;
+
+    .detail-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .detail-text {
+          color: #495057;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .occupancy-section {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+
+      .occupancy-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .occupancy-label {
+          color: #495057;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+      }
+
+      .occupancy-bar {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+
+        .occupancy-fill {
+          height: 100%;
+          border-radius: 4px;
+          transition: width 0.3s ease;
+
+          &.occupancy-low {
+            background: #28a745;
+          }
+
+          &.occupancy-medium {
+            background: #ffc107;
+          }
+
+          &.occupancy-high {
+            background: #fd7e14;
+          }
+
+          &.occupancy-full {
+            background: #dc3545;
+          }
+        }
+      }
+
+      .occupancy-numbers {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.8rem;
+      }
+    }
+
+    .next-showtime {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #e7f3ff;
+      border-radius: 6px;
+      border-left: 3px solid #007bff;
+
+      .showtime-text {
+        color: #0056b3;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+    }
+
+    .facilities-section {
+      .facilities-title {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+      }
+
+      .facilities-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        app-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+      }
+    }
+  }
+
+  .theater-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+
+    app-button {
+      flex: 1;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .theater-card {
+    padding: 1rem;
+
+    .theater-header {
+      flex-direction: column;
+      gap: 1rem;
+
+      .theater-capacity {
+        align-self: flex-start;
+      }
+    }
+
+    .detail-row {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .theater-actions {
+      flex-direction: column;
+    }
+  }
+}
+
+// Animation pour les changements d'occupation
+.occupancy-fill {
+  transition: width 0.5s ease, background-color 0.3s ease;
+}
+
+// États de disponibilité
+.theater-card.unavailable {
+  .theater-actions app-button {
+    opacity: 0.6;
+  }
+}

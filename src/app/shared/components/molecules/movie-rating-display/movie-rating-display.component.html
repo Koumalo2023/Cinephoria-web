@@ -1,1 +1,127 @@
-<p>movie-rating-display works!</p>
+<div class="movie-rating-display" [class.compact]="compact" [class.interactive]="interactive">
+  <!-- Version compacte -->
+  <div class="rating-compact" *ngIf="compact">
+    <div class="compact-stars">
+      <div class="stars-container" [style.font-size]="getStarSize()" [style.gap]="getStarSpacing()">
+        <!-- Étoiles pleines -->
+        <app-icon
+          *ngFor="let star of [].constructor(fullStars)"
+          name="star"
+          class="star star-full"
+          [style.color]="ratingColor">
+        </app-icon>
+
+        <!-- Demi-étoile -->
+        <app-icon
+          *ngIf="hasHalfStar"
+          name="star-half"
+          class="star star-half"
+          [style.color]="ratingColor">
+        </app-icon>
+
+        <!-- Étoiles vides -->
+        <app-icon
+          *ngFor="let star of [].constructor(emptyStars)"
+          name="star"
+          class="star star-empty">
+        </app-icon>
+      </div>
+    </div>
+    <div class="compact-info">
+      <span class="rating-value" [style.color]="ratingColor">
+        {{ rating.toFixed(1) }}
+      </span>
+      <span class="vote-count" *ngIf="showVoteCount">
+        ({{ getVoteText() }})
+      </span>
+    </div>
+  </div>
+
+  <!-- Version étendue -->
+  <div class="rating-expanded" *ngIf="!compact">
+    <!-- En-tête avec note moyenne -->
+    <div class="rating-header" *ngIf="showAverage">
+      <div class="average-rating">
+        <div class="rating-value-large" [style.color]="ratingColor">
+          {{ rating.toFixed(1) }}
+        </div>
+        <div class="rating-details">
+          <div class="stars-container" [style.font-size]="getStarSize()" [style.gap]="getStarSpacing()">
+            <!-- Étoiles pleines -->
+            <app-icon
+              *ngFor="let star of [].constructor(fullStars); let i = index"
+              name="star"
+              class="star star-full"
+              [style.color]="ratingColor"
+              (click)="onStarClick(i + 1)">
+            </app-icon>
+
+            <!-- Demi-étoile -->
+            <app-icon
+              *ngIf="hasHalfStar"
+              name="star-half"
+              class="star star-half"
+              [style.color]="ratingColor"
+              (click)="onStarClick(fullStars + 1)">
+            </app-icon>
+
+            <!-- Étoiles vides -->
+            <app-icon
+              *ngFor="let star of [].constructor(emptyStars); let i = index"
+              name="star"
+              class="star star-empty"
+              (click)="onStarClick(fullStars + (hasHalfStar ? 1 : 0) + i + 1)">
+            </app-icon>
+          </div>
+          <div class="rating-meta">
+            <span class="rating-label">{{ ratingLabel }}</span>
+            <span class="vote-count" *ngIf="showVoteCount">
+              {{ getVoteText() }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribution des notes -->
+    <div class="rating-distribution" *ngIf="showDistribution && distributionArray.length > 0">
+      <div class="distribution-title">Répartition des notes</div>
+      <div class="distribution-list">
+        <div
+          *ngFor="let item of distributionArray"
+          class="distribution-item"
+          (click)="onStarClick(item.rating)">
+          <div class="distribution-rating">
+            <span class="rating-number">{{ item.rating }}</span>
+            <app-icon name="star" class="rating-star"></app-icon>
+          </div>
+          <div class="distribution-bar">
+            <app-progress-bar
+              [value]="item.percentage"
+              [max]="100"
+              class="distribution-progress">
+            </app-progress-bar>
+          </div>
+          <div class="distribution-count">
+            {{ item.count }}
+          </div>
+          <div class="distribution-percentage">
+            {{ item.percentage.toFixed(1) }}%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badge de note (alternative) -->
+    <div class="rating-badge" *ngIf="!showDistribution">
+      <app-badge
+        [variant]="rating >= 4 ? 'success' : rating >= 3 ? 'warning' : 'error'"
+        [size]="size">
+        {{ rating.toFixed(1) }}/{{ maxRating }}
+      </app-badge>
+      <span class="badge-votes" *ngIf="showVoteCount">
+        {{ getVoteText() }}
+      </span>
+    </div>
+  </div>
+</div>

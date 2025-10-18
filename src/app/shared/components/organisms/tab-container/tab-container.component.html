@@ -1,1 +1,100 @@
-<p>tab-container works!</p>
+<div 
+  class="{{ getContainerClasses().join(' ') }}"
+  [style.max-width]="maxWidth"
+>
+  <!-- Navigation des onglets -->
+  <nav 
+    class="tab-navigation"
+    [class.scrollable]="scrollable"
+    role="tablist"
+    aria-label="Navigation par onglets"
+  >
+    <div class="tab-list" [class.full-width]="fullWidth">
+      @for (tab of getVisibleTabs(); track tab.id) {
+        <button
+          type="button"
+          class="{{ getTabClasses(tab).join(' ') }}"
+          role="tab"
+          [attr.aria-selected]="isTabActive(tab.id)"
+          [attr.aria-controls]="'tab-content-' + tab.id"
+          [id]="'tab-' + tab.id"
+          [disabled]="tab.disabled"
+          (click)="selectTab(tab.id)"
+          (keydown.enter)="selectTab(tab.id)"
+          (keydown.space)="selectTab(tab.id); $event.preventDefault()"
+        >
+          <!-- Icône de l'onglet -->
+          @if (tab.icon) {
+            <app-icon
+              [name]="tab.icon"
+              class="tab-icon"
+              [size]="tabSize === 'sm' ? 'small' : 'medium'"
+            ></app-icon>
+          }
+          
+          <!-- Libellé de l'onglet -->
+          <span class="tab-label">{{ tab.label }}</span>
+          
+          <!-- Badge de l'onglet -->
+          @if (tab.badge !== undefined && tab.badge !== null) {
+            <app-badge
+              [count]="typeof tab.badge === 'number' ? tab.badge : null"
+              [size]="tabSize === 'sm' ? 'small' : 'medium'"
+              class="tab-badge"
+            ></app-badge>
+          }
+          
+          <!-- Bouton de fermeture (pour les onglets fermables) -->
+          @if (tabClose.observed) {
+            <button
+              type="button"
+              class="tab-close"
+              (click)="closeTab(tab.id, $event)"
+              aria-label="Fermer l'onglet {{ tab.label }}"
+            >
+              <app-icon name="times" size="xs"></app-icon>
+            </button>
+          }
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- Contenu des onglets -->
+  <div class="tab-content-container">
+    @for (tab of getVisibleTabs(); track tab.id) {
+      <div
+        class="tab-content"
+        [class.active]="isTabActive(tab.id)"
+        [class.loaded]="isTabLoaded(tab.id)"
+        [id]="'tab-content-' + tab.id"
+        [attr.aria-labelledby]="'tab-' + tab.id"
+        role="tabpanel"
+        [attr.data-tab-id]="tab.id"
+        [attr.hidden]="!isTabActive(tab.id) ? true : null"
+      >
+        <!-- Contenu de l'onglet via ng-content -->
+        @if (isTabActive(tab.id) && isTabLoaded(tab.id)) {
+          <ng-content select="[tabId='{{ tab.id }}']"></ng-content>
+        }
+        
+        <!-- Indicateur de chargement pour le lazy loading -->
+        @if (lazyLoad && isTabActive(tab.id) && !isTabLoaded(tab.id)) {
+          <div class="tab-loading">
+            <app-icon name="spinner" size="medium" class="loading-icon"></app-icon>
+            <span class="loading-text">Chargement...</span>
+          </div>
+        }
+      </div>
+    }
+    
+    <!-- Message si aucun onglet n'est disponible -->
+    @if (!shouldShowContent()) {
+      <div class="no-tabs-message">
+        <app-icon name="exclamation-circle" size="medium"></app-icon>
+        <h3>Aucun onglet disponible</h3>
+        <p>Configurez les onglets via la propriété "tabs" ou ajoutez du contenu via ng-content.</p>
+      </div>
+    }
+  </div>
+</div>

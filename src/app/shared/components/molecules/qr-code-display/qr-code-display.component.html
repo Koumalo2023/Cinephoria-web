@@ -1,1 +1,96 @@
-<p>qr-code-display works!</p>
+<div [class]="containerClasses">
+  <!-- En-tête avec titre et description -->
+  <div *ngIf="hasTitle || hasDescription" class="qr-code-display__header">
+    <h2 *ngIf="hasTitle" [class]="titleClasses">
+      {{ mergedConfig.title }}
+    </h2>
+    <p *ngIf="hasDescription" [class]="descriptionClasses">
+      {{ mergedConfig.description }}
+    </p>
+  </div>
+
+  <!-- Contenu principal avec le QR Code -->
+  <div [class]="contentClasses">
+    <!-- QR Code -->
+    <div class="qr-code-display__code">
+      <app-qr-code
+        [data]="data"
+        [size]="getQRCodeSize()"
+        [errorCorrection]="errorCorrection"
+        [margin]="margin"
+        [darkColor]="darkColor"
+        [lightColor]="lightColor"
+        [showDownload]="false"
+      ></app-qr-code>
+    </div>
+
+    <!-- Données encodées (optionnel) -->
+    <div *ngIf="variant === 'card'" class="qr-code-display__data">
+      <p class="qr-code-display__data-label">Données encodées :</p>
+      <code class="qr-code-display__data-content">{{ data }}</code>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div *ngIf="hasActions" [class]="actionsClasses">
+    <!-- Bouton Copier -->
+    <button
+      *ngIf="mergedConfig.showCopy"
+      class="qr-code-display__action qr-code-display__action--copy"
+      (click)="copyToClipboard()"
+      aria-label="Copier les données"
+    >
+      <app-icon name="copy" size="small"></app-icon>
+      <span>Copier</span>
+    </button>
+
+    <!-- Bouton Télécharger -->
+    <button
+      *ngIf="mergedConfig.showDownload"
+      class="qr-code-display__action qr-code-display__action--download"
+      (click)="downloadQRCode()"
+      aria-label="Télécharger le QR Code"
+    >
+      <app-icon name="download" size="small"></app-icon>
+      <span>Télécharger</span>
+    </button>
+
+    <!-- Bouton Partager -->
+    <button
+      *ngIf="mergedConfig.showShare"
+      class="qr-code-display__action qr-code-display__action--share"
+      (click)="shareQRCode()"
+      aria-label="Partager le QR Code"
+    >
+      <app-icon name="share" size="small"></app-icon>
+      <span>Partager</span>
+    </button>
+
+    <!-- Bouton Rafraîchir -->
+    <button
+      *ngIf="mergedConfig.showRefresh"
+      class="qr-code-display__action qr-code-display__action--refresh"
+      (click)="refreshQRCode()"
+      aria-label="Rafraîchir le QR Code"
+    >
+      <app-icon name="refresh" size="small"></app-icon>
+      <span>Rafraîchir</span>
+    </button>
+  </div>
+
+  <!-- Informations supplémentaires -->
+  <div *ngIf="variant === 'card'" class="qr-code-display__info">
+    <div class="qr-code-display__info-item">
+      <span class="qr-code-display__info-label">Taille :</span>
+      <span class="qr-code-display__info-value">{{ getQRCodeSize() }}</span>
+    </div>
+    <div class="qr-code-display__info-item">
+      <span class="qr-code-display__info-label">Correction d'erreur :</span>
+      <span class="qr-code-display__info-value">{{ errorCorrection }}</span>
+    </div>
+    <div class="qr-code-display__info-item">
+      <span class="qr-code-display__info-label">Marge :</span>
+      <span class="qr-code-display__info-value">{{ margin }}px</span>
+    </div>
+  </div>
+</div>

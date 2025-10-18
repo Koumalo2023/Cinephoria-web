@@ -1,1 +1,506 @@
-<p>management-tabs works!</p>
+<div class="{{ getContainerClasses().join(' ') }}">
+  <!-- Conteneur d'onglets pour l'administration -->
+  <app-tab-container
+    [tabs]="managementTabs"
+    [activeTabId]="activeTab"
+    tabType="standard"
+    tabSize="md"
+    [fullWidth]="true"
+    (tabChange)="onTabChange($event)"
+  >
+    <!-- Onglet Tableau de bord -->
+    <div tabId="dashboard" *ngIf="showDashboard">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="chart-bar" size="medium"></app-icon>
+            Tableau de bord administration
+          </h3>
+          <p class="section-description">
+            Vue d'ensemble du système Cinephoria
+          </p>
+        </div>
+
+        <!-- Statistiques système -->
+        <div class="stats-grid" *ngIf="stats">
+          <div class="stat-card critical">
+            <div class="stat-icon">
+              <app-icon name="exclamation-triangle" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ systemAlertsCount }}</div>
+              <div class="stat-label">Alertes système</div>
+            </div>
+          </div>
+
+          <div class="stat-card warning">
+            <div class="stat-icon">
+              <app-icon name="check-circle" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ pendingApprovalsCount }}</div>
+              <div class="stat-label">Approbations en attente</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="users" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.totalUsers }}</div>
+              <div class="stat-label">Utilisateurs total</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="film" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.totalMovies }}</div>
+              <div class="stat-label">Films au catalogue</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="building" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.totalCinemas }}</div>
+              <div class="stat-label">Cinémas partenaires</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions rapides admin -->
+        <div class="quick-actions">
+          <h4 class="actions-title">Actions rapides</h4>
+          <div class="actions-grid">
+            <app-button
+              variant="danger"
+              (click)="onHandleAlert('critical')"
+              *ngIf="systemAlertsCount > 0"
+            >
+              <app-icon name="exclamation-triangle" size="small"></app-icon>
+              Gérer les alertes
+            </app-button>
+
+            <app-button
+              variant="danger"
+              (click)="onHandleApproval('all')"
+              *ngIf="pendingApprovalsCount > 0"
+            >
+              <app-icon name="check-circle" size="small"></app-icon>
+              Traiter les approbations
+            </app-button>
+
+            <app-button
+              variant="primary"
+              (click)="onManageUsers()"
+            >
+              <app-icon name="users" size="small"></app-icon>
+              Gérer les utilisateurs
+            </app-button>
+
+            <app-button
+              variant="secondary"
+              (click)="onViewReports()"
+            >
+              <app-icon name="chart-pie" size="small"></app-icon>
+              Voir les rapports
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Utilisateurs -->
+    <div tabId="users" *ngIf="showUsers">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="users" size="medium"></app-icon>
+            Gestion des utilisateurs
+          </h3>
+          <p class="section-description">
+            Gérez les comptes utilisateurs et leurs permissions
+          </p>
+        </div>
+
+        <div class="management-list">
+          @for (user of getRecentUsers(); track user.id) {
+            <div class="management-item">
+              <div class="item-info">
+                <div class="item-title">{{ user.name }}</div>
+                <div class="item-details">
+                  <span class="email">{{ user.email }}</span>
+                  <span class="role">{{ user.role }}</span>
+                  <span class="status" [class]="user.status">
+                    {{ user.status }}
+                  </span>
+                </div>
+              </div>
+              <div class="item-actions">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onManageUsers()"
+                >
+                  Modifier
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getRecentUsers().length === 0) {
+            <div class="empty-state">
+              <app-icon name="users" size="large"></app-icon>
+              <h3>Aucun utilisateur</h3>
+              <p>Aucun utilisateur trouvé dans le système</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Films -->
+    <div tabId="movies" *ngIf="showMovies">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="film" size="medium"></app-icon>
+            Gestion des films
+          </h3>
+          <p class="section-description">
+            Gérez le catalogue de films
+          </p>
+        </div>
+
+        <div class="management-list">
+          @for (movie of getRecentMovies(); track movie.id) {
+            <div class="management-item">
+              <div class="item-info">
+                <div class="item-title">{{ movie.title }}</div>
+                <div class="item-details">
+                  <span class="year">{{ movie.year }}</span>
+                  <span class="genre">{{ movie.genre }}</span>
+                  <span class="rating">{{ movie.rating }}/10</span>
+                </div>
+              </div>
+              <div class="item-actions">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onManageMovies()"
+                >
+                  Modifier
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getRecentMovies().length === 0) {
+            <div class="empty-state">
+              <app-icon name="film" size="large"></app-icon>
+              <h3>Aucun film</h3>
+              <p>Aucun film dans le catalogue</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Cinémas -->
+    <div tabId="cinemas" *ngIf="showCinemas">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="building" size="medium"></app-icon>
+            Gestion des cinémas
+          </h3>
+          <p class="section-description">
+            Gérez les cinémas partenaires
+          </p>
+        </div>
+
+        <div class="management-list">
+          @for (cinema of getRecentCinemas(); track cinema.id) {
+            <div class="management-item">
+              <div class="item-info">
+                <div class="item-title">{{ cinema.name }}</div>
+                <div class="item-details">
+                  <span class="location">{{ cinema.location }}</span>
+                  <span class="screens">{{ cinema.screens }} salles</span>
+                  <span class="status" [class]="cinema.status">
+                    {{ cinema.status }}
+                  </span>
+                </div>
+              </div>
+              <div class="item-actions">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onManageCinemas()"
+                >
+                  Modifier
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getRecentCinemas().length === 0) {
+            <div class="empty-state">
+              <app-icon name="building" size="large"></app-icon>
+              <h3>Aucun cinéma</h3>
+              <p>Aucun cinéma partenaire configuré</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Séances -->
+    <div tabId="showtimes" *ngIf="showShowtimes">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="clock" size="medium"></app-icon>
+            Gestion des séances
+          </h3>
+          <p class="section-description">
+            Planifiez et gérez les séances de films
+          </p>
+        </div>
+
+        <div class="management-list">
+          @for (showtime of getRecentShowtimes(); track showtime.id) {
+            <div class="management-item">
+              <div class="item-info">
+                <div class="item-title">{{ showtime.movieTitle }}</div>
+                <div class="item-details">
+                  <span class="cinema">{{ showtime.cinema }}</span>
+                  <span class="date">{{ showtime.date }}</span>
+                  <span class="time">{{ showtime.time }}</span>
+                  <span class="seats">{{ showtime.availableSeats }} places</span>
+                </div>
+              </div>
+              <div class="item-actions">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onManageShowtimes()"
+                >
+                  Modifier
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getRecentShowtimes().length === 0) {
+            <div class="empty-state">
+              <app-icon name="clock" size="large"></app-icon>
+              <h3>Aucune séance</h3>
+              <p>Aucune séance programmée</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Rapports -->
+    <div tabId="reports" *ngIf="showReports">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="chart-pie" size="medium"></app-icon>
+            Rapports et analyses
+          </h3>
+          <p class="section-description">
+            Consultez les rapports et statistiques du système
+          </p>
+        </div>
+
+        <div class="reports-grid">
+          <div class="report-card">
+            <h4 class="report-title">Utilisation du système</h4>
+            <p class="report-description">
+              Statistiques d'utilisation et performance
+            </p>
+            <app-button
+              variant="primary"
+              size="small"
+              (click)="onViewReports()"
+            >
+              Voir le rapport
+            </app-button>
+          </div>
+
+          <div class="report-card">
+            <h4 class="report-title">Réservations</h4>
+            <p class="report-description">
+              Analyse des réservations et fréquentation
+            </p>
+            <app-button
+              variant="primary"
+              size="small"
+              (click)="onViewReports()"
+            >
+              Voir le rapport
+            </app-button>
+          </div>
+
+          <div class="report-card">
+            <h4 class="report-title">Performance financière</h4>
+            <p class="report-description">
+              Revenus et indicateurs financiers
+            </p>
+            <app-button
+              variant="primary"
+              size="small"
+              (click)="onViewReports()"
+            >
+              Voir le rapport
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Paramètres -->
+    <div tabId="settings" *ngIf="showSettings">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="cog" size="medium"></app-icon>
+            Paramètres système
+          </h3>
+          <p class="section-description">
+            Configurez les paramètres globaux du système
+          </p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting-card">
+            <h4 class="setting-title">Paramètres généraux</h4>
+            <p class="setting-description">
+              Configuration générale de l'application
+            </p>
+            <app-button
+              variant="primary"
+              size="small"
+              (click)="onSystemSettings()"
+            >
+              Configurer
+            </app-button>
+          </div>
+
+          <div class="setting-card">
+            <h4 class="setting-title">Sécurité</h4>
+            <p class="setting-description">
+              Paramètres de sécurité et authentification
+            </p>
+            <app-button
+              variant="primary"
+              size="small"
+              (click)="onSystemSettings()"
+            >
+              Configurer
+            </app-button>
+          </div>
+
+          <div class="setting-card">
+            <h4 class="setting-title">Notifications</h4>
+            <p class="setting-description">
+              Configuration des notifications système
+            </p>
+            <app-button
+              variant="primary"
+              size="small"
+              (click)="onSystemSettings()"
+            >
+              Configurer
+            </app-button>
+          </div>
+        </div>
+
+        @if (systemAlertsCount > 0) {
+          <div class="alerts-section">
+            <h4 class="alerts-title">Alertes système</h4>
+            <div class="alerts-list">
+              @for (alert of getSystemAlerts(); track alert.id) {
+                <div class="alert-item">
+                  <div class="alert-content">
+                    <app-icon name="exclamation-triangle" size="small"></app-icon>
+                    <span>{{ alert.message }}</span>
+                  </div>
+                  <app-button
+                    variant="danger"
+                    size="small"
+                    (click)="onHandleAlert(alert.id)"
+                  >
+                    Résoudre
+                  </app-button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Onglet Approbations -->
+    <div tabId="approvals" *ngIf="showApprovals">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="check-circle" size="medium"></app-icon>
+            Gestion des approbations
+          </h3>
+          <p class="section-description">
+            Traitez les demandes en attente d'approbation
+          </p>
+        </div>
+
+        <div class="approvals-list">
+          @for (approval of getPendingApprovals(); track approval.id) {
+            <div class="approval-item">
+              <div class="approval-info">
+                <div class="approval-title">{{ approval.type }} - {{ approval.requester }}</div>
+                <div class="approval-details">
+                  <span class="date">{{ approval.date }}</span>
+                  <span class="description">{{ approval.description }}</span>
+                </div>
+              </div>
+              <div class="approval-actions">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onHandleApproval(approval.id)"
+                >
+                  Approuver
+                </app-button>
+                <app-button
+                  variant="danger"
+                  size="small"
+                  (click)="onHandleApproval(approval.id)"
+                >
+                  Rejeter
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getPendingApprovals().length === 0) {
+            <div class="empty-state">
+              <app-icon name="check-circle" size="large"></app-icon>
+              <h3>Aucune approbation en attente</h3>
+              <p>Toutes les demandes ont été traitées</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </app-tab-container>
+</div>

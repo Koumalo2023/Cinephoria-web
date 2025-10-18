@@ -1,0 +1,190 @@
+<div class="auth-layout">
+  <!-- En-tête simplifié pour l'authentification -->
+  <header class="auth-header">
+    <div class="auth-header-content">
+      <!-- Logo -->
+      <div class="auth-logo">
+        <a routerLink="/" class="logo-link">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">Cinephoria</span>
+        </a>
+      </div>
+
+      <!-- Lien de retour à l'accueil -->
+      <a routerLink="/" class="back-to-home">
+        <span class="back-icon">←</span>
+        Retour à l'accueil
+      </a>
+    </div>
+  </header>
+
+  <!-- Contenu principal de l'authentification -->
+  <main class="auth-main">
+    <div class="auth-container">
+      
+      <!-- Section gauche : Formulaire d'authentification -->
+      <section class="auth-form-section">
+        <div class="auth-form-container">
+          
+          <!-- En-tête du formulaire -->
+          <div class="form-header">
+            <h1 class="form-title">{{ getPageTitle() }}</h1>
+            <p class="form-subtitle">
+              {{ authMessages.welcome }}
+            </p>
+          </div>
+
+          <!-- Formulaire d'authentification intégré -->
+          <div class="form-content">
+            <app-auth-form
+              [config]="authFormConfig"
+              [loading]="loading"
+              [errorMessage]="errorMessage"
+              [successMessage]="successMessage"
+              (authSubmit)="onAuthSubmit($event)"
+              (providerAuth)="onProviderAuth($event)"
+              (modeChange)="onModeChange($event)"
+              (passwordReset)="onPasswordReset($event)">
+            </app-auth-form>
+          </div>
+
+          <!-- Séparateur -->
+          <div class="form-separator">
+            <span class="separator-text">ou</span>
+          </div>
+
+          <!-- Connexion rapide avec réseaux sociaux -->
+          <div class="social-auth">
+            <h3 class="social-title">Se connecter avec</h3>
+            <div class="social-buttons">
+              <button class="social-btn google">
+                <span class="social-icon">🔍</span>
+                Google
+              </button>
+              <button class="social-btn facebook">
+                <span class="social-icon">👥</span>
+                Facebook
+              </button>
+              <button class="social-btn apple">
+                <span class="social-icon">🍎</span>
+                Apple
+              </button>
+            </div>
+          </div>
+
+          <!-- Lien alternatif -->
+          <div class="auth-alternate">
+            <p class="alternate-text">
+              {{ getAlternateLinkText() }}
+              <a [routerLink]="getAlternateLinkRoute()" class="alternate-link">
+                {{ getAlternateLinkAction() }}
+              </a>
+            </p>
+          </div>
+
+          <!-- Informations légales -->
+          <div class="auth-legal">
+            <p class="legal-text">
+              En continuant, vous acceptez nos 
+              <a routerLink="/terms" class="legal-link">Conditions d'utilisation</a> 
+              et notre 
+              <a routerLink="/privacy" class="legal-link">Politique de confidentialité</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section droite : Présentation et carrousel -->
+      <section class="auth-presentation">
+        <div class="presentation-container">
+          
+          <!-- Carrousel -->
+          <div class="auth-carousel">
+            <div class="carousel-container">
+              <!-- Slides -->
+              <div 
+                *ngFor="let slide of authCarousel; let i = index"
+                [class]="getSlideClass(i)"
+                class="carousel-slide">
+                
+                <div class="slide-content">
+                  <div class="slide-icon">{{ slide.icon }}</div>
+                  <h2 class="slide-title">{{ slide.title }}</h2>
+                  <p class="slide-description">{{ slide.description }}</p>
+                </div>
+                
+                <div class="slide-background">
+                  <!-- Image de fond simulée -->
+                  <div class="slide-image-placeholder"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contrôles du carrousel -->
+            <div class="carousel-controls">
+              <button class="control-btn prev" (click)="prevSlide()">
+                <span class="control-icon">‹</span>
+              </button>
+              
+              <!-- Indicateurs -->
+              <div class="carousel-indicators">
+                <button 
+                  *ngFor="let slide of authCarousel; let i = index"
+                  [class]="getSlideIndicatorClass(i)"
+                  (click)="goToSlide(i)"
+                  class="indicator-btn">
+                </button>
+              </div>
+              
+              <button class="control-btn next" (click)="nextSlide()">
+                <span class="control-icon">›</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Liste des avantages -->
+          <div class="auth-benefits">
+            <h3 class="benefits-title">Pourquoi créer un compte ?</h3>
+            <ul class="benefits-list">
+              <li *ngFor="let benefit of authMessages.benefits" class="benefit-item">
+                <span class="benefit-icon">✓</span>
+                <span class="benefit-text">{{ benefit }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Témoignage -->
+          <div class="auth-testimonial">
+            <div class="testimonial-content">
+              <p class="testimonial-text">
+                "Cinephoria a révolutionné ma façon d'aller au cinéma. 
+                Plus besoin de faire la queue, je réserve en quelques secondes !"
+              </p>
+              <div class="testimonial-author">
+                <span class="author-name">Marie L.</span>
+                <span class="author-role">Membre depuis 2023</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Pied de page simplifié -->
+  <footer class="auth-footer">
+    <div class="auth-footer-content">
+      <div class="footer-copyright">
+        <p>&copy; {{ currentYear }} Cinephoria. Tous droits réservés.</p>
+      </div>
+      
+      <div class="footer-links">
+        <a routerLink="/help" class="footer-link">Aide</a>
+        <a routerLink="/contact" class="footer-link">Contact</a>
+        <a routerLink="/privacy" class="footer-link">Confidentialité</a>
+        <a routerLink="/terms" class="footer-link">Conditions</a>
+      </div>
+    </div>
+  </footer>
+</div>

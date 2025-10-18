@@ -1,1 +1,128 @@
-<p>notification-settings works!</p>
+<div class="notification-settings">
+  <div class="settings-header">
+    <h2>Paramètres de Notifications</h2>
+    <p class="settings-description">
+      Gérez vos préférences de notifications pour rester informé de vos activités Cinephoria.
+    </p>
+  </div>
+
+  <form [formGroup]="notificationForm" (change)="onToggleChange()" class="settings-form">
+    
+    <!-- Notifications par Email -->
+    <div class="notification-category">
+      <div class="category-header">
+        <h3>Notifications Email</h3>
+        <div class="category-actions">
+          <button type="button" class="btn-toggle-all" (click)="toggleAllEmailNotifications(true)">
+            Tout activer
+          </button>
+          <button type="button" class="btn-toggle-all" (click)="toggleAllEmailNotifications(false)">
+            Tout désactiver
+          </button>
+        </div>
+      </div>
+      
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="emailNotifications">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Notifications par email</span>
+        </label>
+        <p class="notification-description">Recevoir des notifications générales par email</p>
+      </div>
+
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="marketingEmails">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Emails marketing</span>
+        </label>
+        <p class="notification-description">Offres spéciales et promotions</p>
+      </div>
+
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="reservationReminders">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Rappels de réservation</span>
+        </label>
+        <p class="notification-description">Rappels avant vos séances de cinéma</p>
+      </div>
+
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="specialOffers">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Offres spéciales</span>
+        </label>
+        <p class="notification-description">Réductions et offres exclusives</p>
+      </div>
+
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="newMovies">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Nouveaux films</span>
+        </label>
+        <p class="notification-description">Alertes pour les nouveaux films</p>
+      </div>
+    </div>
+
+    <!-- Notifications Push -->
+    <div class="notification-category">
+      <div class="category-header">
+        <h3>Notifications Push</h3>
+        <div class="category-actions">
+          <button type="button" class="btn-toggle-all" (click)="toggleAllPushNotifications(true)">
+            Tout activer
+          </button>
+          <button type="button" class="btn-toggle-all" (click)="toggleAllPushNotifications(false)">
+            Tout désactiver
+          </button>
+        </div>
+      </div>
+      
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="pushNotifications">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Notifications push</span>
+        </label>
+        <p class="notification-description">Notifications sur votre appareil</p>
+      </div>
+
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="cinemaUpdates">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Mises à jour cinéma</span>
+        </label>
+        <p class="notification-description">Changements d'horaire et informations</p>
+      </div>
+    </div>
+
+    <!-- Notifications SMS -->
+    <div class="notification-category">
+      <div class="category-header">
+        <h3>Notifications SMS</h3>
+      </div>
+      
+      <div class="notification-item">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="smsNotifications">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Notifications SMS</span>
+        </label>
+        <p class="notification-description">Alertes importantes par SMS</p>
+      </div>
+    </div>
+
+  </form>
+
+  <div class="settings-footer">
+    <p class="settings-note">
+      <strong>Note :</strong> Les modifications sont automatiquement sauvegardées. 
+      Vous pouvez ajuster ces paramètres à tout moment.
+    </p>
+  </div>
+</div>

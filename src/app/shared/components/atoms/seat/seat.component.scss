@@ -1,0 +1,189 @@
+.seat-wrapper {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  // Types de sièges
+  &.seat--standard {
+    background-color: var(--color-seat-standard);
+    border-color: var(--color-seat-standard-border);
+    
+    &:hover:not(.seat--disabled):not(.seat--occupied) {
+      background-color: var(--color-seat-standard-hover);
+      transform: translateY(-2px);
+    }
+  }
+  
+  &.seat--vip {
+    background-color: var(--color-seat-vip);
+    border-color: var(--color-seat-vip-border);
+    
+    &:hover:not(.seat--disabled):not(.seat--occupied) {
+      background-color: var(--color-seat-vip-hover);
+      transform: translateY(-2px);
+    }
+  }
+  
+  &.seat--handicap {
+    background-color: var(--color-seat-handicap);
+    border-color: var(--color-seat-handicap-border);
+    
+    &:hover:not(.seat--disabled):not(.seat--occupied) {
+      background-color: var(--color-seat-handicap-hover);
+      transform: translateY(-2px);
+    }
+  }
+  
+  &.seat--couple {
+    background-color: var(--color-seat-couple);
+    border-color: var(--color-seat-couple-border);
+    
+    &:hover:not(.seat--disabled):not(.seat--occupied) {
+      background-color: var(--color-seat-couple-hover);
+      transform: translateY(-2px);
+    }
+  }
+  
+  // États des sièges
+  &.seat--available {
+    // État par défaut
+  }
+  
+  &.seat--selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary);
+    
+    .seat__content {
+      opacity: 0.7;
+    }
+  }
+  
+  &.seat--occupied {
+    background-color: var(--color-seat-occupied) !important;
+    border-color: var(--color-seat-occupied-border) !important;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+  
+  &.seat--disabled {
+    background-color: var(--color-seat-disabled) !important;
+    border-color: var(--color-seat-disabled-border) !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.seat__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  z-index: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.seat__icon {
+  font-size: 0.875rem;
+  color: white;
+}
+
+.seat__number {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1;
+}
+
+.seat__price {
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: white;
+  line-height: 1;
+}
+
+.seat__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 0.375rem;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  
+  .seat--selected &,
+  .seat--occupied & {
+    opacity: 1;
+  }
+}
+
+.seat__checkmark,
+.seat__occupied {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+}
+
+.seat__checkmark {
+  color: var(--color-success);
+}
+
+.seat__occupied {
+  color: var(--color-error);
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  
+  // Couleurs des sièges
+  --color-seat-standard: #6b7280;
+  --color-seat-standard-border: #4b5563;
+  --color-seat-standard-hover: #4b5563;
+  
+  --color-seat-vip: #f59e0b;
+  --color-seat-vip-border: #d97706;
+  --color-seat-vip-hover: #d97706;
+  
+  --color-seat-handicap: #06b6d4;
+  --color-seat-handicap-border: #0891b2;
+  --color-seat-handicap-hover: #0891b2;
+  
+  --color-seat-couple: #ec4899;
+  --color-seat-couple-border: #db2777;
+  --color-seat-couple-hover: #db2777;
+  
+  --color-seat-occupied: #ef4444;
+  --color-seat-occupied-border: #dc2626;
+  
+  --color-seat-disabled: #9ca3af;
+  --color-seat-disabled-border: #6b7280;
+}
