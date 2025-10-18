@@ -1,0 +1,70 @@
+🌐 APPLICATION WEB — Checklist complète
+
+
+🔹 Pages publiques
+
+Page Accueil : affichage des films ajoutés le mercredi dernier
+
+Page Films : liste / filtres (cinéma, genre, jour) / détail séances + prix par qualité
+
+Page Réservations : sélection cinéma/film / affichage séances / choix sièges / calcul prix / validation inscription requise
+
+Page Contact : formulaire (titre + description) / envoi message au support
+
+Page Inscription : création compte (nom, prénom, e-mail, mot de passe) / confirmation par e-mail
+
+Page Connexion : connexion (e-mail + mot de passe) / retour page précédente
+
+Page Mot de passe oublié : saisie e-mail / envoi lien de réinitialisation / nouveau mot de passe
+
+
+
+🔹 Pages Utilisateur (User)
+
+Page Mon espace : affichage profil / historique de commandes
+
+Page Mes réservations : liste des réservations / possibilité d’évaluer un film ou une séance
+
+Page Mes avis : afficher / modifier / supprimer mes avis
+
+Page Notifications : affichage des confirmations / validations d’avis / rappels de séances
+
+
+
+🔹 Pages Employé (Employee)
+
+Page Tableau de bord employé : vue rapide des films, séances et incidents en cours
+
+Page GESTION DES FILMS 🎬 : Liste des films / Ajouter un film / Modifier un film
+
+Page GESTION DES SÉANCES 🕒 : Liste des séances / Créer une séance / Modifier une séance
+
+Page GESTION DES SALLES 🪑 : Liste des salles / Modifier les informations
+
+Page MODÉRATION DES AVIS 💬 : Liste des avis en attente / Valider ou Supprimer un avis
+
+Page INCIDENTS TECHNIQUES ⚠️ : Liste des incidents / Déclarer un incident / Mettre à jour le statut
+
+Page CONTACTS CLIENTS 📞 : Consulter messages reçus / Répondre au client
+
+
+
+🔹 Pages Administrateur (Admin)
+
+Page Tableau de bord général : synthèse du système (films, séances, réservations, employés)
+
+Page GESTION DES FILMS 🎬 : Liste des films / Ajouter un film / Modifier un film / Supprimer un film
+
+Page GESTION DES SÉANCES 🕒 : Liste des séances / Créer une séance / Modifier une séance / Supprimer une séance
+
+Page GESTION DES SALLES 🪑 : Liste des salles / Ajouter / Modifier / Supprimer
+
+Page GESTION DES UTILISATEURS 👥 : Liste des clients / Voir réservations client
+
+Page GESTION DES EMPLOYÉS 🧰 : Liste des employés / Créer un compte / Réinitialiser mot de passe / Supprimer employé
+
+Page STATISTIQUES ET ANALYSES 📊 : Dashboard réservations (7 derniers jours) / Classement des films
+
+Page CONFIGURATION ⚙️ : Paramètres du site / Rôles et autorisations
+
+Page AIDE ET SUPPORT ❓ : Documentation / Contact technique

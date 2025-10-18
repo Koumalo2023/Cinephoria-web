@@ -1,0 +1,15 @@
+📱 APPLICATION MOBILE — Checklist complète
+
+Page Accueil mobile : liste des séances du jour et jours suivants
+
+Page Mes billets : affichage des billets actifs (film, jour, salle, sièges, horaires)
+
+Page Détail billet : affichage du QR Code / informations séance
+
+Page Profil : informations utilisateur / déconnexion
+
+Page Connexion : e-mail + mot de passe / lien vers mot de passe oublié
+
+Page Mot de passe oublié : saisie e-mail / lien de réinitialisation
+
+Page Notifications : rappels de séances / confirmations de réservations

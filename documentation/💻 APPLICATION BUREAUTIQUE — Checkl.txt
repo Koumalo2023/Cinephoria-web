@@ -1,0 +1,13 @@
+💻 APPLICATION BUREAUTIQUE — Checklist complète
+
+Page Tableau de bord employé (version bureau) : liste des incidents / accès rapide salles et films
+
+Page INCIDENTS TECHNIQUES ⚠️ : Liste des incidents / Déclarer un incident / Modifier le statut / Clôturer un incident
+
+Page GESTION DES SALLES 🪑 : Consultation des salles / Affichage incidents associés
+
+Page GESTION DES FILMS 🎬 : Liste des films / Consultation des détails
+
+Page Connexion employé : identification interne / déconnexion
+
+Page Aide interne : manuel de saisie / consignes de maintenance

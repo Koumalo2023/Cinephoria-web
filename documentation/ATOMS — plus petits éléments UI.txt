@@ -1,0 +1,95 @@
+ATOMS — plus petits éléments UI
+
+Button
+
+But : déclencher une action.
+
+Inputs : label, variant (primary/secondary/ghost/danger), size (sm/md/lg), disabled, icon (optional), ariaLabel.
+
+Outputs : click.
+
+Variantes : CTA (primary), Ghost (outline), Icon-only.
+
+Accessibilité : rôle button, gestion du focus, état aria-disabled.
+
+Icon
+
+But : icône décorative ou interactive.
+
+Inputs : name, size, title (pour accessibility), ariaHidden.
+
+Usage : intégré dans boutons, liens, menus.
+
+Text / Typography
+
+But : titres, paragraphes, labels.
+
+Inputs : type (h1,h2,h3,subtitle,body,caption), truncate boolean.
+
+Accessibilité : hiérarchie sémantique respectée.
+
+Input (text)
+
+But : champ texte simple.
+
+Inputs : value, type, placeholder, label, error, required, disabled.
+
+Outputs : valueChange, blur, focus.
+
+Accessibilité : aria-describedby pour erreurs, associer label par for/id.
+
+Textarea
+
+Similaire à Input, multi-lignes, autosize optionnel.
+
+Select
+
+But : liste déroulante.
+
+Inputs : options[] (label/value), value, placeholder, disabled.
+
+Outputs : valueChange.
+
+Accessibilité : support keyboard navigation.
+
+Checkbox / Radio
+
+But : choix binaire / groupe.
+
+Inputs/Outputs classiques + aria.
+
+Badge
+
+But : compteur ou étiquette (ex : notifications).
+
+Inputs : label, count, variant (info/warning/error), max (pour "99+").
+
+Usage : notification icon, film label (coup de cœur).
+
+Avatar
+
+But : affichage utilisateur (photo ou initiales).
+
+Inputs : src, initials, size, alt.
+
+Spinner / Loader
+
+But : indicateur de chargement.
+
+Inputs : size, label (pour screen readers).
+
+Accessibilité : role="status" + texte caché pour SR.
+
+Tooltip
+
+But : aide contextuelle.
+
+Inputs : text, position, trigger (hover/focus).
+
+Accessibilité : aria-describedby liaison.
+
+Link
+
+But : lien de navigation.
+
+Inputs : href, variant (inline/button), external boolean.
