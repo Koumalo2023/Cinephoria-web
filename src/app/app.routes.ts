@@ -38,8 +38,18 @@ export const routes: Routes = [
       },
       {
         path: 'register',
-        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
+        loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent),
         title: 'Cinephoria - Inscription'
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+        title: 'Cinephoria - Mot de Passe Oublié'
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+        title: 'Cinephoria - Réinitialiser Mot de Passe'
       },
       {
         path: '',
