@@ -62,23 +62,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const baseItems = [
       { label: 'Accueil', routerLink: ['/'], icon: 'home' },
       { label: 'Films', routerLink: ['/movies'], icon: 'film' },
-      { label: 'Réservations', routerLink: ['/reservations'], icon: 'ticket' },
+      { label: 'Réservations', routerLink: ['/user/reservations'], icon: 'ticket' },
       { label: 'Contact', routerLink: ['/contact'], icon: 'mail' }
     ];
 
     if (!this.isAuthenticated) {
       return [
         ...baseItems,
-        { label: 'Se connecter', routerLink: ['/login'], icon: 'log-in', variant: 'secondary' },
-        { label: 'S\'inscrire', routerLink: ['/register'], icon: 'user-plus', variant: 'primary' }
+        { label: 'Se connecter', routerLink: ['/auth/login'], icon: 'log-in', variant: 'secondary' },
+        { label: 'S\'inscrire', routerLink: ['/auth/register'], icon: 'user-plus', variant: 'primary' }
       ];
     }
 
     if (!this.currentUser) {
       return [
         ...baseItems,
-        { label: 'Se connecter', routerLink: ['/login'], icon: 'log-in', variant: 'secondary' },
-        { label: 'S\'inscrire', routerLink: ['/register'], icon: 'user-plus', variant: 'primary' }
+        { label: 'Se connecter', routerLink: ['/auth/login'], icon: 'log-in', variant: 'secondary' },
+        { label: 'S\'inscrire', routerLink: ['/auth/register'], icon: 'user-plus', variant: 'primary' }
       ];
     }
 
@@ -93,15 +93,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
       case UserRole.Employee:
         return [
           ...baseItems,
-          { label: 'Intranet', routerLink: ['/intranet'], icon: 'settings' },
-          { label: 'Incidents', routerLink: ['/incidents'], icon: 'alert-triangle' }
+          { label: 'Management', routerLink: ['/management/dashboard'], icon: 'settings' },
+          { label: 'Incidents', routerLink: ['/management/incidents'], icon: 'alert-triangle' }
         ];
 
       case UserRole.Admin:
         return [
           ...baseItems,
-          { label: 'Administration', routerLink: ['/admin'], icon: 'shield' },
-          { label: 'Dashboard', routerLink: ['/dashboard'], icon: 'bar-chart' }
+          { label: 'Administration', routerLink: ['/admin/dashboard'], icon: 'shield' },
+          { label: 'Management', routerLink: ['/management/dashboard'], icon: 'settings' }
         ];
 
       default:
@@ -120,12 +120,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // Actions utilisateur
   onLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
     this.closeMobileMenu();
   }
 
   onRegister(): void {
-    this.router.navigate(['/register']);
+    this.router.navigate(['/auth/register']);
     this.closeMobileMenu();
   }
 

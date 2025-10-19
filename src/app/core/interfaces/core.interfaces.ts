@@ -249,6 +249,29 @@ export interface LoginResponseDto {
 }
 
 /**
+ * Réponse de connexion réelle de l'API backend
+ */
+export interface ApiLoginResponseDto {
+  token: string;
+  profile: {
+    employeeId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    position: string;
+    hiredDate: string;
+    createdAt: string;
+    updatedAt: string;
+    profilePictureUrl: string | null;
+    phoneNumber: string;
+    resolvedByIncidents: any[];
+    reportedIncidents: any[];
+    employeeFavorites: any[];
+    role: string;
+  };
+}
+
+/**
  * Profil utilisateur simplifié
  * @see api-documentation.md#userprofiledto
  */

@@ -25,71 +25,9 @@
       <!-- Section gauche : Formulaire d'authentification -->
       <section class="auth-form-section">
         <div class="auth-form-container">
-          
-          <!-- En-tête du formulaire -->
-          <div class="form-header">
-            <h1 class="form-title">{{ getPageTitle() }}</h1>
-            <p class="form-subtitle">
-              {{ authMessages.welcome }}
-            </p>
-          </div>
-
-          <!-- Formulaire d'authentification intégré -->
+          <!-- Contenu des routes d'authentification -->
           <div class="form-content">
-            <app-auth-form
-              [config]="authFormConfig"
-              [loading]="loading"
-              [errorMessage]="errorMessage"
-              [successMessage]="successMessage"
-              (authSubmit)="onAuthSubmit($event)"
-              (providerAuth)="onProviderAuth($event)"
-              (modeChange)="onModeChange($event)"
-              (passwordReset)="onPasswordReset($event)">
-            </app-auth-form>
-          </div>
-
-          <!-- Séparateur -->
-          <div class="form-separator">
-            <span class="separator-text">ou</span>
-          </div>
-
-          <!-- Connexion rapide avec réseaux sociaux -->
-          <div class="social-auth">
-            <h3 class="social-title">Se connecter avec</h3>
-            <div class="social-buttons">
-              <button class="social-btn google">
-                <span class="social-icon">🔍</span>
-                Google
-              </button>
-              <button class="social-btn facebook">
-                <span class="social-icon">👥</span>
-                Facebook
-              </button>
-              <button class="social-btn apple">
-                <span class="social-icon">🍎</span>
-                Apple
-              </button>
-            </div>
-          </div>
-
-          <!-- Lien alternatif -->
-          <div class="auth-alternate">
-            <p class="alternate-text">
-              {{ getAlternateLinkText() }}
-              <a [routerLink]="getAlternateLinkRoute()" class="alternate-link">
-                {{ getAlternateLinkAction() }}
-              </a>
-            </p>
-          </div>
-
-          <!-- Informations légales -->
-          <div class="auth-legal">
-            <p class="legal-text">
-              En continuant, vous acceptez nos 
-              <a routerLink="/terms" class="legal-link">Conditions d'utilisation</a> 
-              et notre 
-              <a routerLink="/privacy" class="legal-link">Politique de confidentialité</a>.
-            </p>
+            <router-outlet></router-outlet>
           </div>
         </div>
       </section>

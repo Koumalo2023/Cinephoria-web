@@ -20,7 +20,7 @@ export const routes: Routes = [
       },
       {
         path: 'contact',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent),
+        loadComponent: () => import('./features/public/contact/contact.component').then(m => m.ContactComponent),
         title: 'Cinephoria - Contact'
       }
     ]
@@ -72,17 +72,17 @@ export const routes: Routes = [
       },
       {
         path: 'reservations',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent),
+        loadComponent: () => import('./features/user/reservations/reservations.component').then(m => m.ReservationsComponent),
         title: 'Cinephoria - Mes Réservations'
       },
       {
         path: 'reviews',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent),
+        loadComponent: () => import('./features/user/reviews/reviews.component').then(m => m.ReviewsComponent),
         title: 'Cinephoria - Mes Avis'
       },
       {
         path: 'profile',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent),
+        loadComponent: () => import('./features/user/profile/profile.component').then(m => m.ProfileComponent),
         title: 'Cinephoria - Mon Profil'
       },
       {
@@ -107,28 +107,83 @@ export const routes: Routes = [
       },
       {
         path: 'movies',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/movies/movie-management.component').then(m => m.MovieManagementComponent),
         title: 'Cinephoria - Gestion Films'
       },
       {
         path: 'showtimes',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/showtimes/showtime-management.component').then(m => m.ShowtimeManagementComponent),
         title: 'Cinephoria - Gestion Séances'
       },
       {
         path: 'theaters',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/theaters/theater-management.component').then(m => m.TheaterManagementComponent),
         title: 'Cinephoria - Gestion Salles'
       },
       {
         path: 'reservations',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/users/user-management.component').then(m => m.UserManagementComponent),
         title: 'Cinephoria - Validation Réservations'
       },
       {
         path: 'checkin',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/statistics/statistics.component').then(m => m.StatisticsComponent),
         title: 'Cinephoria - Check-in Clients'
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
+  },
+
+  // Routes management avec layout management (protégées pour employés et admins)
+  {
+    path: 'management',
+    loadComponent: () => import('./layouts/management-layout/management-layout.component').then(m => m.ManagementLayoutComponent),
+    canActivate: [RoleGuard],
+    data: { roles: [UserRole.Employee, UserRole.Admin] },
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/management/dashboard/management-dashboard.component').then(m => m.ManagementDashboardComponent),
+        title: 'Cinephoria - Tableau de Bord Management'
+      },
+      {
+        path: 'movies',
+        loadComponent: () => import('./features/management/movies/movie-management.component').then(m => m.MovieManagementComponent),
+        title: 'Cinephoria - Gestion Films'
+      },
+      {
+        path: 'showtimes',
+        loadComponent: () => import('./features/management/showtimes/showtime-management.component').then(m => m.ShowtimeManagementComponent),
+        title: 'Cinephoria - Gestion Séances'
+      },
+      {
+        path: 'theaters',
+        loadComponent: () => import('./features/management/theaters/theater-management.component').then(m => m.TheaterManagementComponent),
+        title: 'Cinephoria - Gestion Salles'
+      },
+      {
+        path: 'reservations',
+        loadComponent: () => import('./features/management/users/user-management.component').then(m => m.UserManagementComponent),
+        title: 'Cinephoria - Gestion Réservations'
+      },
+      {
+        path: 'incidents',
+        loadComponent: () => import('./features/management/statistics/statistics.component').then(m => m.StatisticsComponent),
+        title: 'Cinephoria - Gestion Incidents'
+      },
+      {
+        path: 'statistics',
+        loadComponent: () => import('./features/management/statistics/statistics.component').then(m => m.StatisticsComponent),
+        title: 'Cinephoria - Statistiques'
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/management/settings/settings.component').then(m => m.SettingsComponent),
+        title: 'Cinephoria - Paramètres'
       },
       {
         path: '',
@@ -152,37 +207,37 @@ export const routes: Routes = [
       },
       {
         path: 'movies',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/movies/movie-management.component').then(m => m.MovieManagementComponent),
         title: 'Cinephoria - Gestion Films'
       },
       {
         path: 'showtimes',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/showtimes/showtime-management.component').then(m => m.ShowtimeManagementComponent),
         title: 'Cinephoria - Gestion Séances'
       },
       {
         path: 'theaters',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/theaters/theater-management.component').then(m => m.TheaterManagementComponent),
         title: 'Cinephoria - Gestion Salles'
       },
       {
         path: 'users',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/users/user-management.component').then(m => m.UserManagementComponent),
         title: 'Cinephoria - Gestion Utilisateurs'
       },
       {
         path: 'employees',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/employees/employee-management.component').then(m => m.EmployeeManagementComponent),
         title: 'Cinephoria - Gestion Employés'
       },
       {
         path: 'statistics',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/statistics/statistics.component').then(m => m.StatisticsComponent),
         title: 'Cinephoria - Statistiques'
       },
       {
         path: 'settings',
-        loadComponent: () => import('./features/public/home/home.component').then(m => m.HomeComponent), // Temporaire
+        loadComponent: () => import('./features/management/settings/settings.component').then(m => m.SettingsComponent),
         title: 'Cinephoria - Paramètres'
       },
       {

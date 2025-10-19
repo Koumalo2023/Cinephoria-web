@@ -58,9 +58,9 @@
           <span class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
         </div>
         <div class="user-dropdown">
-          <a routerLink="/profile" class="dropdown-item">Mon profil</a>
-          <a routerLink="/reservations" class="dropdown-item">Mes réservations</a>
-          <a routerLink="/settings" class="dropdown-item">Paramètres</a>
+          <a routerLink="/user/profile" class="dropdown-item">Mon profil</a>
+          <a routerLink="/user/reservations" class="dropdown-item">Mes réservations</a>
+          <a routerLink="/user/reviews" class="dropdown-item">Mes avis</a>
           <div class="dropdown-divider"></div>
           <button (click)="logout()" class="dropdown-item logout">Déconnexion</button>
         </div>
@@ -68,8 +68,8 @@
 
       <!-- Utilisateur non connecté -->
       <div *ngIf="!currentUser" class="auth-actions">
-        <a routerLink="/login" class="btn btn-secondary">Se connecter</a>
-        <a routerLink="/register" class="btn btn-primary">S'inscrire</a>
+        <a routerLink="/auth/login" class="btn btn-secondary">Se connecter</a>
+        <a routerLink="/auth/register" class="btn btn-primary">S'inscrire</a>
       </div>
     </div>
 
@@ -136,14 +136,14 @@
         </div>
         
         <div class="mobile-auth-actions" *ngIf="!currentUser">
-          <a routerLink="/login" class="btn btn-secondary" (click)="closeMobileMenu()">Se connecter</a>
-          <a routerLink="/register" class="btn btn-primary" (click)="closeMobileMenu()">S'inscrire</a>
+          <a routerLink="/auth/login" class="btn btn-secondary" (click)="closeMobileMenu()">Se connecter</a>
+          <a routerLink="/auth/register" class="btn btn-primary" (click)="closeMobileMenu()">S'inscrire</a>
         </div>
 
         <div *ngIf="currentUser" class="mobile-user-links">
-          <a routerLink="/profile" class="mobile-user-link" (click)="closeMobileMenu()">Mon profil</a>
-          <a routerLink="/reservations" class="mobile-user-link" (click)="closeMobileMenu()">Mes réservations</a>
-          <a routerLink="/settings" class="mobile-user-link" (click)="closeMobileMenu()">Paramètres</a>
+          <a routerLink="/user/profile" class="mobile-user-link" (click)="closeMobileMenu()">Mon profil</a>
+          <a routerLink="/user/reservations" class="mobile-user-link" (click)="closeMobileMenu()">Mes réservations</a>
+          <a routerLink="/user/reviews" class="mobile-user-link" (click)="closeMobileMenu()">Mes avis</a>
           <button (click)="logout(); closeMobileMenu()" class="mobile-user-link logout">Déconnexion</button>
         </div>
       </div>
