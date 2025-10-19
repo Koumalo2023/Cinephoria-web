@@ -1,10 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 // Interfaces core
 import { AppUserDto } from '../../../../core/interfaces/core.interfaces';
 import { UserRole } from '../../../../core/enums/user-role.enum';
+import { UserStateService } from '../../../../core/services/auth/user-state.service';
 
 export type HeaderVariant = 'default' | 'transparent' | 'sticky';
 
@@ -18,20 +20,36 @@ export type HeaderVariant = 'default' | 'transparent' | 'sticky';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   @Input() variant: 'default' | 'transparent' | 'sticky' = 'default';
   @Input() showLogo: boolean = true;
   @Input() showNavigation: boolean = true;
   @Input() showUserMenu: boolean = true;
-  @Input() currentUser: AppUserDto | null = null;
 
+  currentUser: AppUserDto | null = null;
   isMobileMenuOpen: boolean = false;
   unreadNotifications: number = 0;
+  
+  private userSubscription: Subscription | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private userStateService: UserStateService
+  ) {}
 
   ngOnInit(): void {
-    this.updateNotificationCount();
+    this.userSubscription = this.userStateService.currentUser$.subscribe(
+      user => {
+        this.currentUser = user;
+        this.updateNotificationCount();
+      }
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   private updateNotificationCount(): void {
@@ -112,8 +130,7 @@ export class HeaderComponent implements OnInit {
   }
 
   onLogout(): void {
-    // Simuler la déconnexion
-    this.currentUser = null;
+    this.userStateService.logout();
     this.router.navigate(['/']);
     this.closeMobileMenu();
   }
@@ -181,9 +198,7 @@ export class HeaderComponent implements OnInit {
 
   // Gestion de la déconnexion
   logout(): void {
-    // TODO: Implémenter la logique de déconnexion
-    console.log('Déconnexion de l\'utilisateur');
-    this.currentUser = null;
+    this.userStateService.logout();
     this.closeMobileMenu();
     this.router.navigate(['/']);
   }

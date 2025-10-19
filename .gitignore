@@ -180,3 +180,6 @@ Temporary Items
 # Build artifacts specific to AWS deployment
 /aws-dist/
 /deploy/
+
+#autres repertoires
+/documentation
