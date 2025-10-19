@@ -1,0 +1,129 @@
+.radio-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+  
+  &:focus-within {
+    .radio__control {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  // États
+  &.radio--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    
+    .radio__control {
+      background-color: var(--color-background-disabled);
+      border-color: var(--color-border-disabled);
+    }
+  }
+  
+  // Tailles
+  &.radio--small {
+    .radio__control {
+      width: 1rem;
+      height: 1rem;
+    }
+    
+    .radio__dot {
+      width: 0.5rem;
+      height: 0.5rem;
+    }
+    
+    .radio__label {
+      font-size: 0.875rem;
+    }
+  }
+  
+  &.radio--medium {
+    .radio__control {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    
+    .radio__dot {
+      width: 0.625rem;
+      height: 0.625rem;
+    }
+    
+    .radio__label {
+      font-size: 1rem;
+    }
+  }
+  
+  &.radio--large {
+    .radio__control {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    .radio__dot {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+    
+    .radio__label {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+.radio__input {
+  display: flex;
+  align-items: center;
+}
+
+.radio__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  background-color: white;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  
+  .radio--checked & {
+    border-color: var(--color-primary);
+    
+    .radio__dot {
+      background-color: var(--color-primary);
+    }
+  }
+  
+  &:hover:not(.radio--disabled) {
+    border-color: var(--color-primary);
+  }
+}
+
+.radio__dot {
+  border-radius: 50%;
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.radio__label {
+  color: var(--color-text);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.radio__required {
+  color: var(--color-error);
+  margin-left: 0.25rem;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-error: #ef4444;
+  --color-text: #1f2937;
+  --color-border: #d1d5db;
+  --color-border-disabled: #e5e7eb;
+  --color-background-disabled: #f9fafb;
+}

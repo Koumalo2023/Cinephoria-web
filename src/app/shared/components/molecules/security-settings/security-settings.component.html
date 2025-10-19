@@ -1,1 +1,146 @@
-<p>security-settings works!</p>
+<div class="security-settings">
+  <div class="settings-header">
+    <h2>Sécurité du Compte</h2>
+    <p class="settings-description">
+      Gérez les paramètres de sécurité de votre compte Cinephoria pour protéger vos informations personnelles.
+    </p>
+  </div>
+
+  <form [formGroup]="securityForm" (change)="onSecurityToggleChange()" class="security-form">
+    
+    <!-- Authentification à deux facteurs -->
+    <div class="security-section">
+      <h3>Authentification</h3>
+      
+      <div class="security-item">
+        <div class="security-info">
+          <h4>Authentification à deux facteurs</h4>
+          <p>Ajoutez une couche de sécurité supplémentaire à votre compte</p>
+        </div>
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="twoFactorAuth">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="security-item">
+        <div class="security-info">
+          <h4>Alertes de connexion</h4>
+          <p>Recevez une notification pour les nouvelles connexions</p>
+        </div>
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="loginAlerts">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Changement de mot de passe -->
+    <div class="security-section">
+      <h3>Mot de passe</h3>
+      
+      <div class="password-info">
+        <p>
+          <strong>Dernier changement :</strong> 
+          {{ settings?.passwordLastChanged ? (settings.passwordLastChanged | date:'dd/MM/yyyy') : 'Non disponible' }}
+        </p>
+        <button 
+          type="button" 
+          class="btn-change-password"
+          (click)="togglePasswordForm()">
+          {{ showPasswordForm ? 'Annuler' : 'Changer le mot de passe' }}
+        </button>
+      </div>
+
+      <div class="password-form" *ngIf="showPasswordForm">
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="change-password-form">
+          <div class="form-group">
+            <label for="currentPassword">Mot de passe actuel</label>
+            <input 
+              id="currentPassword"
+              type="password" 
+              formControlName="currentPassword"
+              placeholder="Entrez votre mot de passe actuel"
+              [class.error]="getPasswordError('currentPassword')">
+            <div class="error-message" *ngIf="getPasswordError('currentPassword')">
+              {{ getPasswordError('currentPassword') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">Nouveau mot de passe</label>
+            <input 
+              id="newPassword"
+              type="password" 
+              formControlName="newPassword"
+              placeholder="Minimum 8 caractères"
+              [class.error]="getPasswordError('newPassword')">
+            <div class="error-message" *ngIf="getPasswordError('newPassword')">
+              {{ getPasswordError('newPassword') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirmer le mot de passe</label>
+            <input 
+              id="confirmPassword"
+              type="password" 
+              formControlName="confirmPassword"
+              placeholder="Confirmez votre nouveau mot de passe"
+              [class.error]="getPasswordError('confirmPassword')">
+            <div class="error-message" *ngIf="getPasswordError('confirmPassword')">
+              {{ getPasswordError('confirmPassword') }}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="btn-save-password"
+              [disabled]="!passwordForm.valid">
+              Mettre à jour le mot de passe
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Sessions actives -->
+    <div class="security-section" *ngIf="settings?.activeSessions?.length">
+      <h3>Sessions Actives</h3>
+      
+      <div class="sessions-list">
+        <div
+          *ngFor="let session of settings?.activeSessions || []"
+          class="session-item"
+          [class.current-session]="session.current">
+          
+          <div class="session-info">
+            <div class="session-header">
+              <h4>{{ session.device }}</h4>
+              <span class="session-badge" *ngIf="session.current">Session actuelle</span>
+            </div>
+            <p class="session-location">{{ session.location }}</p>
+            <p class="session-time">Dernière activité : {{ formatLastActive(session.lastActive) }}</p>
+          </div>
+
+          <div class="session-actions" *ngIf="!session.current">
+            <button 
+              type="button" 
+              class="btn-revoke"
+              (click)="onRevokeSession(session.id)">
+              Révoquer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+  <div class="settings-footer">
+    <p class="settings-note">
+      <strong>Conseil de sécurité :</strong> Utilisez un mot de passe unique et activez l'authentification à deux facteurs pour une sécurité optimale.
+    </p>
+  </div>
+</div>

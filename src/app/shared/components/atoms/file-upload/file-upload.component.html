@@ -1,1 +1,63 @@
-<p>file-upload works!</p>
+<div class="file-upload-wrapper">
+  <div
+    [class]="uploadClasses"
+    (drop)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    class="file-upload__area">
+    
+    <input
+      type="file"
+      [accept]="accept"
+      [multiple]="multiple"
+      [disabled]="disabled"
+      (change)="onFileSelected($event)"
+      class="file-upload__input"
+      #fileInput>
+    
+    <div class="file-upload__content">
+      <i class="fas fa-cloud-upload-alt file-upload__icon"></i>
+      <span class="file-upload__label">{{ label }}</span>
+      <span class="file-upload__helper">ou glissez-déposez vos fichiers ici</span>
+    </div>
+  </div>
+  
+  <div *ngIf="helperText" class="file-upload__helper-text">
+    {{ helperText }}
+  </div>
+  
+  <div *ngIf="showPreview && previewUrls.length > 0" class="file-upload__previews">
+    <div
+      *ngFor="let previewUrl of previewUrls; let i = index"
+      class="file-upload__preview">
+      
+      <img
+        [src]="previewUrl"
+        [alt]="files[i]?.name"
+        class="file-upload__preview-image">
+      
+      <div class="file-upload__preview-info">
+        <span class="file-upload__preview-name">{{ files[i]?.name }}</span>
+        <span class="file-upload__preview-size">{{ formatFileSize(files[i]?.size || 0) }}</span>
+      </div>
+      
+      <button
+        type="button"
+        class="file-upload__preview-remove"
+        (click)="removeFile(i)"
+        aria-label="Supprimer">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+  
+  <div *ngIf="files.length > 0" class="file-upload__actions">
+    <button
+      type="button"
+      class="file-upload__clear"
+      (click)="clearAll()"
+      [disabled]="disabled">
+      Effacer tout
+    </button>
+  </div>
+</div>

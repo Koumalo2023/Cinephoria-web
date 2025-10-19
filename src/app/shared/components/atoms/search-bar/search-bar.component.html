@@ -1,0 +1,143 @@
+<div class="search-bar">
+  <!-- Conteneur principal -->
+  <div [class]="wrapperClasses">
+    <!-- Icône de recherche -->
+    <div class="search-bar__icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+    </div>
+
+    <!-- Input de recherche -->
+    <input
+      #searchInput
+      type="text"
+      class="search-bar__input"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      (input)="onInput($event)"
+      (focus)="isOpen = showResults && (filteredResults.length > 0 || showRecentSearches)"
+      aria-label="Barre de recherche"
+      aria-haspopup="listbox"
+      [attr.aria-expanded]="isOpen"
+      [attr.aria-activedescendant]="selectedResultIndex >= 0 ? 'result-' + selectedResultIndex : null"
+    />
+
+    <!-- Indicateur de chargement -->
+    <div *ngIf="loading" class="search-bar__loading">
+      <div class="search-bar__spinner"></div>
+    </div>
+
+    <!-- Bouton clear -->
+    <button
+      *ngIf="isClearable && !loading"
+      type="button"
+      class="search-bar__clear"
+      (click)="clearSearch()"
+      (keydown.enter)="clearSearch()"
+      (keydown.space)="clearSearch(); $event.preventDefault()"
+      aria-label="Effacer la recherche"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.707L8 8.707z"/>
+      </svg>
+    </button>
+
+    <!-- Résultats et suggestions -->
+    <div *ngIf="isOpen" class="search-bar__results">
+      <!-- Résultats de recherche -->
+      <div *ngIf="filteredResults.length > 0" class="search-bar__results-section">
+        <div class="search-bar__results-header">
+          <h3 class="search-bar__results-title">Résultats</h3>
+          <span class="search-bar__results-count">{{ filteredResults.length }}</span>
+        </div>
+        
+        <ul class="search-bar__results-list" role="listbox">
+          <li
+            *ngFor="let result of filteredResults; let i = index"
+            [id]="'result-' + i"
+            class="search-bar__result"
+            [class.search-bar__result--selected]="i === selectedResultIndex"
+            role="option"
+            [attr.aria-selected]="i === selectedResultIndex"
+            (click)="selectResult(result, i)"
+            (mouseenter)="selectedResultIndex = i"
+          >
+            <!-- Icône du résultat -->
+            <div *ngIf="result.icon" class="search-bar__result-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path [attr.d]="result.icon"></path>
+              </svg>
+            </div>
+
+            <!-- Contenu du résultat -->
+            <div class="search-bar__result-content">
+              <div class="search-bar__result-title">{{ result.title }}</div>
+              <div *ngIf="result.subtitle" class="search-bar__result-subtitle">
+                {{ result.subtitle }}
+              </div>
+              <div *ngIf="result.category" class="search-bar__result-category">
+                {{ result.category }}
+              </div>
+            </div>
+
+            <!-- Indicateur de sélection clavier -->
+            <div
+              *ngIf="i === selectedResultIndex"
+              class="search-bar__result-indicator"
+              aria-hidden="true"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M10.28 3.28L4.5 9.06 1.72 6.28a.75.75 0 00-1.06 1.06l3.25 3.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06z"/>
+              </svg>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Recherches récentes -->
+      <div *ngIf="showRecentSearches && recentSearches.length > 0 && (!value || value.length < minLength)" 
+           class="search-bar__results-section">
+        <div class="search-bar__results-header">
+          <h3 class="search-bar__results-title">Recherches récentes</h3>
+        </div>
+        
+        <ul class="search-bar__recent-list" role="listbox">
+          <li
+            *ngFor="let search of recentSearches; let i = index"
+            [id]="'recent-' + i"
+            class="search-bar__recent-item"
+            [class.search-bar__recent-item--selected]="i + filteredResults.length === selectedResultIndex"
+            role="option"
+            [attr.aria-selected]="i + filteredResults.length === selectedResultIndex"
+            (click)="selectRecentSearch(search)"
+            (mouseenter)="selectedResultIndex = i + filteredResults.length"
+          >
+            <div class="search-bar__recent-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+              </svg>
+            </div>
+            <span class="search-bar__recent-text">{{ search }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Message "Aucun résultat" -->
+      <div *ngIf="filteredResults.length === 0 && value && value.length >= minLength" 
+           class="search-bar__no-results">
+        <div class="search-bar__no-results-message">
+          Aucun résultat trouvé pour "{{ value }}"
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateur de longueur minimale -->
+  <div *ngIf="value && value.length < minLength" class="search-bar__min-length-hint">
+    <small class="search-bar__hint-text">
+      Saisissez au moins {{ minLength }} caractères pour voir les résultats
+    </small>
+  </div>
+</div>

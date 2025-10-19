@@ -1,1 +1,105 @@
-<p>modal-container works!</p>
+<!-- Backdrop -->
+@if (hasBackdrop) {
+  <div
+    class="{{ getBackdropClasses().join(' ') }}"
+    (click)="onBackdropClick($event)"
+    [attr.aria-hidden]="!isOpen"
+  ></div>
+}
+
+<!-- Modal Container -->
+<div
+  class="{{ getModalClasses().join(' ') }}"
+  role="dialog"
+  [attr.aria-modal]="isOpen"
+  [attr.aria-labelledby]="getAriaLabelledBy()"
+  [attr.aria-describedby]="getAriaDescribedBy()"
+  [attr.aria-hidden]="!isOpen"
+  tabindex="-1"
+  #modalContent
+>
+  <div
+    class="{{ getDialogClasses().join(' ') }}"
+    [style]="getDialogStyles()"
+    #modalDialog
+  >
+    <!-- En-tête de la modal -->
+    @if (showHeader) {
+      <div class="{{ getHeaderClasses().join(' ') }}">
+        <div class="modal-header-content">
+          <!-- Titre et sous-titre -->
+          @if (config.title || config.subtitle) {
+            <div class="modal-title-section">
+              @if (config.title) {
+                <h2 class="modal-title" id="modal-title">
+                  {{ config.title }}
+                </h2>
+              }
+              @if (config.subtitle) {
+                <p class="modal-subtitle" id="modal-description">
+                  {{ config.subtitle }}
+                </p>
+              }
+            </div>
+          }
+          
+          <!-- Bouton de fermeture -->
+          @if (showCloseButton) {
+            <button
+              type="button"
+              class="modal-close"
+              (click)="close()"
+              aria-label="Fermer la modal"
+            >
+              <app-icon name="times" size="medium"></app-icon>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Contenu principal -->
+    <div class="{{ getContentClasses().join(' ') }}">
+      <!-- Indicateur de chargement -->
+      @if (loading) {
+        <div class="modal-loading">
+          <app-icon name="spinner" size="large" class="loading-icon"></app-icon>
+          <span class="loading-text">Chargement...</span>
+        </div>
+      }
+      
+      <!-- Contenu projeté -->
+      <ng-content></ng-content>
+    </div>
+
+    <!-- Pied de page avec actions -->
+    @if (showFooter) {
+      <div class="modal-footer">
+        <div class="modal-footer-content">
+          <!-- Actions personnalisées -->
+          @for (action of footerActions; track action.label) {
+            <app-button
+              [variant]="getButtonVariant(action.variant)"
+              [disabled]="action.disabled || action.loading || false"
+              [loading]="action.loading || false"
+              [type]="action.type || 'button'"
+              (click)="onActionClick(action)"
+            >
+              {{ action.label }}
+            </app-button>
+          }
+          
+          <!-- Bouton de fermeture par défaut -->
+          @if (footerActions.length === 0) {
+            <app-button
+              variant="primary"
+              (click)="close()"
+            >
+              Fermer
+            </app-button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

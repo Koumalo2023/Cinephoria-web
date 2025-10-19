@@ -1,0 +1,223 @@
+.rating-stars {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  // Tailles
+  &.rating-stars--small {
+    .rating-stars__star {
+      width: 16px;
+      height: 16px;
+    }
+
+    .rating-stars__value-number {
+      font-size: 0.875rem;
+    }
+
+    .rating-stars__value-max {
+      font-size: 0.75rem;
+    }
+
+    .rating-stars__hint-text {
+      font-size: 0.75rem;
+    }
+  }
+
+  &.rating-stars--medium {
+    .rating-stars__star {
+      width: 24px;
+      height: 24px;
+    }
+
+    .rating-stars__value-number {
+      font-size: 1rem;
+    }
+
+    .rating-stars__value-max {
+      font-size: 0.875rem;
+    }
+
+    .rating-stars__hint-text {
+      font-size: 0.875rem;
+    }
+  }
+
+  &.rating-stars--large {
+    .rating-stars__star {
+      width: 32px;
+      height: 32px;
+    }
+
+    .rating-stars__value-number {
+      font-size: 1.25rem;
+    }
+
+    .rating-stars__value-max {
+      font-size: 1rem;
+    }
+
+    .rating-stars__hint-text {
+      font-size: 1rem;
+    }
+  }
+
+  // Variantes
+  &.rating-stars--primary {
+    .rating-stars__star--fill {
+      color: var(--color-primary);
+    }
+
+    .rating-stars__star--empty {
+      color: var(--color-border);
+    }
+  }
+
+  &.rating-stars--secondary {
+    .rating-stars__star--fill {
+      color: var(--color-secondary);
+    }
+
+    .rating-stars__star--empty {
+      color: var(--color-border-light);
+    }
+  }
+
+  &.rating-stars--warning {
+    .rating-stars__star--fill {
+      color: var(--color-warning);
+    }
+
+    .rating-stars__star--empty {
+      color: var(--color-border);
+    }
+  }
+
+  // États
+  &.rating-stars--interactive {
+    .rating-stars__star-wrapper {
+      cursor: pointer;
+
+      &:hover {
+        .rating-stars__star--fill {
+          color: var(--color-primary);
+        }
+      }
+    }
+  }
+
+  &.rating-stars--disabled {
+    opacity: 0.6;
+
+    .rating-stars__star-wrapper {
+      cursor: not-allowed;
+    }
+  }
+}
+
+.rating-stars__container {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.rating-stars__star-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+
+  .rating-stars--interactive &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.rating-stars__star {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: color 0.2s ease-in-out;
+
+  &.rating-stars__star--empty {
+    z-index: 1;
+  }
+
+  &.rating-stars__star--fill {
+    z-index: 2;
+    clip-path: inset(0 50% 0 0);
+  }
+}
+
+.rating-stars__value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.125rem;
+  font-weight: 600;
+
+  &.rating--excellent {
+    color: var(--color-success);
+  }
+
+  &.rating--good {
+    color: var(--color-primary);
+  }
+
+  &.rating--average {
+    color: var(--color-warning);
+  }
+
+  &.rating--poor {
+    color: var(--color-error);
+  }
+}
+
+.rating-stars__value-number {
+  font-weight: 700;
+}
+
+.rating-stars__value-max {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.rating-stars__hint,
+.rating-stars__disabled-hint {
+  text-align: center;
+}
+
+.rating-stars__hint-text {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-secondary: #6b7280;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-text-muted: #6b7280;
+  --color-border: #d1d5db;
+  --color-border-light: #e5e7eb;
+}
+
+// Animation pour l'interaction
+@keyframes rating-stars-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: scale(1);
+  }
+  40%, 43% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  90% {
+    transform: scale(1.02);
+  }
+}
+
+.rating-stars--interactive .rating-stars__star-wrapper:active {
+  animation: rating-stars-bounce 0.6s ease;
+}

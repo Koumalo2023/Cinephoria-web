@@ -1,1 +1,230 @@
-<p>admin-table works!</p>
+<div class="admin-table-container">
+  <!-- En-tête du tableau avec contrôles -->
+  <header class="admin-table-header" *ngIf="config.showHeader">
+    <div class="header-controls">
+      <!-- Barre de recherche -->
+      <div class="search-section" *ngIf="config.showSearch">
+        <app-search-bar></app-search-bar>
+      </div>
+
+      <!-- Filtres -->
+      <div class="filter-section" *ngIf="config.showFilters">
+        <app-filter-panel></app-filter-panel>
+      </div>
+
+      <!-- Actions globales -->
+      <div class="actions-section" *ngIf="actions.length > 0">
+        <div class="action-buttons">
+          <app-button
+            *ngFor="let action of actions"
+            [variant]="convertVariant(action.variant)"
+            [size]="'small'"
+            (clicked)="rowAction.emit({ action: action.id, row: null })"
+          >
+            <app-icon [name]="action.icon" [size]="'small'"></app-icon>
+            {{ action.label }}
+          </app-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="header-stats" *ngIf="config.showFooter">
+      <span class="stats-text">
+        {{ getDisplayedRange() }}
+      </span>
+      <span class="stats-selected" *ngIf="selectedRows.size > 0">
+        ({{ selectedRows.size }} sélectionné{{ selectedRows.size > 1 ? 's' : '' }})
+      </span>
+    </div>
+  </header>
+
+  <!-- Contenu principal du tableau -->
+  <main class="admin-table-content">
+    <!-- État de chargement -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="loading-content">
+        <app-icon name="spinner" size="large" class="loading-icon"></app-icon>
+        <p class="loading-text">{{ loadingMessage }}</p>
+      </div>
+    </div>
+
+    <!-- État vide -->
+    <div class="empty-state" *ngIf="!loading && displayedRows.length === 0">
+      <div class="empty-content">
+        <app-icon name="inbox" size="large" class="empty-icon"></app-icon>
+        <h3 class="empty-title">Aucune donnée</h3>
+        <p class="empty-description">{{ emptyMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Tableau de données -->
+    <div class="table-wrapper" *ngIf="!loading && displayedRows.length > 0">
+      <table [class]="getTableClasses()">
+        <!-- En-tête du tableau -->
+        <thead class="admin-table__head">
+          <tr class="admin-table__header-row">
+            <!-- Case à cocher pour sélection multiple -->
+            <th class="admin-table__header admin-table__header--checkbox" *ngIf="config.selectable">
+              <app-checkbox
+                [indeterminate]="selectedRows.size > 0 && !isAllSelected()"
+                (valueChange)="toggleAllSelection()"
+              ></app-checkbox>
+            </th>
+
+            <!-- Colonnes dynamiques -->
+            <th
+              *ngFor="let column of data.columns"
+              [class]="getHeaderClasses(column)"
+              [style.width]="column.width"
+              (click)="sortBy(column)"
+            >
+              <div class="header-content">
+                <span class="header-label">{{ column.label }}</span>
+                
+                <!-- Indicateur de tri -->
+                <span class="sort-indicator" *ngIf="column.sortable">
+                  <app-icon
+                    *ngIf="sortColumn === column.key"
+                    [name]="sortDirection === 'asc' ? 'sort-up' : 'sort-down'"
+                    size="small"
+                    class="sort-icon"
+                  ></app-icon>
+                  <app-icon
+                    *ngIf="sortColumn !== column.key"
+                    name="sort"
+                    size="small"
+                    class="sort-icon sort-icon--inactive"
+                  ></app-icon>
+                </span>
+              </div>
+            </th>
+
+            <!-- Colonne d'actions -->
+            <th class="admin-table__header admin-table__header--actions" *ngIf="config.showActions && actions.length > 0">
+              Actions
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Corps du tableau -->
+        <tbody class="admin-table__body">
+          <tr
+            *ngFor="let row of displayedRows; let i = index; trackBy: trackByFn"
+            [class]="getRowClasses(row)"
+            (click)="rowSelected.emit(row)"
+          >
+            <!-- Case à cocher de ligne -->
+            <td class="admin-table__cell admin-table__cell--checkbox" *ngIf="config.selectable">
+              <app-checkbox
+                (valueChange)="toggleRowSelection(row)"
+              ></app-checkbox>
+            </td>
+
+            <!-- Cellules de données -->
+            <td
+              *ngFor="let column of data.columns"
+              [class]="getCellClasses(column)"
+            >
+              <div class="cell-content">
+                <!-- Affichage selon le type de cellule -->
+                <ng-container [ngSwitch]="getCellType(column)">
+                  
+                  <!-- Type avatar -->
+                  <div *ngSwitchCase="'avatar'" class="cell-avatar">
+                    <app-avatar
+                      [src]="getCellValue(column, row)"
+                      [alt]="row.name || 'Avatar'"
+                      size="small"
+                    ></app-avatar>
+                  </div>
+
+                  <!-- Type badge -->
+                  <div *ngSwitchCase="'badge'" class="cell-badge">
+                    <app-badge
+                      [variant]="'primary'"
+                      [size]="'small'"
+                    >
+                      {{ getCellValue(column, row) }}
+                    </app-badge>
+                  </div>
+
+                  <!-- Type boolean -->
+                  <div *ngSwitchCase="'boolean'" class="cell-boolean">
+                    <app-icon
+                      [name]="row[column.key] ? 'check' : 'x'"
+                      [size]="'small'"
+                      [class]="row[column.key] ? 'icon-success' : 'icon-error'"
+                    ></app-icon>
+                  </div>
+
+                  <!-- Type action -->
+                  <div *ngSwitchCase="'action'" class="cell-actions">
+                    <app-button
+                      variant="secondary"
+                      size="small"
+                      (click)="$event.stopPropagation(); rowAction.emit({ action: column.key, row })"
+                    >
+                      {{ getCellValue(column, row) }}
+                    </app-button>
+                  </div>
+
+                  <!-- Type par défaut (texte) -->
+                  <div *ngSwitchDefault class="cell-text">
+                    {{ getCellValue(column, row) }}
+                  </div>
+
+                </ng-container>
+              </div>
+            </td>
+
+            <!-- Cellule d'actions -->
+            <td class="admin-table__cell admin-table__cell--actions" *ngIf="config.showActions && actions.length > 0">
+              <div class="action-buttons">
+                <app-button
+                  *ngFor="let action of actions"
+                  [variant]="convertVariant(action.variant)"
+                  [size]="'small'"
+                  [disabled]="action.disabled ? action.disabled(row) : false"
+                  (clicked)="$event.stopPropagation(); onAction(action, row)"
+                  class="action-button"
+                >
+                  <app-icon [name]="action.icon" [size]="'small'"></app-icon>
+                  <span class="action-label">{{ action.label }}</span>
+                </app-button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Pied de page avec pagination -->
+  <footer class="admin-table-footer" *ngIf="config.showFooter && config.pagination">
+    <div class="footer-content">
+      <!-- Sélecteur de taille de page -->
+      <div class="page-size-selector">
+        <label for="pageSize" class="page-size-label">Lignes par page:</label>
+        <app-select
+          id="pageSize"
+          [options]="getPageSizeOptions()"
+          (valueChange)="onPageSizeSelect($event)"
+          size="small"
+        ></app-select>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-section">
+        <app-pagination
+          [currentPage]="currentPage"
+          [totalPages]="getTotalPages()"
+          [pageSize]="pageSize"
+          [totalItems]="filteredRows.length"
+          (pageChange)="onPageChange($event)"
+        ></app-pagination>
+      </div>
+    </div>
+  </footer>
+</div>
+

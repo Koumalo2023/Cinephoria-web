@@ -1,1 +1,36 @@
-<p>chip works!</p>
+<span
+  [class]="chipClasses"
+  (click)="toggleSelection()"
+  (keydown)="onKeydown($event)"
+  tabindex="0"
+  class="chip-wrapper"
+  role="button"
+  [attr.aria-pressed]="selected"
+  [attr.aria-disabled]="disabled">
+  
+  <img
+    *ngIf="avatar"
+    [src]="avatar"
+    [alt]="avatarAlt"
+    class="chip__avatar">
+  
+  <i
+    *ngIf="icon"
+    [class]="icon"
+    class="chip__icon">
+  </i>
+  
+  <span class="chip__content">
+    <ng-content></ng-content>
+  </span>
+  
+  <button
+    *ngIf="removable"
+    type="button"
+    class="chip__remove"
+    (click)="onRemove($event)"
+    [disabled]="disabled"
+    aria-label="Supprimer">
+    <i class="fas fa-times"></i>
+  </button>
+</span>

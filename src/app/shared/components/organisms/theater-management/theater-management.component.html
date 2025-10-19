@@ -1,1 +1,374 @@
-<p>theater-management works!</p>
+<div class="theater-management">
+  <!-- En-tête avec statistiques -->
+  <header class="management-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">
+          <app-icon name="home" size="large"></app-icon>
+          Gestion des Salles
+        </h1>
+        <p class="subtitle">Gérez vos salles de projection et leur configuration</p>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalTheaters }}</div>
+          <div class="stat-label">Salles</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.activeTheaters }}</div>
+          <div class="stat-label">Actives</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalSeats }}</div>
+          <div class="stat-label">Sièges</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.occupancyRate }}%</div>
+          <div class="stat-label">Taux d'occupation</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barre d'outils -->
+  <div class="management-toolbar">
+    <div class="toolbar-left">
+      <!-- Sélecteur de vue -->
+      <div class="view-selector">
+        <app-button 
+          [variant]="activeView === 'theaters' ? 'primary' : 'ghost'"
+          (clicked)="setView('theaters')">
+          <app-icon name="home"></app-icon>
+          Salles
+        </app-button>
+        <app-button 
+          [variant]="activeView === 'layout' ? 'primary' : 'ghost'"
+          (clicked)="setView('layout')">
+          <app-icon name="grid"></app-icon>
+          Layouts
+        </app-button>
+        <app-button 
+          [variant]="activeView === 'seats' ? 'primary' : 'ghost'"
+          (clicked)="setView('seats')">
+          <app-icon name="chair"></app-icon>
+          Sièges
+        </app-button>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Actions principales -->
+      <app-button variant="primary" (clicked)="addNewTheater()">
+        <app-icon name="plus"></app-icon>
+        Nouvelle salle
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="management-content">
+    <!-- Panneau latéral des filtres -->
+    <aside class="filters-sidebar">
+      <app-filter-panel
+        [filterGroups]="filterGroups"
+        [appliedFilters]="appliedFilters"
+        [showHeader]="true"
+        [showActions]="true"
+        [showAppliedFilters]="true"
+        [collapsible]="true"
+        (filtersChange)="onFiltersChange($event)"
+        (filtersApply)="onFiltersApply($event)"
+        (filtersReset)="onFiltersReset()"
+        (filterRemove)="onFilterRemove($event)">
+      </app-filter-panel>
+    </aside>
+
+    <!-- Zone de contenu principale -->
+    <main class="content-main">
+      <!-- Vue Salles -->
+      <section *ngIf="activeView === 'theaters'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Liste des Salles</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ filteredTheaters.length }} salle(s)</span>
+          </div>
+        </div>
+
+        <!-- Grille des salles -->
+        <div class="theaters-grid">
+          <div *ngFor="let theater of filteredTheaters" class="theater-item">
+            <app-theater-card
+              [theater]="theater"
+              [showActions]="true"
+              (theaterSelected)="onTheaterSelected($event)"
+              (manageSeats)="onManageSeats($event)"
+              (viewSchedule)="onViewSchedule($event)">
+            </app-theater-card>
+            
+            <!-- Actions rapides -->
+            <div class="theater-actions">
+              <app-button 
+                variant="ghost" 
+                size="small"
+                (clicked)="editTheater(theater)">
+                <app-icon name="edit"></app-icon>
+                Modifier
+              </app-button>
+              <app-button 
+                variant="ghost" 
+                size="small"
+                (clicked)="onManageSeats(theater.id)">
+                <app-icon name="chair"></app-icon>
+                Sièges
+              </app-button>
+              <app-button 
+                variant="ghost" 
+                size="small"
+                (clicked)="deleteTheater(theater.id)">
+                <app-icon name="trash-2"></app-icon>
+                Supprimer
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message vide -->
+        <div *ngIf="filteredTheaters.length === 0" class="empty-state">
+          <app-icon name="home" size="large"></app-icon>
+          <h3>Aucune salle trouvée</h3>
+          <p>Aucune salle ne correspond à vos critères de recherche.</p>
+          <app-button variant="primary" (clicked)="addNewTheater()">
+            <app-icon name="plus"></app-icon>
+            Ajouter la première salle
+          </app-button>
+        </div>
+      </section>
+
+      <!-- Vue Layouts -->
+      <section *ngIf="activeView === 'layout'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Gestion des Layouts</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ theaterLayouts.length }} layout(s)</span>
+            <app-button variant="primary" (clicked)="createNewLayout()">
+              <app-icon name="plus"></app-icon>
+              Nouveau layout
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Liste des layouts -->
+        <div class="layouts-grid">
+          <div *ngFor="let layout of theaterLayouts" class="layout-card">
+            <div class="layout-header">
+              <h3 class="layout-name">{{ layout.name }}</h3>
+              <app-badge [variant]="'info'">
+                {{ layout.screenType }}
+              </app-badge>
+            </div>
+            
+            <div class="layout-details">
+              <div class="layout-stat">
+                <app-icon name="grid"></app-icon>
+                <span>{{ layout.rows }} rangées × {{ layout.seatsPerRow }} sièges</span>
+              </div>
+              <div class="layout-stat">
+                <app-icon name="users"></app-icon>
+                <span>{{ layout.totalSeats }} sièges totaux</span>
+              </div>
+              <div class="layout-stat">
+                <app-icon name="calendar"></app-icon>
+                <span>Créé le {{ layout.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+            
+            <div class="layout-facilities">
+              <app-chip
+                *ngFor="let facility of layout.facilities"
+                [variant]="'outline'">
+                {{ facility }}
+              </app-chip>
+            </div>
+            
+            <div class="layout-actions">
+              <app-button variant="ghost" size="small">
+                <app-icon name="edit"></app-icon>
+                Modifier
+              </app-button>
+              <app-button variant="ghost" size="small">
+                <app-icon name="copy"></app-icon>
+                Dupliquer
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulaire de création de layout -->
+        <div *ngIf="false" class="layout-form-container">
+          <h3>Créer un nouveau layout</h3>
+          <form [formGroup]="layoutForm" class="layout-form">
+            <div class="form-row">
+              <app-input
+                label="Nom du layout"
+                formControlName="name"
+                placeholder="Ex: Layout IMAX Standard">
+              </app-input>
+            </div>
+            
+            <div class="form-row">
+              <app-input
+                label="Nombre de rangées"
+                formControlName="rows"
+                type="number"
+                placeholder="Ex: 15">
+              </app-input>
+              
+              <app-input
+                label="Sièges par rangée"
+                formControlName="seatsPerRow"
+                type="number"
+                placeholder="Ex: 24">
+              </app-input>
+            </div>
+            
+            <div class="form-actions">
+              <app-button variant="ghost">
+                Annuler
+              </app-button>
+              <app-button variant="primary" (clicked)="saveLayout()">
+                <app-icon name="save"></app-icon>
+                Sauvegarder
+              </app-button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Vue Sièges -->
+      <section *ngIf="activeView === 'seats'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Gestion des Sièges</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ selectedSeats.length }} siège(s) sélectionné(s)</span>
+            <app-button variant="ghost" (clicked)="setView('theaters')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour aux salles
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Salle sélectionnée -->
+        <div *ngIf="selectedTheater" class="selected-theater">
+          <h3>{{ selectedTheater.name }}</h3>
+          <p>{{ selectedTheater.cinemaName }} • {{ selectedTheater.capacity }} sièges</p>
+        </div>
+
+        <!-- Grille de sièges -->
+        <div class="seats-container">
+          <app-seat-grid
+            [seats]="seats"
+            [selectedSeats]="selectedSeats"
+            [maxSelection]="10"
+            [showScreen]="true"
+            [showLegend]="true"
+            (seatSelected)="onSeatSelected($event)"
+            (seatDeselected)="onSeatDeselected($event)"
+            (selectionChanged)="onSelectionChanged($event)">
+          </app-seat-grid>
+        </div>
+
+        <!-- Actions sur les sièges -->
+        <div class="seats-actions">
+          <div class="seats-info">
+            <div class="info-item">
+              <span class="info-label">Sièges sélectionnés:</span>
+              <span class="info-value">{{ selectedSeats.length }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Prix total:</span>
+              <span class="info-value">{{ getTotalPrice() }}€</span>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <app-button variant="ghost" (clicked)="selectedSeats = []">
+              <app-icon name="refresh-cw"></app-icon>
+              Effacer
+            </app-button>
+            <app-button variant="primary">
+              <app-icon name="save"></app-icon>
+              Sauvegarder
+            </app-button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal d'édition de salle -->
+  <div *ngIf="isEditing" class="edit-modal-overlay">
+    <div class="edit-modal">
+      <div class="modal-header">
+        <h3>{{ selectedTheater ? 'Modifier la salle' : 'Ajouter une salle' }}</h3>
+        <app-button variant="ghost" (clicked)="cancelEdit()">
+          <app-icon name="x"></app-icon>
+        </app-button>
+      </div>
+      
+      <div class="modal-content">
+        <form [formGroup]="theaterForm" class="theater-form">
+          <div class="form-row">
+            <app-input
+              label="Nom de la salle"
+              formControlName="name"
+              placeholder="Ex: Salle 1 - IMAX">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-select
+              label="Cinéma"
+              formControlName="cinemaId"
+              [options]="[
+                { label: 'Cinéma Pathé Bellecour', value: '1' },
+                { label: 'UGC Ciné Cité Internationale', value: '2' },
+                { label: 'Cinéma Le Comœdia', value: '3' }
+              ]">
+            </app-select>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Capacité"
+              formControlName="capacity"
+              type="number"
+              placeholder="Ex: 350">
+            </app-input>
+            
+            <app-select
+              label="Type d'écran"
+              formControlName="screenType"
+              [options]="[
+                { label: 'IMAX', value: 'imax' },
+                { label: 'Dolby Cinema', value: 'dolby' },
+                { label: '4K Laser', value: '4k' },
+                { label: 'Standard', value: 'standard' }
+              ]">
+            </app-select>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-actions">
+        <app-button variant="ghost" (clicked)="cancelEdit()">
+          Annuler
+        </app-button>
+        <app-button variant="primary" (clicked)="saveTheater()">
+          <app-icon name="save"></app-icon>
+          Sauvegarder
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>

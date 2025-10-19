@@ -1,1 +1,140 @@
-<p>cinema-card works!</p>
+<div 
+  class="cinema-card" 
+  [class.expanded]="isExpanded"
+  (click)="onCardClick()">
+  
+  <!-- Image du cinéma -->
+  <div class="cinema-image" *ngIf="cinema?.imageUrl">
+    <img [src]="cinema?.imageUrl" [alt]="cinema?.name">
+    <div class="image-overlay">
+      <button 
+        class="btn-favorite"
+        (click)="onFavoriteClick($event)"
+        [class.favorited]="cinema?.isFavorite">
+        ♥
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="cinema-content">
+    <!-- En-tête -->
+    <div class="cinema-header">
+      <div class="cinema-info">
+        <h3 class="cinema-name">{{ cinema?.name }}</h3>
+        <div class="cinema-meta">
+          <span class="cinema-location">
+            📍 {{ cinema?.city }} • {{ cinema?.postalCode }}
+          </span>
+          <span class="cinema-distance" *ngIf="cinema?.distance">
+            • {{ cinema?.distance }} km
+          </span>
+        </div>
+      </div>
+      
+      <div class="cinema-status">
+        <span 
+          class="status-badge" 
+          [class.open]="isOpenNow()"
+          [class.closed]="!isOpenNow()">
+          {{ isOpenNow() ? 'Ouvert' : 'Fermé' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Évaluation -->
+    <div class="cinema-rating">
+      <div class="stars">
+        <span 
+          *ngFor="let star of getRatingStars()" 
+          class="star"
+          [class.filled]="star <= (cinema?.rating || 0)">
+          ★
+        </span>
+      </div>
+      <span class="rating-value">{{ cinema?.rating?.toFixed(1) }}</span>
+    </div>
+
+    <!-- Horaires d'ouverture -->
+    <div class="opening-hours">
+      <div class="today-hours">
+        <strong>Aujourd'hui :</strong> {{ getTodayOpeningHours() }}
+      </div>
+      <button 
+        class="btn-show-hours"
+        (click)="toggleDetails($event)">
+        {{ isExpanded ? 'Masquer' : 'Voir tous les horaires' }}
+      </button>
+    </div>
+
+    <!-- Horaires détaillés (expandable) -->
+    <div class="detailed-hours" *ngIf="isExpanded">
+      <div class="hours-grid">
+        <div class="hour-item">
+          <span class="day">Lundi</span>
+          <span class="time">{{ cinema?.openingHours?.monday }}</span>
+        </div>
+        <div class="hour-item">
+          <span class="day">Mardi</span>
+          <span class="time">{{ cinema?.openingHours?.tuesday }}</span>
+        </div>
+        <div class="hour-item">
+          <span class="day">Mercredi</span>
+          <span class="time">{{ cinema?.openingHours?.wednesday }}</span>
+        </div>
+        <div class="hour-item">
+          <span class="day">Jeudi</span>
+          <span class="time">{{ cinema?.openingHours?.thursday }}</span>
+        </div>
+        <div class="hour-item">
+          <span class="day">Vendredi</span>
+          <span class="time">{{ cinema?.openingHours?.friday }}</span>
+        </div>
+        <div class="hour-item">
+          <span class="day">Samedi</span>
+          <span class="time">{{ cinema?.openingHours?.saturday }}</span>
+        </div>
+        <div class="hour-item">
+          <span class="day">Dimanche</span>
+          <span class="time">{{ cinema?.openingHours?.sunday }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Équipements -->
+    <div class="cinema-facilities" *ngIf="cinema?.facilities?.length">
+      <div class="facilities-title">Équipements :</div>
+      <div class="facilities-list">
+        <span
+          *ngFor="let facility of cinema?.facilities || []"
+          class="facility-item">
+          {{ getFacilityIcon(facility) }} {{ facility }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Informations de contact -->
+    <div class="cinema-contact" *ngIf="cinema?.phone || cinema?.email">
+      <div class="contact-info" *ngIf="cinema?.phone">
+        <strong>📞</strong> {{ cinema?.phone }}
+      </div>
+      <div class="contact-info" *ngIf="cinema?.email">
+        <strong>✉️</strong> {{ cinema?.email }}
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="cinema-actions">
+      <button 
+        class="btn-primary"
+        (click)="onCardClick()">
+        Voir les séances
+      </button>
+      <button 
+        class="btn-secondary"
+        (click)="onDirectionsClick($event)">
+        🗺️ Itinéraire
+      </button>
+    </div>
+  </div>
+</div>

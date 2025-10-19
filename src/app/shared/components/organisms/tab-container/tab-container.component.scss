@@ -1,0 +1,450 @@
+.tab-container {
+  display: flex;
+  width: 100%;
+  background: var(--background-primary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+
+  // Positionnement des onglets
+  &.tab-position-top {
+    flex-direction: column;
+  }
+
+  &.tab-position-left {
+    flex-direction: row;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  &.tab-position-right {
+    flex-direction: row-reverse;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  // Navigation des onglets
+  .tab-navigation {
+    background: var(--background-secondary);
+    border-bottom: 1px solid var(--border-color);
+
+    &.scrollable {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+
+      &::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: var(--background-tertiary);
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 2px;
+      }
+    }
+
+    .tab-list {
+      display: flex;
+      min-width: min-content;
+
+      &.full-width {
+        width: 100%;
+      }
+
+      // Positionnement vertical
+      .tab-container.tab-position-left &,
+      .tab-container.tab-position-right & {
+        flex-direction: column;
+        min-width: 200px;
+        border-bottom: none;
+        border-right: 1px solid var(--border-color);
+
+        @media (max-width: 768px) {
+          min-width: auto;
+          flex-direction: row;
+          border-right: none;
+          border-bottom: 1px solid var(--border-color);
+        }
+      }
+
+      .tab-container.tab-position-right & {
+        border-right: none;
+        border-left: 1px solid var(--border-color);
+
+        @media (max-width: 768px) {
+          border-left: none;
+        }
+      }
+    }
+  }
+
+  // Élément d'onglet
+  .tab-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    // Tailles
+    &.tab-size-sm {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-sm);
+    }
+
+    &.tab-size-lg {
+      padding: var(--spacing-lg) var(--spacing-xl);
+      font-size: var(--font-size-lg);
+    }
+
+    // États
+    &:hover:not(.disabled) {
+      background: var(--background-tertiary);
+      color: var(--text-primary);
+    }
+
+    &.active {
+      color: var(--primary-color);
+      background: var(--background-primary);
+
+      // Indicateur visuel pour l'onglet actif
+      &::after {
+        content: '';
+        position: absolute;
+        background: var(--primary-color);
+      }
+
+      // Positionnement de l'indicateur selon le type d'onglet
+      .tab-type-standard & {
+        &::after {
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+        }
+      }
+
+      .tab-type-underline & {
+        &::after {
+          bottom: 0;
+          left: var(--spacing-md);
+          right: var(--spacing-md);
+          height: 2px;
+        }
+      }
+
+      .tab-type-pills & {
+        background: var(--primary-color);
+        color: var(--text-inverse);
+        border-radius: var(--border-radius-pill);
+
+        &::after {
+          display: none;
+        }
+      }
+
+      .tab-type-cards & {
+        background: var(--background-primary);
+        border: 1px solid var(--primary-color);
+        border-bottom-color: transparent;
+        border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+        box-shadow: var(--shadow-sm);
+
+        &::after {
+          display: none;
+        }
+      }
+
+      // Positionnement vertical
+      .tab-container.tab-position-left &,
+      .tab-container.tab-position-right & {
+        &::after {
+          bottom: auto;
+          top: 0;
+          left: 0;
+          right: auto;
+          width: 2px;
+          height: 100%;
+        }
+
+        @media (max-width: 768px) {
+          &::after {
+            bottom: 0;
+            top: auto;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 2px;
+          }
+        }
+      }
+
+      .tab-container.tab-position-right & {
+        &::after {
+          left: auto;
+          right: 0;
+        }
+
+        @media (max-width: 768px) {
+          &::after {
+            left: 0;
+            right: 0;
+          }
+        }
+      }
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    // Éléments internes
+    .tab-icon {
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .tab-label {
+      flex: 1;
+      text-align: left;
+    }
+
+    .tab-badge {
+      flex-shrink: 0;
+    }
+
+    .tab-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+
+      &:hover {
+        background: var(--background-tertiary);
+        color: var(--text-primary);
+      }
+
+      // Afficher le bouton de fermeture au survol
+      .tab-item:hover & {
+        opacity: 1;
+      }
+    }
+  }
+
+  // Contenu des onglets
+  .tab-content-container {
+    flex: 1;
+    background: var(--background-primary);
+    position: relative;
+
+    .tab-content {
+      display: none;
+      padding: var(--spacing-xl);
+      animation: fadeIn 0.3s ease;
+
+      &.active {
+        display: block;
+      }
+
+      // Animation de chargement
+      .tab-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-2xl);
+        color: var(--text-secondary);
+        text-align: center;
+
+        .loading-icon {
+          margin-bottom: var(--spacing-md);
+          animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+          font-size: var(--font-size-sm);
+        }
+      }
+    }
+
+    // Message aucun onglet
+    .no-tabs-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-2xl);
+      text-align: center;
+      color: var(--text-secondary);
+
+      app-icon {
+        margin-bottom: var(--spacing-md);
+        opacity: 0.5;
+      }
+
+      h3 {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+      }
+
+      p {
+        margin: 0;
+        font-size: var(--font-size-md);
+        line-height: 1.5;
+      }
+    }
+  }
+
+  // Styles spécifiques pour le type "cards"
+  &.tab-type-cards {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+
+    .tab-navigation {
+      background: var(--background-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-content-container {
+      border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    }
+  }
+
+  // Styles spécifiques pour le type "pills"
+  &.tab-type-pills {
+    .tab-navigation {
+      background: transparent;
+      border: none;
+      padding: var(--spacing-sm);
+
+      .tab-list {
+        gap: var(--spacing-xs);
+      }
+
+      .tab-item {
+        border-radius: var(--border-radius-pill);
+
+        &:not(.active):hover {
+          background: var(--background-tertiary);
+        }
+      }
+    }
+  }
+
+  // Styles spécifiques pour le type "underline"
+  &.tab-type-underline {
+    .tab-navigation {
+      background: transparent;
+      border-bottom: 1px solid var(--border-color);
+
+      .tab-item {
+        background: transparent;
+
+        &:hover:not(.active) {
+          background: var(--background-tertiary);
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Mode sombre
+@media (prefers-color-scheme: dark) {
+  .tab-container {
+    &.tab-type-cards {
+      border-color: var(--border-color-dark);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .tab-container {
+    &.tab-position-left,
+    &.tab-position-right {
+      .tab-navigation {
+        .tab-list {
+          min-width: auto;
+        }
+      }
+    }
+
+    .tab-content-container {
+      .tab-content {
+        padding: var(--spacing-lg);
+      }
+    }
+  }
+}
+
+// Accessibilité
+@media (prefers-reduced-motion: reduce) {
+  .tab-container {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+// Focus visible pour l'accessibilité
+.tab-item:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.tab-close:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}

@@ -1,1 +1,18 @@
-<p>radio works!</p>
+<label
+  [class]="radioClasses"
+  (click)="select()"
+  (keydown)="onKeydown($event)"
+  tabindex="0"
+  class="radio-wrapper">
+  
+  <span class="radio__input">
+    <span class="radio__control">
+      <span *ngIf="isChecked" class="radio__dot"></span>
+    </span>
+  </span>
+  
+  <span *ngIf="label" class="radio__label">
+    {{ label }}
+    <span *ngIf="required" class="radio__required">*</span>
+  </span>
+</label>

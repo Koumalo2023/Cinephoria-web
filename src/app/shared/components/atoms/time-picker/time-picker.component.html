@@ -1,1 +1,91 @@
-<p>time-picker works!</p>
+<div class="time-picker-wrapper">
+  <!-- Label -->
+  <label *ngIf="label" class="time-picker__label">
+    {{ label }}
+    <span *ngIf="required" class="time-picker__required" aria-hidden="true">*</span>
+  </label>
+
+  <!-- Conteneur principal -->
+  <div [class]="wrapperClasses">
+    <!-- Input pour l'heure -->
+    <input
+      type="time"
+      class="time-picker__input"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [min]="minTime"
+      [max]="maxTime"
+      [step]="step"
+      (change)="onTimeChange($event)"
+      (click)="togglePicker()"
+      aria-label="{{ label || 'Sélectionner une heure' }}"
+      aria-haspopup="true"
+      [attr.aria-expanded]="isOpen"
+    />
+
+    <!-- Bouton clear -->
+    <button
+      *ngIf="isClearable"
+      type="button"
+      class="time-picker__clear"
+      (click)="clearTime()"
+      (keydown.enter)="clearTime()"
+      (keydown.space)="clearTime(); $event.preventDefault()"
+      aria-label="Effacer l'heure"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.707L8 8.707z"/>
+      </svg>
+    </button>
+
+    <!-- Bouton horloge -->
+    <button
+      type="button"
+      class="time-picker__clock"
+      (click)="togglePicker()"
+      (keydown.enter)="togglePicker()"
+      (keydown.space)="togglePicker(); $event.preventDefault()"
+      [disabled]="disabled"
+      aria-label="Ouvrir le sélecteur d'heure"
+      [attr.aria-expanded]="isOpen"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/>
+        <path d="M8 4v4l3 2"/>
+      </svg>
+    </button>
+
+    <!-- Popup du sélecteur d'heure (pour l'accessibilité) -->
+    <div *ngIf="isOpen" class="time-picker__popup" role="dialog" aria-label="Sélecteur d'heure">
+      <div class="time-picker__popup-content">
+        <p class="time-picker__popup-hint">
+          Utilisez le sélecteur d'heure natif de votre navigateur
+        </p>
+        
+        <!-- Affichage de l'heure actuelle -->
+        <div *ngIf="value" class="time-picker__current-time">
+          <strong>Heure sélectionnée :</strong> {{ displayValue }}
+        </div>
+
+        <!-- Contrôles de validation -->
+        <div *ngIf="minTime || maxTime" class="time-picker__constraints">
+          <small>
+            <span *ngIf="minTime">Min: {{ minTime }}</span>
+            <span *ngIf="minTime && maxTime"> - </span>
+            <span *ngIf="maxTime">Max: {{ maxTime }}</span>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message d'aide pour les contraintes -->
+  <div *ngIf="minTime || maxTime" class="time-picker__help">
+    <small class="time-picker__help-text">
+      <span *ngIf="minTime">Heure minimum : {{ minTime }}</span>
+      <span *ngIf="minTime && maxTime">, </span>
+      <span *ngIf="maxTime">Heure maximum : {{ maxTime }}</span>
+    </small>
+  </div>
+</div>

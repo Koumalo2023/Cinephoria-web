@@ -1,0 +1,416 @@
+.seat-counter {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  border: 1px solid #e9ecef;
+
+  &.compact {
+    padding: 1rem;
+    background: #f8f9fa;
+  }
+
+  .counter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+
+    .counter-title {
+      margin: 0;
+      color: #333;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .counter-stats {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .total-price {
+        color: #28a745;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  .progress-section {
+    margin-bottom: 1.5rem;
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .progress-label {
+        color: #495057;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .progress-text {
+        color: #6c757d;
+        font-size: 0.8rem;
+      }
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+
+        &.progress-success {
+          background: #28a745;
+        }
+
+        &.progress-warning {
+          background: #ffc107;
+        }
+
+        &.progress-error {
+          background: #dc3545;
+        }
+      }
+    }
+  }
+
+  .seat-details {
+    margin-bottom: 1.5rem;
+
+    .details-title {
+      margin: 0 0 1rem 0;
+      color: #495057;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .seat-types {
+      .seat-type-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &:hover {
+          border-color: #007bff;
+          box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+
+        .type-visual {
+          .type-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+
+            app-icon {
+              color: rgba(0, 0, 0, 0.7);
+            }
+          }
+        }
+
+        .type-info {
+          flex: 1;
+
+          .type-label {
+            display: block;
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+          }
+
+          .type-count {
+            display: block;
+            color: #6c757d;
+            font-size: 0.8rem;
+          }
+        }
+
+        .type-total {
+          color: #28a745;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    .compact-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+
+      .summary-text {
+        color: #495057;
+        font-size: 0.9rem;
+      }
+
+      .summary-price {
+        color: #28a745;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .counter-info {
+    margin-bottom: 1.5rem;
+
+    .info-message {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+
+      &.info-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      &:not(.info-warning) {
+        background: #e9ecef;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+      }
+    }
+  }
+
+  .counter-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+
+    app-button {
+      flex: 1;
+    }
+  }
+}
+
+// Version responsive
+@media (max-width: 768px) {
+  .seat-counter {
+    padding: 1rem;
+
+    &.compact {
+      padding: 0.75rem;
+    }
+
+    .counter-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+
+      .counter-stats {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    .seat-details {
+      .seat-types {
+        .seat-type-item {
+          padding: 0.5rem;
+
+          .type-visual {
+            .type-color {
+              width: 28px;
+              height: 28px;
+            }
+          }
+
+          .type-info {
+            .type-label {
+              font-size: 0.85rem;
+            }
+
+            .type-count {
+              font-size: 0.75rem;
+            }
+          }
+
+          .type-total {
+            font-size: 0.85rem;
+          }
+        }
+      }
+    }
+
+    .counter-actions {
+      flex-direction: column;
+    }
+  }
+}
+
+// Animation pour les changements de compteur
+.seat-type-item {
+  animation: slideIn 0.3s ease;
+
+  &:nth-child(odd) {
+    animation-delay: 0.05s;
+  }
+
+  &:nth-child(even) {
+    animation-delay: 0.1s;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Animation pour la barre de progression
+.progress-fill {
+  transition: width 0.5s ease, background-color 0.3s ease;
+}
+
+// Styles pour l'intégration avec d'autres composants
+.seat-counter.inline {
+  display: inline-block;
+  width: auto;
+  max-width: none;
+}
+
+.seat-counter.sticky {
+  position: sticky;
+  top: 1rem;
+}
+
+// Support pour les thèmes sombres
+@media (prefers-color-scheme: dark) {
+  .seat-counter {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+
+    .counter-header {
+      border-color: #4a5568;
+
+      .counter-title {
+        color: #e2e8f0;
+      }
+
+      .counter-stats {
+        .total-price {
+          color: #68d391;
+        }
+      }
+    }
+
+    .progress-section {
+      .progress-info {
+        .progress-label {
+          color: #cbd5e0;
+        }
+
+        .progress-text {
+          color: #a0aec0;
+        }
+      }
+
+      .progress-bar {
+        background: #4a5568;
+      }
+    }
+
+    .seat-details {
+      .details-title {
+        color: #cbd5e0;
+      }
+
+      .seat-types {
+        .seat-type-item {
+          background: #4a5568;
+          border-color: #718096;
+
+          .type-info {
+            .type-label {
+              color: #e2e8f0;
+            }
+
+            .type-count {
+              color: #a0aec0;
+            }
+          }
+
+          .type-total {
+            color: #68d391;
+          }
+        }
+      }
+
+      .compact-summary {
+        background: #4a5568;
+        border-color: #718096;
+
+        .summary-text {
+          color: #e2e8f0;
+        }
+
+        .summary-price {
+          color: #68d391;
+        }
+      }
+    }
+
+    .counter-info {
+      .info-message {
+        &.info-warning {
+          background: #744210;
+          color: #faf089;
+          border-color: #d69e2e;
+        }
+
+        &:not(.info-warning) {
+          background: #4a5568;
+          color: #a0aec0;
+          border-color: #718096;
+        }
+      }
+    }
+
+    .counter-actions {
+      border-color: #4a5568;
+    }
+  }
+}

@@ -1,1 +1,45 @@
-<p>date-picker works!</p>
+<div class="date-picker-wrapper">
+  <label *ngIf="label" class="date-picker__label">
+    {{ label }}
+    <span *ngIf="required" class="date-picker__required">*</span>
+  </label>
+  
+  <div [class]="datePickerClasses" class="date-picker__input-wrapper">
+    <input
+      type="date"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [required]="required"
+      [min]="minDateAttr"
+      [max]="maxDateAttr"
+      (change)="onInputChange($event)"
+      (blur)="onBlur()"
+      class="date-picker__input">
+    
+    <button
+      type="button"
+      class="date-picker__calendar"
+      (click)="onCalendarClick()"
+      [disabled]="disabled"
+      aria-label="Ouvrir le calendrier">
+      <i class="fas fa-calendar-alt"></i>
+    </button>
+    
+    <button
+      *ngIf="isClearable"
+      type="button"
+      class="date-picker__clear"
+      (click)="clearDate()"
+      aria-label="Effacer la date">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <div *ngIf="isOpen" class="date-picker__calendar-popup">
+    <!-- Le calendrier natif HTML5 sera utilisé via l'input type="date" -->
+    <p class="date-picker__calendar-hint">
+      Utilisez le sélecteur de date natif de votre navigateur
+    </p>
+  </div>
+</div>

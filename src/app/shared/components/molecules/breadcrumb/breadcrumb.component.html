@@ -1,1 +1,68 @@
-<p>breadcrumb works!</p>
+<nav [class]="containerClasses" [attr.aria-label]="ariaLabel">
+  <ol [class]="listClasses">
+    <li
+      *ngFor="let item of displayItems; let i = index; let last = last"
+      [class]="getItemClasses(i)"
+      [attr.aria-current]="getItemAriaCurrent(i)"
+    >
+      <!-- Lien pour les éléments non-actifs et non-ellipsis -->
+      <a
+        *ngIf="!isLastItem(i) && !isEllipsis(item)"
+        [class]="getLinkClasses(item, i)"
+        [routerLink]="getNavigationUrl(item)"
+        [queryParams]="item.queryParams"
+        [fragment]="item.fragment"
+        [attr.aria-label]="getLinkAriaLabel(item, i)"
+        (click)="onItemClick(item, $event)"
+      >
+        <!-- Icône (si présente) -->
+        <app-icon
+          *ngIf="hasIcon(item)"
+          [name]="item.icon!"
+          [size]="size === 'small' ? 'xs' : 'small'"
+          class="breadcrumb__icon"
+        ></app-icon>
+        
+        <!-- Label -->
+        <span class="breadcrumb__label">{{ item.label }}</span>
+      </a>
+
+      <!-- Élément ellipsis (non cliquable) -->
+      <span
+        *ngIf="isEllipsis(item)"
+        [class]="getLinkClasses(item, i)"
+        class="breadcrumb__ellipsis"
+      >
+        {{ item.label }}
+      </span>
+
+      <!-- Élément actif (dernier élément) -->
+      <span
+        *ngIf="isLastItem(i) && !isEllipsis(item)"
+        [class]="getLinkClasses(item, i)"
+        class="breadcrumb__current"
+      >
+        <!-- Icône (si présente) -->
+        <app-icon
+          *ngIf="hasIcon(item)"
+          [name]="item.icon!"
+          [size]="size === 'small' ? 'xs' : 'small'"
+          class="breadcrumb__icon"
+        ></app-icon>
+        
+        <!-- Label -->
+        <span class="breadcrumb__label">{{ item.label }}</span>
+      </span>
+
+      <!-- Séparateur (sauf pour le dernier élément) -->
+      <span
+        *ngIf="!last"
+        [class]="separatorClasses"
+        class="breadcrumb__separator"
+        aria-hidden="true"
+      >
+        {{ separator }}
+      </span>
+    </li>
+  </ol>
+</nav>

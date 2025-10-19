@@ -1,1 +1,87 @@
-<p>seat-legend works!</p>
+<div class="seat-legend" [class.compact]="compact">
+  <!-- En-tête de la légende -->
+  <div class="legend-header" *ngIf="title">
+    <h3 class="legend-title">{{ title }}</h3>
+  </div>
+
+  <!-- Légende des types de sièges -->
+  <div class="legend-section" *ngIf="showTypes && getTypeItems().length > 0">
+    <h4 class="section-title" *ngIf="!compact">Types de sièges</h4>
+    <div class="legend-items">
+      <div
+        *ngFor="let item of getTypeItems()"
+        class="legend-item"
+        [class]="getItemClasses(item)">
+        
+        <div class="item-visual">
+          <div 
+            class="item-color"
+            [style.background-color]="item.color">
+            <app-icon 
+              *ngIf="item.icon"
+              [name]="item.icon" 
+              size="small"
+              variant="primary">
+            </app-icon>
+          </div>
+        </div>
+
+        <div class="item-info">
+          <span class="item-label">{{ item.label }}</span>
+          <span class="item-description" *ngIf="item.description && !compact">
+            {{ item.description }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Légende des statuts -->
+  <div class="legend-section" *ngIf="showStatus && getStatusItems().length > 0">
+    <h4 class="section-title" *ngIf="!compact">Statuts des sièges</h4>
+    <div class="legend-items">
+      <div
+        *ngFor="let item of getStatusItems()"
+        class="legend-item"
+        [class]="getItemClasses(item)">
+        
+        <div class="item-visual">
+          <div 
+            class="item-color"
+            [style.background-color]="item.color">
+            <app-icon 
+              *ngIf="item.icon"
+              [name]="item.icon" 
+              size="small"
+              [variant]="getIconVariant(item)">
+            </app-icon>
+          </div>
+        </div>
+
+        <div class="item-info">
+          <span class="item-label">{{ item.label }}</span>
+          <span class="item-description" *ngIf="item.description && !compact">
+            {{ item.description }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version compacte avec badges -->
+  <div class="compact-legend" *ngIf="compact">
+    <div class="compact-items">
+      <app-badge
+        *ngFor="let item of legendItems"
+        [variant]="getBadgeVariant(item)"
+        size="small"
+        [title]="item.description">
+        <app-icon 
+          [name]="item.icon || 'circle'" 
+          size="xs">
+        </app-icon>
+        {{ item.label }}
+      </app-badge>
+    </div>
+  </div>
+</div>

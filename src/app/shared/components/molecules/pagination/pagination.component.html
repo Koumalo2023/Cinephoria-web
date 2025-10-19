@@ -1,1 +1,99 @@
-<p>pagination works!</p>
+<div *ngIf="hasPagination" [class]="containerClasses" [attr.aria-label]="ariaLabel">
+  <!-- Informations de page -->
+  <div *ngIf="mergedConfig.showPageInfo" [class]="infoClasses">
+    <span class="pagination__info-text">{{ pageInfo }}</span>
+  </div>
+
+  <!-- Navigation de pagination -->
+  <nav [class]="navigationClasses">
+    <!-- Boutons de navigation -->
+    <div class="pagination__buttons">
+      <!-- Premier -->
+      <button
+        *ngIf="mergedConfig.showFirstLast"
+        class="pagination__nav-button pagination__nav-button--first"
+        [class]="'pagination__nav-button--' + size"
+        [disabled]="isFirstPage"
+        (click)="goToFirstPage()"
+        aria-label="Aller à la première page"
+      >
+        <app-icon name="chevron-left" size="xs"></app-icon>
+        <span class="pagination__nav-text">Premier</span>
+      </button>
+
+      <!-- Précédent -->
+      <button
+        *ngIf="mergedConfig.showPrevNext"
+        class="pagination__nav-button pagination__nav-button--prev"
+        [class]="'pagination__nav-button--' + size"
+        [disabled]="isFirstPage"
+        (click)="goToPreviousPage()"
+        aria-label="Aller à la page précédente"
+      >
+        <app-icon name="chevron-left" size="xs"></app-icon>
+        <span class="pagination__nav-text">Précédent</span>
+      </button>
+
+      <!-- Numéros de page -->
+      <div *ngIf="mergedConfig.showPageNumbers" class="pagination__pages">
+        <button
+          *ngFor="let page of visiblePages"
+          [class]="getPageButtonClasses(page)"
+          [disabled]="isButtonDisabled(page)"
+          [attr.aria-label]="getPageButtonAriaLabel(page)"
+          [attr.aria-current]="page === currentPage ? 'page' : null"
+          (click)="!isEllipsis(page) && goToPage(page)"
+        >
+          {{ getPageButtonText(page) }}
+        </button>
+      </div>
+
+      <!-- Suivant -->
+      <button
+        *ngIf="mergedConfig.showPrevNext"
+        class="pagination__nav-button pagination__nav-button--next"
+        [class]="'pagination__nav-button--' + size"
+        [disabled]="isLastPage"
+        (click)="goToNextPage()"
+        aria-label="Aller à la page suivante"
+      >
+        <span class="pagination__nav-text">Suivant</span>
+        <app-icon name="chevron-right" size="xs"></app-icon>
+      </button>
+
+      <!-- Dernier -->
+      <button
+        *ngIf="mergedConfig.showFirstLast"
+        class="pagination__nav-button pagination__nav-button--last"
+        [class]="'pagination__nav-button--' + size"
+        [disabled]="isLastPage"
+        (click)="goToLastPage()"
+        aria-label="Aller à la dernière page"
+      >
+        <span class="pagination__nav-text">Dernier</span>
+        <app-icon name="chevron-right" size="xs"></app-icon>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Sélecteur de taille de page -->
+  <div *ngIf="mergedConfig.showPageSize" [class]="sizeClasses">
+    <label class="pagination__size-label" for="pageSize">
+      Éléments par page :
+    </label>
+    <select
+      id="pageSize"
+      class="pagination__size-select"
+      [value]="pageSize"
+      (change)="onPageSizeChange($event)"
+    >
+      <option
+        *ngFor="let option of pageSizeOptions"
+        [value]="option"
+        [selected]="option === pageSize"
+      >
+        {{ option }}
+      </option>
+    </select>
+  </div>
+</div>

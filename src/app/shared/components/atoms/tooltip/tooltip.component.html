@@ -1,1 +1,17 @@
-<p>tooltip works!</p>
+<div class="tooltip-wrapper">
+  <div class="tooltip__trigger">
+    <ng-content></ng-content>
+  </div>
+  
+  <div
+    [class]="tooltipClasses"
+    [style]="tooltipStyles"
+    class="tooltip__content"
+    role="tooltip">
+    
+    <span class="tooltip__arrow"></span>
+    <span class="tooltip__text">
+      <ng-content select="[tooltip-content]"></ng-content>
+    </span>
+  </div>
+</div>

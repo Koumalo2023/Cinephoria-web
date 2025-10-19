@@ -1,1 +1,108 @@
-<p>seat-grid works!</p>
+<div class="seat-grid-container">
+  <!-- En-tête avec informations de sélection -->
+  <div class="grid-header">
+    <div class="selection-info">
+      <h3>Sélection des sièges</h3>
+      <div class="selection-stats">
+        <app-badge [variant]="getRemainingSelection() > 0 ? 'success' : 'warning'" size="small">
+          {{ getSelectionCount() }} / {{ maxSelection }} sièges sélectionnés
+        </app-badge>
+        <span class="total-price" *ngIf="getSelectionCount() > 0">
+          Total: {{ getTotalPrice() }}€
+        </span>
+      </div>
+    </div>
+    
+    <div class="grid-actions" *ngIf="!readonly">
+      <app-button 
+        variant="ghost" 
+        size="small"
+        (clicked)="clearSelection()"
+        [disabled]="getSelectionCount() === 0">
+        <app-icon name="trash" size="small"></app-icon>
+        Tout effacer
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Écran de cinéma -->
+  <div class="cinema-screen" *ngIf="showScreen">
+    <div class="screen-content">
+      <div class="screen-bar"></div>
+      <span class="screen-label">ÉCRAN</span>
+    </div>
+  </div>
+
+  <!-- Grille de sièges -->
+  <div class="seat-grid">
+    <!-- En-tête des colonnes -->
+    <div class="grid-header-row">
+      <div class="row-label header-label"></div>
+      <div 
+        *ngFor="let seat of getSeatsInRow(rows[0])" 
+        class="column-label">
+        {{ getColumnLabel(seat) }}
+      </div>
+    </div>
+
+    <!-- Rangées de sièges -->
+    <div 
+      *ngFor="let row of rows" 
+      class="seat-row">
+      
+      <!-- Label de la rangée -->
+      <div class="row-label">
+        {{ getRowLabel(row) }}
+      </div>
+
+      <!-- Sièges de la rangée -->
+      <div class="seats-in-row">
+        <button
+          *ngFor="let seat of getSeatsInRow(row)"
+          type="button"
+          class="seat-button"
+          [class]="getSeatClass(seat)"
+          [title]="getSeatTooltip(seat)"
+          [disabled]="readonly || seat.status === 'occupied' || seat.status === 'blocked'"
+          (click)="onSeatClick(seat)">
+          
+          <app-icon 
+            [name]="getSeatIcon(seat)" 
+            size="small"
+            [variant]="getSeatIconVariant(seat)">
+          </app-icon>
+          
+          <span class="seat-number">{{ seat.number }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informations de sélection -->
+  <div class="selection-summary" *ngIf="getSelectionCount() > 0">
+    <h4>Sièges sélectionnés :</h4>
+    <div class="selected-seats-list">
+      <app-badge 
+        *ngFor="let seat of selectedSeats"
+        variant="primary" 
+        size="small">
+        {{ seat.row }}{{ seat.number }} ({{ seat.price }}€)
+      </app-badge>
+    </div>
+  </div>
+
+  <!-- Message d'information -->
+  <div class="grid-info" *ngIf="getRemainingSelection() === 0 && !readonly">
+    <div class="info-message info-warning">
+      <app-icon name="info" size="small" variant="warning"></app-icon>
+      <span>Vous avez atteint la limite de {{ maxSelection }} sièges.</span>
+    </div>
+  </div>
+
+  <div class="grid-info" *ngIf="readonly">
+    <div class="info-message info-info">
+      <app-icon name="lock" size="small" variant="muted"></app-icon>
+      <span>Affichage en lecture seule - Sélection désactivée</span>
+    </div>
+  </div>
+</div>

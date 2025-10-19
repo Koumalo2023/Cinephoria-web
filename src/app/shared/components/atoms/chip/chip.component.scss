@@ -1,0 +1,218 @@
+.chip-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 1.5rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+  
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  // Variantes
+  &.chip--primary {
+    background-color: var(--color-primary);
+    color: white;
+    
+    &:hover:not(.chip--disabled) {
+      background-color: var(--color-primary-dark);
+    }
+  }
+  
+  &.chip--secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    
+    &:hover:not(.chip--disabled) {
+      background-color: var(--color-secondary-dark);
+    }
+  }
+  
+  &.chip--success {
+    background-color: var(--color-success);
+    color: white;
+    
+    &:hover:not(.chip--disabled) {
+      background-color: var(--color-success-dark);
+    }
+  }
+  
+  &.chip--warning {
+    background-color: var(--color-warning);
+    color: white;
+    
+    &:hover:not(.chip--disabled) {
+      background-color: var(--color-warning-dark);
+    }
+  }
+  
+  &.chip--error {
+    background-color: var(--color-error);
+    color: white;
+    
+    &:hover:not(.chip--disabled) {
+      background-color: var(--color-error-dark);
+    }
+  }
+  
+  &.chip--outline {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    
+    &:hover:not(.chip--disabled) {
+      background-color: var(--color-primary);
+      color: white;
+    }
+  }
+  
+  // États
+  &.chip--selected {
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
+  
+  &.chip--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    
+    &:hover {
+      background-color: inherit;
+    }
+  }
+  
+  // Tailles
+  &.chip--small {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    min-height: 1.5rem;
+    
+    .chip__avatar {
+      width: 1rem;
+      height: 1rem;
+    }
+    
+    .chip__icon {
+      font-size: 0.75rem;
+    }
+    
+    .chip__remove {
+      padding: 0.125rem;
+    }
+  }
+  
+  &.chip--medium {
+    padding: 0.375rem 1rem;
+    font-size: 0.875rem;
+    min-height: 2rem;
+    
+    .chip__avatar {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    
+    .chip__icon {
+      font-size: 0.875rem;
+    }
+    
+    .chip__remove {
+      padding: 0.25rem;
+    }
+  }
+  
+  &.chip--large {
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    min-height: 2.5rem;
+    
+    .chip__avatar {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    .chip__icon {
+      font-size: 1rem;
+    }
+    
+    .chip__remove {
+      padding: 0.375rem;
+    }
+  }
+  
+  // Avec avatar/icône
+  &.chip--has-avatar,
+  &.chip--has-icon {
+    padding-left: 0.5rem;
+  }
+  
+  // Supprimable
+  &.chip--removable {
+    padding-right: 0.5rem;
+  }
+}
+
+.chip__avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.chip__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chip__content {
+  flex: 1;
+  line-height: 1;
+}
+
+.chip__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+  
+  &:hover:not(:disabled) {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-secondary: #f3f4f6;
+  --color-secondary-dark: #e5e7eb;
+  --color-success: #22c55e;
+  --color-success-dark: #16a34a;
+  --color-warning: #f59e0b;
+  --color-warning-dark: #d97706;
+  --color-error: #ef4444;
+  --color-error-dark: #dc2626;
+  --color-text: #1f2937;
+}

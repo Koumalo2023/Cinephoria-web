@@ -1,1 +1,158 @@
-<p>sidebar works!</p>
+<aside class="sidebar" [class]="getCollapsedClass()">
+  <!-- En-tête de la sidebar -->
+  <div class="sidebar-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <app-icon name="film" class="logo-icon"></app-icon>
+        <h1 class="logo-text" *ngIf="!collapsed">Cinephoria</h1>
+      </div>
+      <app-button
+        variant="ghost"
+        size="small"
+        (clicked)="onToggleCollapse()"
+        class="collapse-button">
+        <app-icon [name]="collapsed ? 'chevron-right' : 'chevron-left'"></app-icon>
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Section utilisateur -->
+  <div class="user-section">
+    <div class="user-info">
+      <app-avatar
+        [src]="user.avatar || ''"
+        [alt]="user.name"
+        size="medium"
+        class="user-avatar">
+      </app-avatar>
+      <div class="user-details" *ngIf="!collapsed">
+        <h3 class="user-name">{{ user.name }}</h3>
+        <p class="user-role">{{ user.role }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation principale -->
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li
+        *ngFor="let item of navigationItems"
+        class="nav-item"
+        [class.active]="isItemActive(item)"
+        [class.has-children]="item.children && item.children.length > 0"
+        [class.expanded]="expandedItems.has(item.id)">
+        
+        <!-- Élément de navigation principal -->
+        <div
+          class="nav-link-wrapper"
+          (click)="onItemClick(item)"
+          [class.disabled]="!hasPermission(item)">
+          
+          <app-nav-link
+            [label]="item.label"
+            [icon]="item.icon"
+            [routerLink]="item.route || ''"
+            [state]="isItemActive(item) ? 'active' : 'default'"
+            class="nav-link">
+          </app-nav-link>
+
+          <!-- Badge pour les notifications -->
+          <app-badge
+            *ngIf="item.badge && item.badge > 0 && !collapsed"
+            variant="primary"
+            size="small"
+            class="nav-badge">
+            {{ item.badge }}
+          </app-badge>
+
+          <!-- Indicateur pour les éléments avec enfants -->
+          <app-icon
+            *ngIf="item.children && item.children.length > 0 && !collapsed"
+            [name]="expandedItems.has(item.id) ? 'chevron-down' : 'chevron-right'"
+            class="expand-icon">
+          </app-icon>
+        </div>
+
+        <!-- Sous-menu pour les éléments avec enfants -->
+        <ul
+          *ngIf="item.children && item.children.length > 0 && expandedItems.has(item.id) && !collapsed"
+          class="submenu">
+          <li
+            *ngFor="let child of item.children"
+            class="submenu-item"
+            [class.active]="child.route === currentRoute"
+            [class.disabled]="!hasPermission(child)">
+            
+            <app-nav-link
+              [label]="child.label"
+              [icon]="child.icon"
+              [routerLink]="child.route || ''"
+              [state]="child.route === currentRoute ? 'active' : 'default'"
+              size="small"
+              class="submenu-link">
+            </app-nav-link>
+
+            <app-badge
+              *ngIf="child.badge && child.badge > 0"
+              variant="primary"
+              size="small"
+              class="submenu-badge">
+              {{ child.badge }}
+            </app-badge>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Section pied de page -->
+  <div class="sidebar-footer" *ngIf="!collapsed">
+    <div class="footer-content">
+      <!-- Paramètres -->
+      <app-button
+        variant="ghost"
+        size="small"
+        class="footer-button">
+        <app-icon name="settings"></app-icon>
+        <span class="button-text">Paramètres</span>
+      </app-button>
+
+      <!-- Déconnexion -->
+      <app-button
+        variant="ghost"
+        size="small"
+        class="footer-button logout-button">
+        <app-icon name="log-out"></app-icon>
+        <span class="button-text">Déconnexion</span>
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Version réduite avec tooltips -->
+  <div class="sidebar-tooltips" *ngIf="collapsed">
+    <div
+      *ngFor="let item of navigationItems"
+      class="tooltip-item"
+      [class.active]="isItemActive(item)">
+      
+      <app-nav-link
+        [label]="item.label"
+        [icon]="item.icon"
+        [routerLink]="item.route || ''"
+        [state]="isItemActive(item) ? 'active' : 'default'"
+        class="tooltip-link">
+      </app-nav-link>
+
+      <div class="tooltip">
+        {{ item.label }}
+        <app-badge
+          *ngIf="item.badge && item.badge > 0"
+          variant="primary"
+          size="small"
+          class="tooltip-badge">
+          {{ item.badge }}
+        </app-badge>
+      </div>
+    </div>
+  </div>
+</aside>

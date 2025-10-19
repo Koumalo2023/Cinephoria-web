@@ -1,1 +1,200 @@
-<p>system-settings-panel works!</p>
+<div class="system-settings-panel" [class.compact]="compact">
+  <!-- En-tête du panneau -->
+  <div class="settings-header">
+    <h2 class="settings-title">Paramètres système</h2>
+    <div class="settings-actions" *ngIf="showReset">
+      <app-button
+        variant="secondary"
+        size="small"
+        (clicked)="onResetSettings()"
+        class="reset-button">
+        <app-icon name="refresh"></app-icon>
+        Réinitialiser
+      </app-button>
+      <app-button
+        variant="primary"
+        size="small"
+        (clicked)="onSaveSettings()"
+        [disabled]="!hasUnsavedChanges()"
+        class="save-button">
+        <app-icon name="save"></app-icon>
+        Enregistrer
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Version avec catégories -->
+  <div class="settings-categories" *ngIf="showCategories">
+    <div *ngFor="let category of categories" class="settings-category">
+      <div class="category-header">
+        <app-icon [name]="getCategoryIcon(category)" class="category-icon"></app-icon>
+        <h3 class="category-title">{{ category }}</h3>
+      </div>
+      <div class="category-settings">
+        <div
+          *ngFor="let setting of getSettingsByCategory(category)"
+          class="setting-item">
+          <div class="setting-info">
+            <div class="setting-header">
+              <app-icon [name]="getSettingIcon(setting)" class="setting-icon"></app-icon>
+              <div class="setting-details">
+                <h4 class="setting-label">{{ setting.label }}</h4>
+                <p class="setting-description" *ngIf="setting.description">
+                  {{ setting.description }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="setting-control">
+            <!-- Toggle -->
+            <app-checkbox
+              *ngIf="setting.type === 'toggle'"
+              [label]="setting.label"
+              (valueChange)="onSettingChange(setting.id, $event)"
+              [disabled]="setting.disabled || false"
+              class="setting-toggle">
+            </app-checkbox>
+
+            <!-- Select -->
+            <div *ngIf="setting.type === 'select'" class="select-wrapper">
+              <label class="select-label">{{ setting.label }}</label>
+              <select
+                [value]="getSettingValue(setting)"
+                (change)="onSettingChange(setting.id, $any($event.target).value)"
+                [disabled]="setting.disabled"
+                class="setting-select">
+                <option
+                  *ngFor="let option of setting.options"
+                  [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Input -->
+            <div *ngIf="setting.type === 'input'" class="input-wrapper">
+              <label class="input-label">{{ setting.label }}</label>
+              <input
+                type="text"
+                [value]="getSettingValue(setting)"
+                [placeholder]="setting.placeholder || ''"
+                (input)="onSettingChange(setting.id, $any($event.target).value)"
+                [disabled]="setting.disabled"
+                class="setting-input">
+            </div>
+
+            <!-- Radio -->
+            <div *ngIf="setting.type === 'radio'" class="radio-group">
+              <label class="radio-label">{{ setting.label }}</label>
+              <div class="radio-options">
+                <label
+                  *ngFor="let option of setting.options"
+                  class="radio-option">
+                  <input
+                    type="radio"
+                    [name]="setting.id"
+                    [value]="option.value"
+                    [checked]="getSettingValue(setting) === option.value"
+                    (change)="onSettingChange(setting.id, option.value)"
+                    [disabled]="setting.disabled"
+                    class="radio-input">
+                  <span class="radio-text">{{ option.label }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Button -->
+            <app-button
+              *ngIf="setting.type === 'button'"
+              variant="secondary"
+              size="small"
+              (clicked)="onSettingChange(setting.id, true)"
+              [disabled]="setting.disabled || false"
+              class="setting-button">
+              {{ setting.label }}
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version sans catégories (compacte) -->
+  <div class="settings-list" *ngIf="!showCategories">
+    <div
+      *ngFor="let setting of settings"
+      class="setting-item compact">
+      <div class="setting-info">
+        <div class="setting-header">
+          <app-icon [name]="getSettingIcon(setting)" class="setting-icon"></app-icon>
+          <div class="setting-details">
+            <h4 class="setting-label">{{ setting.label }}</h4>
+            <p class="setting-description" *ngIf="setting.description">
+              {{ setting.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="setting-control">
+        <!-- Toggle compact -->
+        <app-checkbox
+          *ngIf="setting.type === 'toggle'"
+          (valueChange)="onSettingChange(setting.id, $event)"
+          [disabled]="setting.disabled || false"
+          class="setting-toggle">
+        </app-checkbox>
+
+        <!-- Select compact -->
+        <select
+          *ngIf="setting.type === 'select'"
+          [value]="getSettingValue(setting)"
+          (change)="onSettingChange(setting.id, $any($event.target).value)"
+          [disabled]="setting.disabled"
+          class="setting-select compact">
+          <option
+            *ngFor="let option of setting.options"
+            [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+
+        <!-- Input compact -->
+        <input
+          *ngIf="setting.type === 'input'"
+          type="text"
+          [value]="getSettingValue(setting)"
+          [placeholder]="setting.placeholder || ''"
+          (input)="onSettingChange(setting.id, $any($event.target).value)"
+          [disabled]="setting.disabled"
+          class="setting-input compact">
+
+        <!-- Radio compact -->
+        <div *ngIf="setting.type === 'radio'" class="radio-group compact">
+          <div class="radio-options">
+            <label
+              *ngFor="let option of setting.options"
+              class="radio-option">
+              <input
+                type="radio"
+                [name]="setting.id"
+                [value]="option.value"
+                [checked]="getSettingValue(setting) === option.value"
+                (change)="onSettingChange(setting.id, option.value)"
+                [disabled]="setting.disabled"
+                class="radio-input">
+              <span class="radio-text">{{ option.label }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateur de modifications non sauvegardées -->
+  <div class="unsaved-changes" *ngIf="hasUnsavedChanges()">
+    <div class="changes-indicator">
+      <app-icon name="alert-circle" class="changes-icon"></app-icon>
+      <span class="changes-text">Modifications non sauvegardées</span>
+    </div>
+  </div>
+</div>

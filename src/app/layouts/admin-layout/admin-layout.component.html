@@ -1,0 +1,191 @@
+<div class="admin-layout">
+  <!-- Header avec navigation adaptée aux administrateurs -->
+  <app-header
+    [variant]="headerConfig.variant"
+    [showLogo]="headerConfig.showLogo"
+    [showNavigation]="headerConfig.showNavigation"
+    [showUserMenu]="headerConfig.showUserMenu"
+    [currentUser]="currentUser">
+  </app-header>
+
+  <!-- Contenu principal du layout admin -->
+  <main class="admin-main">
+    <!-- Barre latérale de navigation admin -->
+    <aside class="admin-sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-header">
+          <h3 class="sidebar-title">Administration</h3>
+          <p class="sidebar-subtitle">Interface système</p>
+        </div>
+
+        <!-- Statistiques système -->
+        <div class="system-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ adminStats.systemHealth }}%</div>
+            <div class="stat-label">Santé système</div>
+            <div 
+              class="stat-indicator"
+              [style.background-color]="getSystemHealthColor()">
+            </div>
+          </div>
+        </div>
+
+        <ul class="sidebar-menu">
+          <!-- Tableau de bord admin -->
+          <li class="menu-item">
+            <a routerLink="/admin/dashboard" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🏠</span>
+              <span class="menu-label">Tableau de bord</span>
+            </a>
+          </li>
+
+          <!-- Gestion des utilisateurs -->
+          <li class="menu-item">
+            <a routerLink="/admin/users" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">👥</span>
+              <span class="menu-label">Utilisateurs</span>
+              <span class="menu-badge">{{ adminStats.totalUsers }}</span>
+            </a>
+          </li>
+
+          <!-- Gestion des employés -->
+          <li class="menu-item">
+            <a routerLink="/admin/employees" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">👨‍💼</span>
+              <span class="menu-label">Employés</span>
+              <span class="menu-badge">{{ adminStats.activeEmployees }}</span>
+            </a>
+          </li>
+
+          <!-- Gestion des cinémas -->
+          <li class="menu-item">
+            <a routerLink="/admin/cinemas" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🏢</span>
+              <span class="menu-label">Cinémas</span>
+              <span class="menu-badge">{{ adminStats.totalCinemas }}</span>
+            </a>
+          </li>
+
+          <!-- Gestion des films -->
+          <li class="menu-item">
+            <a routerLink="/admin/movies" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🎬</span>
+              <span class="menu-label">Films</span>
+            </a>
+          </li>
+
+          <!-- Gestion des incidents -->
+          <li class="menu-item">
+            <a routerLink="/admin/incidents" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">⚠️</span>
+              <span class="menu-label">Incidents</span>
+              <span class="menu-badge">{{ adminStats.pendingIncidents }}</span>
+            </a>
+          </li>
+
+          <!-- Statistiques et rapports -->
+          <li class="menu-item">
+            <a routerLink="/admin/statistics" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">📊</span>
+              <span class="menu-label">Rapports</span>
+            </a>
+          </li>
+
+          <!-- Paramètres système -->
+          <li class="menu-item">
+            <a routerLink="/admin/system" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-label">Système</span>
+            </a>
+          </li>
+
+          <!-- Sécurité -->
+          <li class="menu-item">
+            <a routerLink="/admin/security" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🔒</span>
+              <span class="menu-label">Sécurité</span>
+            </a>
+          </li>
+
+          <!-- Logs système -->
+          <li class="menu-item">
+            <a routerLink="/admin/logs" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">📋</span>
+              <span class="menu-label">Logs</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Actions système -->
+        <div class="system-actions">
+          <h4 class="actions-title">Actions système</h4>
+          <div class="action-buttons">
+            <button class="action-btn primary" (click)="onAdminAction('refresh_stats')">
+              <span class="action-icon">🔄</span>
+              Actualiser stats
+            </button>
+            <button class="action-btn warning" (click)="onAdminAction('system_health')">
+              <span class="action-icon">❤️</span>
+              Santé système
+            </button>
+            <button class="action-btn secondary" (click)="onAdminAction('backup')">
+              <span class="action-icon">💾</span>
+              Sauvegarde
+            </button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Zone de contenu principale -->
+    <section class="admin-content">
+      <!-- En-tête de page admin -->
+      <div class="content-header">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">Administration</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-item active">Tableau de bord</span>
+        </div>
+        
+        <div class="content-actions">
+          <div class="admin-quick-stats">
+            <div class="quick-stat">
+              <span class="stat-icon">💰</span>
+              <span class="stat-text">{{ adminStats.totalRevenue }}€</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-icon">👥</span>
+              <span class="stat-text">{{ adminStats.totalUsers }}</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-icon">⚠️</span>
+              <span class="stat-text">{{ adminStats.pendingIncidents }}</span>
+            </div>
+          </div>
+          
+          <button class="btn btn-primary" (click)="onAdminAction('refresh_stats')">
+            <span class="btn-icon">🔄</span>
+            Actualiser
+          </button>
+          <button class="btn btn-secondary" (click)="onAdminAction('system_health')">
+            <span class="btn-icon">📊</span>
+            Diagnostics
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu dynamique des routes admin -->
+      <div class="content-area">
+        <router-outlet></router-outlet>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer compact pour admin -->
+  <app-footer
+    [variant]="footerConfig.variant"
+    [showCinemaInfo]="footerConfig.showCinemaInfo"
+    [showSocialLinks]="footerConfig.showSocialLinks"
+    [showLegalLinks]="footerConfig.showLegalLinks">
+  </app-footer>
+</div>

@@ -1,1 +1,175 @@
-<p>footer works!</p>
+<footer [class]="footerClasses">
+  <div [class]="containerClasses">
+    
+    <!-- Section principale du footer -->
+    <div class="footer-main" *ngIf="variant === 'default'">
+      
+      <!-- Logo et description -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">Cinephoria</span>
+        </div>
+        <p class="footer-description">
+          Votre destination cinéma préférée. Découvrez les derniers films, réservez vos places 
+          et vivez une expérience cinématographique exceptionnelle.
+        </p>
+        
+        <!-- Liens sociaux -->
+        <div class="social-links" *ngIf="showSocialLinks">
+          <h4 class="social-title">Suivez-nous</h4>
+          <div class="social-icons">
+            <button 
+              *ngFor="let social of socialLinks"
+              class="social-icon"
+              (click)="openExternalLink(social.url)"
+              [style.background-color]="social.color"
+              [attr.aria-label]="'Suivez-nous sur ' + social.name">
+              <span class="social-icon-text">{{ social.icon }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="footer-nav">
+        <div class="nav-section" *ngFor="let section of navigationLinks">
+          <h4 class="nav-title">{{ section.title }}</h4>
+          <ul class="nav-links">
+            <li *ngFor="let link of section.links">
+              <a 
+                [routerLink]="link.routerLink" 
+                class="nav-link">
+                {{ link.label }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Informations des cinémas -->
+      <div class="cinema-info" *ngIf="showCinemaInfo">
+        <h4 class="cinema-title">Nos cinémas</h4>
+        <div class="cinema-list">
+          <div class="cinema-item" *ngFor="let cinema of cinemas">
+            <h5 class="cinema-name">{{ cinema.name }}</h5>
+            <div class="cinema-details">
+              <div class="cinema-address">
+                <span class="address-icon">📍</span>
+                {{ cinema.address }}, {{ cinema.city }}
+              </div>
+              <div class="cinema-phone">
+                <span class="phone-icon">📞</span>
+                {{ formatPhoneNumber(cinema.phoneNumber) }}
+              </div>
+              <div class="cinema-hours">
+                <span class="hours-icon">🕒</span>
+                {{ cinema.openingHours }}
+              </div>
+              <div class="cinema-email">
+                <span class="email-icon">✉️</span>
+                {{ getCinemaEmail(cinema.name) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations de contact -->
+      <div class="contact-info">
+        <h4 class="contact-title">Contact</h4>
+        <div class="contact-details">
+          <div class="contact-item">
+            <span class="contact-icon">📞</span>
+            <span class="contact-text">{{ formatPhoneNumber(mainContactInfo.phoneNumber) }}</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-icon">✉️</span>
+            <span class="contact-text">contact&#64;cinephoria.com</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-icon">📍</span>
+            <span class="contact-text">Service client 7j/7</span>
+          </div>
+        </div>
+        
+        <!-- Newsletter -->
+        <div class="newsletter">
+          <h5 class="newsletter-title">Newsletter</h5>
+          <p class="newsletter-description">
+            Recevez les dernières actualités et offres spéciales
+          </p>
+          <div class="newsletter-form">
+            <input 
+              type="email" 
+              placeholder="Votre email" 
+              class="newsletter-input">
+            <button class="newsletter-btn">S'abonner</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer compact -->
+    <div class="footer-compact" *ngIf="variant === 'compact'">
+      <div class="compact-content">
+        <!-- Logo -->
+        <div class="compact-logo">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">Cinephoria</span>
+        </div>
+
+        <!-- Navigation compacte -->
+        <div class="compact-nav">
+          <ng-container *ngFor="let section of navigationLinks; let first = first">
+            <a
+              *ngIf="first"
+              [routerLink]="section.links[0].routerLink"
+              class="compact-nav-link">
+              {{ section.links[0].label }}
+            </a>
+          </ng-container>
+          <a routerLink="/contact" class="compact-nav-link">Contact</a>
+        </div>
+
+        <!-- Liens sociaux compacts -->
+        <div class="compact-social" *ngIf="showSocialLinks">
+          <button 
+            *ngFor="let social of socialLinks"
+            class="compact-social-icon"
+            (click)="openExternalLink(social.url)"
+            [attr.aria-label]="social.name">
+            <span class="social-icon-text">{{ social.icon }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section bas du footer -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <!-- Copyright -->
+        <div class="copyright">
+          <p>&copy; {{ currentYear }} Cinephoria. Tous droits réservés.</p>
+        </div>
+
+        <!-- Liens légaux -->
+        <div class="legal-links" *ngIf="showLegalLinks && variant === 'default'">
+          <a routerLink="/legal" class="legal-link">Mentions légales</a>
+          <a routerLink="/privacy" class="legal-link">Confidentialité</a>
+          <a routerLink="/terms" class="legal-link">CGU</a>
+          <a routerLink="/cookies" class="legal-link">Cookies</a>
+        </div>
+
+        <!-- Informations supplémentaires -->
+        <div class="footer-info">
+          <span class="info-text">Version 1.0.0</span>
+          <span class="info-separator">•</span>
+          <span class="info-text">Made with ❤️ for cinema lovers</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</footer>

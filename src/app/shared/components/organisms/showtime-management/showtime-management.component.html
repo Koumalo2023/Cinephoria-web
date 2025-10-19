@@ -1,1 +1,323 @@
-<p>showtime-management works!</p>
+<div class="showtime-management">
+  <!-- En-tête avec statistiques -->
+  <header class="management-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">
+          <app-icon name="calendar" size="large"></app-icon>
+          Gestion des Séances
+        </h1>
+        <p class="subtitle">Planifiez et géz les séances de projection</p>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalShowtimes }}</div>
+          <div class="stat-label">Séances totales</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.todayShowtimes }}</div>
+          <div class="stat-label">Aujourd'hui</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.averageOccupancy }}%</div>
+          <div class="stat-label">Occupation moyenne</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalRevenue }}€</div>
+          <div class="stat-label">Revenu total</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barre d'outils -->
+  <div class="management-toolbar">
+    <div class="toolbar-left">
+      <!-- Sélecteur de vue -->
+      <div class="view-selector">
+        <app-button 
+          [variant]="activeView === 'calendar' ? 'primary' : 'ghost'"
+          (clicked)="setView('calendar')">
+          <app-icon name="calendar"></app-icon>
+          Calendrier
+        </app-button>
+        <app-button 
+          [variant]="activeView === 'list' ? 'primary' : 'ghost'"
+          (clicked)="setView('list')">
+          <app-icon name="list"></app-icon>
+          Liste
+        </app-button>
+        <app-button 
+          [variant]="activeView === 'create' ? 'primary' : 'ghost'"
+          (clicked)="setView('create')">
+          <app-icon name="plus"></app-icon>
+          Nouvelle séance
+        </app-button>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Actions principales -->
+      <app-button variant="primary" (clicked)="createNewShowtime()">
+        <app-icon name="plus"></app-icon>
+        Créer une séance
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="management-content">
+    <!-- Panneau latéral des filtres -->
+    <aside class="filters-sidebar">
+      <app-filter-panel
+        [filterGroups]="filterGroups"
+        [appliedFilters]="appliedFilters"
+        [showHeader]="true"
+        [showActions]="true"
+        [showAppliedFilters]="true"
+        [collapsible]="true"
+        (filtersChange)="onFiltersChange($event)"
+        (filtersApply)="onFiltersApply($event)"
+        (filtersReset)="onFiltersReset()"
+        (filterRemove)="onFilterRemove($event)">
+      </app-filter-panel>
+    </aside>
+
+    <!-- Zone de contenu principale -->
+    <main class="content-main">
+      <!-- Vue Calendrier -->
+      <section *ngIf="activeView === 'calendar'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Calendrier des Séances</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ getTotalShowtimes() }} séance(s)</span>
+          </div>
+        </div>
+
+        <!-- Sélecteur de séances -->
+        <div class="showtime-selector-container">
+          <app-showtime-selector
+            [showtimes]="filteredShowtimeGroups"
+            [selectedShowtime]="selectedShowtime || undefined"
+            [showFormat]="true"
+            [showLanguage]="true"
+            [showAccessibility]="true"
+            [showTheater]="true"
+            [showPrice]="true"
+            [showAvailability]="true"
+            (showtimeSelected)="onShowtimeSelected($event)"
+            (showtimeDeselected)="onShowtimeDeselected()">
+          </app-showtime-selector>
+        </div>
+
+        <!-- Actions sur séance sélectionnée -->
+        <div *ngIf="selectedShowtime" class="selected-showtime-actions">
+          <div class="showtime-info">
+            <h3>{{ selectedShowtime.time }} - {{ selectedShowtime.theater }}</h3>
+            <p>{{ selectedShowtime.format }} • {{ selectedShowtime.language }} • {{ selectedShowtime.price }}€</p>
+          </div>
+          
+          <div class="action-buttons">
+            <app-button variant="ghost" (clicked)="editShowtime(selectedShowtime)">
+              <app-icon name="edit"></app-icon>
+              Modifier
+            </app-button>
+            <app-button variant="ghost" (clicked)="duplicateShowtime(selectedShowtime)">
+              <app-icon name="copy"></app-icon>
+              Dupliquer
+            </app-button>
+            <app-button variant="ghost" (clicked)="deleteShowtime(selectedShowtime.id)">
+              <app-icon name="trash-2"></app-icon>
+              Supprimer
+            </app-button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Liste -->
+      <section *ngIf="activeView === 'list'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Liste des Séances</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ getTotalShowtimes() }} séance(s)</span>
+          </div>
+        </div>
+
+        <!-- Tableau des séances -->
+        <div class="showtimes-table">
+          <div class="table-header">
+            <div class="table-cell">Film</div>
+            <div class="table-cell">Date & Heure</div>
+            <div class="table-cell">Salle</div>
+            <div class="table-cell">Format</div>
+            <div class="table-cell">Langue</div>
+            <div class="table-cell">Prix</div>
+            <div class="table-cell">Places</div>
+            <div class="table-cell">Actions</div>
+          </div>
+
+          <div *ngFor="let group of filteredShowtimeGroups" class="table-group">
+            <div class="group-header">
+              <h3>{{ group.dayOfWeek }} {{ group.date | date:'dd/MM/yyyy' }}</h3>
+            </div>
+            
+            <div *ngFor="let showtime of group.showtimes" class="table-row">
+              <div class="table-cell">
+                <div class="movie-info">
+                  <span class="movie-title">{{ getMovieTitle(showtime.id) }}</span>
+                </div>
+              </div>
+              <div class="table-cell">
+                {{ showtime.time }}
+              </div>
+              <div class="table-cell">
+                {{ showtime.theater }}
+              </div>
+              <div class="table-cell">
+                <app-badge [variant]="showtime.format === 'IMAX' ? 'primary' : 'secondary'">
+                  {{ showtime.format }}
+                </app-badge>
+              </div>
+              <div class="table-cell">
+                {{ showtime.language }}
+                <span *ngIf="showtime.subtitles" class="accessibility-badge">ST</span>
+                <span *ngIf="showtime.audioDescription" class="accessibility-badge">AD</span>
+              </div>
+              <div class="table-cell">
+                {{ showtime.price }}€
+              </div>
+              <div class="table-cell">
+                <app-badge [variant]="showtime.availableSeats === 0 ? 'error' : (showtime.availableSeats < 50 ? 'warning' : 'success')">
+                  {{ showtime.availableSeats }}/{{ showtime.totalSeats }}
+                </app-badge>
+              </div>
+              <div class="table-cell">
+                <div class="row-actions">
+                  <app-button variant="ghost" size="small" (clicked)="editShowtime(showtime)">
+                    <app-icon name="edit"></app-icon>
+                  </app-button>
+                  <app-button variant="ghost" size="small" (clicked)="deleteShowtime(showtime.id)">
+                    <app-icon name="trash-2"></app-icon>
+                  </app-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Création/Édition -->
+      <section *ngIf="activeView === 'create'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            {{ selectedShowtime ? 'Modifier la séance' : 'Créer une nouvelle séance' }}
+          </h2>
+          <div class="section-info">
+            <app-button variant="ghost" (clicked)="cancelEdit()">
+              <app-icon name="arrow-left"></app-icon>
+              Retour au calendrier
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Formulaire de création -->
+        <div class="create-form-container">
+          <form [formGroup]="showtimeForm" class="showtime-form">
+            <div class="form-section">
+              <h3>Informations de base</h3>
+              
+              <div class="form-row">
+                <app-select
+                  label="Film"
+                  formControlName="movieId"
+                  [options]="movieOptions"
+                  placeholder="Sélectionnez un film">
+                </app-select>
+                
+                <app-select
+                  label="Salle"
+                  formControlName="theater"
+                  [options]="theaterOptions"
+                  placeholder="Sélectionnez une salle">
+                </app-select>
+              </div>
+
+              <div class="form-row">
+                <app-date-picker
+                  label="Date"
+                  formControlName="date"
+                  placeholder="Sélectionnez une date">
+                </app-date-picker>
+                
+                <app-time-picker
+                  label="Heure"
+                  formControlName="time"
+                  placeholder="HH:MM">
+                </app-time-picker>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Configuration</h3>
+              
+              <div class="form-row">
+                <app-select
+                  label="Format"
+                  formControlName="format"
+                  [options]="[
+                    { label: '2D', value: '2D' },
+                    { label: '3D', value: '3D' },
+                    { label: 'IMAX', value: 'IMAX' },
+                    { label: '4DX', value: '4DX' }
+                  ]">
+                </app-select>
+                
+                <app-select
+                  label="Langue"
+                  formControlName="language"
+                  [options]="[
+                    { label: 'VO', value: 'VO' },
+                    { label: 'VF', value: 'VF' },
+                    { label: 'VOST', value: 'VOST' }
+                  ]">
+                </app-select>
+              </div>
+
+              <div class="form-row">
+                <app-input
+                  label="Prix (€)"
+                  formControlName="price"
+                  type="number"
+                  placeholder="0.00">
+                </app-input>
+              </div>
+
+              <div class="form-row">
+                <app-checkbox
+                  label="Sous-titres"
+                  formControlName="subtitles">
+                </app-checkbox>
+                
+                <app-checkbox
+                  label="Audio-description"
+                  formControlName="audioDescription">
+                </app-checkbox>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <app-button variant="ghost" (clicked)="cancelEdit()">
+                Annuler
+              </app-button>
+              <app-button variant="primary" (clicked)="saveShowtime()">
+                <app-icon name="save"></app-icon>
+                {{ selectedShowtime ? 'Mettre à jour' : 'Créer la séance' }}
+              </app-button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>

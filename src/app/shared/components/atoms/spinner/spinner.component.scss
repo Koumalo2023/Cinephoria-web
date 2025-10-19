@@ -1,0 +1,100 @@
+.spinner-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spinner__loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // Tailles
+  &.spinner--small {
+    .spinner__circle {
+      width: 1rem;
+      height: 1rem;
+      border-width: 2px;
+    }
+  }
+  
+  &.spinner--medium {
+    .spinner__circle {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-width: 2px;
+    }
+  }
+  
+  &.spinner--large {
+    .spinner__circle {
+      width: 2rem;
+      height: 2rem;
+      border-width: 3px;
+    }
+  }
+  
+  // Variantes
+  &.spinner--primary {
+    .spinner__circle {
+      border-color: var(--color-primary) transparent transparent transparent;
+    }
+  }
+  
+  &.spinner--secondary {
+    .spinner__circle {
+      border-color: var(--color-secondary) transparent transparent transparent;
+    }
+  }
+  
+  &.spinner--success {
+    .spinner__circle {
+      border-color: var(--color-success) transparent transparent transparent;
+    }
+  }
+  
+  &.spinner--warning {
+    .spinner__circle {
+      border-color: var(--color-warning) transparent transparent transparent;
+    }
+  }
+  
+  &.spinner--error {
+    .spinner__circle {
+      border-color: var(--color-error) transparent transparent transparent;
+    }
+  }
+}
+
+.spinner__circle {
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  border-style: solid;
+  border-color: transparent;
+}
+
+.spinner__label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-secondary: #6b7280;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-text-muted: #6b7280;
+}

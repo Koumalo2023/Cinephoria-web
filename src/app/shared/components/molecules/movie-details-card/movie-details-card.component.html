@@ -1,1 +1,169 @@
-<p>movie-details-card works!</p>
+<div class="movie-details-card">
+  <!-- En-tête avec image de fond -->
+  <div class="movie-details-card__header" *ngIf="movie.backdropUrl">
+    <img
+      [src]="movie.backdropUrl"
+      [alt]="movie.title"
+      class="movie-details-card__backdrop"
+      loading="lazy"
+    />
+    <div class="movie-details-card__header-overlay"></div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="movie-details-card__content">
+    <!-- Section image et actions -->
+    <div class="movie-details-card__main">
+      <!-- Poster -->
+      <div class="movie-details-card__poster-section">
+        <img
+          [src]="movie.posterUrl"
+          [alt]="movie.title"
+          class="movie-details-card__poster"
+          loading="lazy"
+        />
+        
+        <!-- Actions -->
+        <div *ngIf="showActions" class="movie-details-card__actions">
+          <button
+            class="movie-details-card__action movie-details-card__action--favorite"
+            [class.movie-details-card__action--active]="movie.isFavorite"
+            (click)="onFavoriteToggle()"
+            aria-label="Ajouter aux favoris"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span>Favori</span>
+          </button>
+
+          <button
+            class="movie-details-card__action movie-details-card__action--watchlist"
+            [class.movie-details-card__action--active]="movie.isInWatchlist"
+            (click)="onWatchlistToggle()"
+            aria-label="Ajouter à la watchlist"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <span>Watchlist</span>
+          </button>
+
+          <button
+            class="movie-details-card__action movie-details-card__action--watched"
+            [class.movie-details-card__action--active]="movie.isWatched"
+            (click)="onWatchedToggle()"
+            aria-label="Marquer comme vu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span>Vu</span>
+          </button>
+
+          <button
+            *ngIf="showTrailer && movie.trailerUrl"
+            class="movie-details-card__action movie-details-card__action--trailer"
+            (click)="onTrailerClick()"
+            aria-label="Voir la bande-annonce"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <span>Bande-annonce</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Informations principales -->
+      <div class="movie-details-card__info">
+        <!-- Titre et métadonnées -->
+        <div class="movie-details-card__title-section">
+          <h1 class="movie-details-card__title">{{ movie.title }}</h1>
+          
+          <div *ngIf="movie.originalTitle && movie.originalTitle !== movie.title" 
+               class="movie-details-card__original-title">
+            {{ movie.originalTitle }}
+          </div>
+
+          <div class="movie-details-card__metadata">
+            <span class="movie-details-card__year">{{ movie.year }}</span>
+            <span class="movie-details-card__duration">{{ formattedDuration }}</span>
+            <span class="movie-details-card__release-date">{{ formattedReleaseDate }}</span>
+            <span *ngIf="isRecent" class="movie-details-card__recent-badge">Nouveau</span>
+          </div>
+        </div>
+
+        <!-- Rating et votes -->
+        <div class="movie-details-card__rating-section">
+          <div class="movie-details-card__rating" [class]="ratingColor">
+            <span class="movie-details-card__rating-value">{{ movie.rating.toFixed(1) }}</span>
+            <span class="movie-details-card__rating-max">/10</span>
+          </div>
+          <div class="movie-details-card__vote-count">
+            {{ movie.voteCount }} votes
+          </div>
+        </div>
+
+        <!-- Genres -->
+        <div class="movie-details-card__genres">
+          <span *ngFor="let genre of movie.genres" class="movie-details-card__genre">
+            {{ genre }}
+          </span>
+        </div>
+
+        <!-- Synopsis -->
+        <div class="movie-details-card__synopsis">
+          <h3 class="movie-details-card__synopsis-title">Synopsis</h3>
+          <p class="movie-details-card__synopsis-text">{{ movie.synopsis }}</p>
+        </div>
+
+        <!-- Réalisateur -->
+        <div *ngIf="movie.director" class="movie-details-card__director">
+          <strong>Réalisateur :</strong> {{ movie.director }}
+        </div>
+
+        <!-- Casting principal -->
+        <div *ngIf="movie.cast && movie.cast.length" class="movie-details-card__cast">
+          <h3 class="movie-details-card__cast-title">Avec</h3>
+          <div class="movie-details-card__cast-list">
+            <span *ngFor="let actor of mainCast" class="movie-details-card__actor">
+              {{ actor }}
+            </span>
+            <span *ngIf="movie.cast && movie.cast.length > 5" class="movie-details-card__cast-more">
+              et {{ movie.cast.length - 5 }} autres
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informations financières -->
+    <div *ngIf="showFinancials && (movie.budget || movie.revenue)" 
+         class="movie-details-card__financials">
+      <h3 class="movie-details-card__section-title">Informations financières</h3>
+      <div class="movie-details-card__financials-grid">
+        <div *ngIf="movie.budget" class="movie-details-card__financial-item">
+          <span class="movie-details-card__financial-label">Budget</span>
+          <span class="movie-details-card__financial-value">{{ formattedBudget }}</span>
+        </div>
+        <div *ngIf="movie.revenue" class="movie-details-card__financial-item">
+          <span class="movie-details-card__financial-label">Recettes</span>
+          <span class="movie-details-card__financial-value">{{ formattedRevenue }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sociétés de production -->
+    <div *ngIf="showProduction && movie.productionCompanies?.length" 
+         class="movie-details-card__production">
+      <h3 class="movie-details-card__section-title">Production</h3>
+      <div class="movie-details-card__production-companies">
+        <span *ngFor="let company of movie.productionCompanies" 
+              class="movie-details-card__production-company">
+          {{ company }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

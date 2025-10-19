@@ -1,1 +1,117 @@
-<p>movie-sort-options works!</p>
+<div class="movie-sort-options" [class.compact]="compact">
+  <!-- Version compacte (bouton avec menu déroulant) -->
+  <div class="sort-compact" *ngIf="compact">
+    <app-button
+      variant="secondary"
+      size="small"
+      class="sort-trigger">
+      <app-icon name="sort"></app-icon>
+      {{ currentSortLabel }}
+    </app-button>
+  </div>
+
+  <!-- Version étendue -->
+  <div class="sort-expanded" *ngIf="!compact">
+    <!-- Sélecteur de champ de tri -->
+    <div class="sort-field">
+      <label class="sort-label">Trier par</label>
+      <div class="field-selector">
+        <app-button
+          variant="ghost"
+          size="small"
+          class="field-button"
+          [class.active]="true">
+          <app-icon name="sort"></app-icon>
+          {{ currentSortOption?.label || 'Trier par' }}
+        </app-button>
+        <div class="field-options">
+          <button
+            *ngFor="let option of sortOptions"
+            class="field-option"
+            [class.active]="currentSort.field === option.value"
+            (click)="onSortFieldChange(option.value)">
+            <span class="option-label">{{ option.label }}</span>
+            <app-icon
+              *ngIf="currentSort.field === option.value"
+              [name]="getDirectionIcon()"
+              class="direction-indicator">
+            </app-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton de direction -->
+    <div class="sort-direction" *ngIf="showDirectionToggle">
+      <app-button
+        variant="ghost"
+        size="small"
+        (clicked)="onSortDirectionToggle()"
+        class="direction-button"
+        [title]="getDirectionLabel()">
+        <app-icon [name]="getDirectionIcon()"></app-icon>
+        <span class="direction-label">{{ getDirectionLabel() }}</span>
+      </app-button>
+    </div>
+
+    <!-- Options de tri rapide -->
+    <div class="quick-sorts" *ngIf="showQuickSorts">
+      <div class="quick-sorts-label">Tri rapide:</div>
+      <div class="quick-sorts-list">
+        <app-chip
+          *ngFor="let option of sortOptions"
+          [variant]="isQuickSortActive(option.value, option.direction || 'asc') ? 'primary' : 'outline'"
+          size="small"
+          (click)="onQuickSortSelect(option.value, option.direction || 'asc')"
+          class="quick-sort-chip">
+          {{ option.label }}
+          <app-icon
+            [name]="(option.direction || 'asc') === 'asc' ? 'arrow-up' : 'arrow-down'"
+            class="quick-sort-icon">
+          </app-icon>
+        </app-chip>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu déroulant pour la version compacte -->
+  <div class="compact-menu" *ngIf="compact">
+    <div class="menu-section">
+      <div class="menu-title">Champ de tri</div>
+      <div class="menu-options">
+        <button
+          *ngFor="let option of sortOptions"
+          class="menu-option"
+          [class.active]="currentSort.field === option.value"
+          (click)="onSortFieldChange(option.value)">
+          <span class="option-text">{{ option.label }}</span>
+          <app-icon
+            *ngIf="currentSort.field === option.value"
+            [name]="getDirectionIcon()"
+            class="option-icon">
+          </app-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section" *ngIf="showDirectionToggle">
+      <div class="menu-title">Direction</div>
+      <div class="menu-options">
+        <button
+          class="menu-option"
+          [class.active]="currentSort.direction === 'asc'"
+          (click)="onSortDirectionToggle()">
+          <app-icon name="arrow-up" class="option-icon"></app-icon>
+          <span class="option-text">Croissant</span>
+        </button>
+        <button
+          class="menu-option"
+          [class.active]="currentSort.direction === 'desc'"
+          (click)="onSortDirectionToggle()">
+          <app-icon name="arrow-down" class="option-icon"></app-icon>
+          <span class="option-text">Décroissant</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,138 @@
-<p>qr-code-scanner works!</p>
+<div class="qr-scanner">
+  <!-- En-tête -->
+  <div class="scanner-header">
+    <h2 class="scanner-title">{{ title }}</h2>
+    <p class="scanner-description">{{ description }}</p>
+  </div>
+
+  <!-- Contrôles principaux -->
+  <div class="scanner-controls">
+    <div class="control-info">
+      <app-badge 
+        [variant]="hasCameraAccess ? 'success' : 'error'" 
+        size="small">
+        {{ hasCameraAccess ? 'Caméra disponible' : 'Caméra indisponible' }}
+      </app-badge>
+      
+      <app-badge 
+        [variant]="isScanning ? 'success' : 'secondary'" 
+        size="small">
+        {{ isScanning ? 'Scan en cours...' : 'Prêt à scanner' }}
+      </app-badge>
+    </div>
+
+    <app-button 
+      [variant]="isScanning ? 'danger' : 'primary'"
+      [loading]="isScanning"
+      (clicked)="toggleScanning()"
+      [disabled]="!hasCameraAccess">
+      <app-icon 
+        [name]="isScanning ? 'stop' : 'camera'" 
+        size="small">
+      </app-icon>
+      {{ isScanning ? 'Arrêter le scan' : 'Démarrer le scan' }}
+    </app-button>
+  </div>
+
+  <!-- Zone de scan -->
+  <div class="scanner-area" *ngIf="isScanning">
+    <div class="video-container">
+      <video 
+        #videoElement
+        class="scanner-video"
+        autoplay
+        playsinline
+        muted>
+      </video>
+      
+      <!-- Overlay de scan -->
+      <div class="scan-overlay">
+        <div class="scan-frame">
+          <div class="scan-corners">
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+          </div>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+
+      <!-- Indicateur de chargement -->
+      <div class="scan-loading" *ngIf="isScanning">
+        <app-spinner size="large" variant="primary"></app-spinner>
+        <p>Recherche de QR code...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dernier code scanné -->
+  <div class="last-scanned" *ngIf="lastScannedCode">
+    <div class="scanned-header">
+      <h3>Dernier code scanné</h3>
+      <app-badge 
+        [variant]="validateCode(lastScannedCode) ? 'success' : 'error'" 
+        size="small">
+        {{ validateCode(lastScannedCode) ? 'Valide' : 'Invalide' }}
+      </app-badge>
+    </div>
+    
+    <div class="scanned-code">
+      <code class="code-text">{{ lastScannedCode }}</code>
+      <app-button 
+        variant="ghost" 
+        size="small"
+        (clicked)="copyToClipboard(lastScannedCode)">
+        <app-icon name="copy" size="small"></app-icon>
+        Copier
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Historique des scans -->
+  <div class="scan-history" *ngIf="scanHistory.length > 0">
+    <div class="history-header">
+      <h3>Historique des scans</h3>
+      <app-button 
+        variant="ghost" 
+        size="small"
+        (clicked)="clearHistory()">
+        <app-icon name="trash" size="small"></app-icon>
+        Effacer
+      </app-button>
+    </div>
+
+    <div class="history-list">
+      <div 
+        *ngFor="let scan of scanHistory; trackBy: trackByScan"
+        class="history-item"
+        [class.valid]="scan.valid"
+        [class.invalid]="!scan.valid">
+        
+        <div class="scan-info">
+          <div class="scan-code">{{ scan.code }}</div>
+          <div class="scan-time">{{ formatTimestamp(scan.timestamp) }}</div>
+        </div>
+        
+        <app-badge 
+          [variant]="scan.valid ? 'success' : 'error'" 
+          size="small">
+          {{ scan.valid ? '✓' : '✗' }}
+        </app-badge>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message d'erreur d'accès caméra -->
+  <div class="camera-error" *ngIf="!hasCameraAccess">
+    <div class="error-content">
+      <app-icon name="camera" size="large" variant="error"></app-icon>
+      <h3>Accès à la caméra refusé</h3>
+      <p>Veuillez autoriser l'accès à votre caméra pour utiliser le scanner QR code.</p>
+      <app-button variant="primary">
+        <app-icon name="settings" size="small"></app-icon>
+        Paramètres de permission
+      </app-button>
+    </div>
+  </div>
+</div>

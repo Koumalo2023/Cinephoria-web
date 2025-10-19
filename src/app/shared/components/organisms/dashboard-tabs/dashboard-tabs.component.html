@@ -1,1 +1,286 @@
-<p>dashboard-tabs works!</p>
+<div class="{{ getContainerClasses().join(' ') }}">
+  <!-- Conteneur d'onglets pour le dashboard -->
+  <app-tab-container
+    [tabs]="dashboardTabs"
+    [activeTabId]="activeTab"
+    tabType="pills"
+    tabSize="md"
+    [fullWidth]="true"
+    (tabChange)="onTabChange($event)"
+  >
+    <!-- Onglet Vue d'ensemble -->
+    <div tabId="overview" *ngIf="showOverview">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="home" size="medium"></app-icon>
+            Vue d'ensemble
+          </h3>
+          <p class="section-description">
+            Résumé de votre activité Cinephoria
+          </p>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-grid" *ngIf="stats">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="calendar" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.totalReservations }}</div>
+              <div class="stat-label">Réservations totales</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="clock" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.upcomingReservations }}</div>
+              <div class="stat-label">Prochaines séances</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="heart" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.favoriteMovies }}</div>
+              <div class="stat-label">Films favoris</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="star" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.reviewsWritten }}</div>
+              <div class="stat-label">Avis écrits</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <app-icon name="award" size="large"></app-icon>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">{{ stats.loyaltyPoints }}</div>
+              <div class="stat-label">Points fidélité</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="quick-actions">
+          <h4 class="actions-title">Actions rapides</h4>
+          <div class="actions-grid">
+            <app-button
+              variant="primary"
+              (click)="onViewReservation('next')"
+            >
+              <app-icon name="calendar" size="small"></app-icon>
+              Prochaine réservation
+            </app-button>
+
+            <app-button
+              variant="secondary"
+              (click)="onManageFavorites()"
+            >
+              <app-icon name="heart" size="small"></app-icon>
+              Gérer les favoris
+            </app-button>
+
+            <app-button
+              variant="secondary"
+              (click)="onWriteReview('latest')"
+            >
+              <app-icon name="star" size="small"></app-icon>
+              Écrire un avis
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Réservations -->
+    <div tabId="reservations" *ngIf="showReservations">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="calendar" size="medium"></app-icon>
+            Mes réservations
+          </h3>
+          <p class="section-description">
+            Gérez vos réservations actuelles et à venir
+          </p>
+        </div>
+
+        <div class="reservations-list">
+          @for (reservation of getRecentReservations(); track reservation.id) {
+            <div class="reservation-item">
+              <div class="reservation-info">
+                <div class="movie-title">{{ reservation.movieTitle }}</div>
+                <div class="reservation-details">
+                  <span class="cinema">{{ reservation.cinema }}</span>
+                  <span class="date">{{ reservation.date }}</span>
+                  <span class="time">{{ reservation.time }}</span>
+                  <span class="seats">{{ reservation.seats }} place(s)</span>
+                </div>
+              </div>
+              <div class="reservation-actions">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onViewReservation(reservation.id)"
+                >
+                  Voir détails
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getRecentReservations().length === 0) {
+            <div class="empty-state">
+              <app-icon name="calendar" size="large"></app-icon>
+              <h3>Aucune réservation</h3>
+              <p>Vous n'avez pas encore de réservations</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Favoris -->
+    <div tabId="favorites" *ngIf="showFavorites">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="heart" size="medium"></app-icon>
+            Mes films favoris
+          </h3>
+          <p class="section-description">
+            Retrouvez vos films préférés
+          </p>
+        </div>
+
+        <div class="favorites-grid">
+          @for (movie of getRecentFavorites(); track movie.id) {
+            <div class="favorite-item">
+              <div class="movie-poster">
+                <img [src]="movie.poster" [alt]="movie.title" class="poster-image">
+              </div>
+              <div class="movie-info">
+                <h4 class="movie-title">{{ movie.title }}</h4>
+                <p class="movie-year">{{ movie.year }}</p>
+                <p class="movie-genre">{{ movie.genre }}</p>
+              </div>
+              <div class="movie-actions">
+                <app-button
+                  variant="ghost"
+                  size="small"
+                  (click)="onWriteReview(movie.id)"
+                >
+                  Noter
+                </app-button>
+              </div>
+            </div>
+          }
+
+          @if (getRecentFavorites().length === 0) {
+            <div class="empty-state">
+              <app-icon name="heart" size="large"></app-icon>
+              <h3>Aucun favori</h3>
+              <p>Ajoutez des films à vos favoris</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Avis -->
+    <div tabId="reviews" *ngIf="showReviews">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="star" size="medium"></app-icon>
+            Mes avis
+          </h3>
+          <p class="section-description">
+            Partagez votre opinion sur les films
+          </p>
+        </div>
+
+        <div class="reviews-list">
+          @for (review of getRecentReviews(); track review.id) {
+            <div class="review-item">
+              <div class="review-header">
+                <h4 class="movie-title">{{ review.movieTitle }}</h4>
+                <div class="review-rating">
+                  <app-icon name="star" size="small"></app-icon>
+                  <span>{{ review.rating }}/5</span>
+                </div>
+              </div>
+              <p class="review-content">{{ review.content }}</p>
+              <div class="review-date">{{ review.date }}</div>
+            </div>
+          }
+
+          @if (getRecentReviews().length === 0) {
+            <div class="empty-state">
+              <app-icon name="star" size="large"></app-icon>
+              <h3>Aucun avis</h3>
+              <p>Écrivez votre premier avis sur un film</p>
+              <app-button
+                variant="primary"
+                (click)="onWriteReview('new')"
+              >
+                Écrire un avis
+              </app-button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Historique -->
+    <div tabId="history" *ngIf="showHistory">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="clock" size="medium"></app-icon>
+            Historique d'activité
+          </h3>
+          <p class="section-description">
+            Retracez votre activité sur Cinephoria
+          </p>
+        </div>
+
+        <div class="history-timeline">
+          @for (event of getRecentHistory(); track event.id) {
+            <div class="timeline-item">
+              <div class="timeline-icon">
+                <app-icon [name]="event.icon" size="small"></app-icon>
+              </div>
+              <div class="timeline-content">
+                <div class="event-description">{{ event.description }}</div>
+                <div class="event-date">{{ event.date }}</div>
+              </div>
+            </div>
+          }
+
+          @if (getRecentHistory().length === 0) {
+            <div class="empty-state">
+              <app-icon name="clock" size="large"></app-icon>
+              <h3>Aucune activité</h3>
+              <p>Votre historique d'activité apparaîtra ici</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </app-tab-container>
+</div>

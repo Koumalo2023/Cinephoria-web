@@ -1,1 +1,149 @@
-<p>showtime-selector works!</p>
+<div [class]="containerClasses">
+  <!-- État de chargement -->
+  <div
+    *ngIf="loading"
+    class="showtime-selector__loading"
+  >
+    <div class="showtime-selector__loading-content">
+      <app-icon name="spinner" size="large" [spin]="true"></app-icon>
+      <p class="showtime-selector__loading-text">{{ loadingMessage }}</p>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div
+    *ngIf="!loading && (!showtimes || showtimes.length === 0)"
+    class="showtime-selector__empty"
+  >
+    <app-icon name="calendar-x" size="large"></app-icon>
+    <p class="showtime-selector__empty-text">{{ emptyMessage }}</p>
+  </div>
+
+  <!-- Liste des séances -->
+  <div
+    *ngIf="!loading && showtimes && showtimes.length > 0"
+    class="showtime-selector__content"
+  >
+    <div
+      *ngFor="let group of showtimes"
+      [class]="getGroupClasses(group)"
+      class="showtime-selector__group"
+    >
+      <!-- En-tête du groupe (date) -->
+      <div class="showtime-selector__group-header">
+        <h3 class="showtime-selector__group-title">
+          {{ formatDate(group.date) }}
+          <span class="showtime-selector__group-day">
+            {{ group.dayOfWeek }}
+            <span
+              *ngIf="isToday(group.date)"
+              class="showtime-selector__today-badge"
+            >
+              Aujourd'hui
+            </span>
+            <span
+              *ngIf="isTomorrow(group.date)"
+              class="showtime-selector__tomorrow-badge"
+            >
+              Demain
+            </span>
+          </span>
+        </h3>
+      </div>
+
+      <!-- Liste des séances du groupe -->
+      <div class="showtime-selector__showtimes">
+        <button
+          *ngFor="let showtime of group.showtimes"
+          [class]="getShowtimeClasses(showtime)"
+          class="showtime-selector__showtime"
+          type="button"
+          [disabled]="showtime.isFull || disabled"
+          (click)="onShowtimeSelect(showtime)"
+        >
+          <!-- Heure et informations principales -->
+          <div class="showtime-selector__showtime-main">
+            <div class="showtime-selector__time">
+              {{ formatTime(showtime.time) }}
+            </div>
+
+            <!-- Informations supplémentaires -->
+            <div class="showtime-selector__info">
+              <!-- Format -->
+              <span
+                *ngIf="showFormat"
+                class="showtime-selector__format"
+              >
+                {{ showtime.format }}
+              </span>
+
+              <!-- Langue -->
+              <span
+                *ngIf="showLanguage"
+                class="showtime-selector__language"
+              >
+                {{ showtime.language }}
+              </span>
+
+              <!-- Accessibilité -->
+              <span
+                *ngIf="showAccessibility && getAccessibilityText(showtime)"
+                class="showtime-selector__accessibility"
+              >
+                {{ getAccessibilityText(showtime) }}
+              </span>
+
+              <!-- Salle -->
+              <span
+                *ngIf="showTheater"
+                class="showtime-selector__theater"
+              >
+                Salle {{ showtime.theater }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Informations secondaires -->
+          <div class="showtime-selector__showtime-secondary">
+            <!-- Prix -->
+            <div
+              *ngIf="showPrice"
+              class="showtime-selector__price"
+            >
+              {{ formatPrice(showtime.price) }}
+            </div>
+
+            <!-- Disponibilité -->
+            <div
+              *ngIf="showAvailability"
+              class="showtime-selector__availability"
+            >
+              <app-badge
+                [variant]="getAvailabilityBadgeVariant(showtime)"
+                [size]="size === 'small' ? 'small' : 'medium'"
+              >
+                {{ getAvailabilityText(showtime) }}
+              </app-badge>
+            </div>
+
+            <!-- Indicateur de sélection -->
+            <div
+              *ngIf="isSelected(showtime)"
+              class="showtime-selector__selected-indicator"
+            >
+              <app-icon name="check" size="small"></app-icon>
+            </div>
+          </div>
+
+          <!-- Indicateur de bientôt -->
+          <div
+            *ngIf="showtime.isSoon"
+            class="showtime-selector__soon-indicator"
+          >
+            Bientôt
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

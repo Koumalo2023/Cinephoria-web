@@ -1,0 +1,263 @@
+.notification-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md, 12px);
+  padding: var(--spacing-md, 12px);
+  background-color: var(--color-white, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  transition: all var(--transition-fast, 150ms) ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    border-color: var(--color-primary-300, #a5b4fc);
+    transform: translateY(-1px);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--color-primary-500, #6366f1);
+    outline-offset: 2px;
+  }
+
+  // Variantes
+  &--unread {
+    background-color: var(--color-primary-50, #eef2ff);
+    border-left: 3px solid var(--color-primary-500, #6366f1);
+  }
+
+  &--urgent {
+    border-color: var(--color-danger-300, #fca5a5);
+    background-color: var(--color-danger-50, #fef2f2);
+  }
+
+  &--success {
+    border-color: var(--color-success-300, #86efac);
+    background-color: var(--color-success-50, #f0fdf4);
+  }
+
+  &--warning {
+    border-color: var(--color-warning-300, #fcd34d);
+    background-color: var(--color-warning-50, #fffbeb);
+  }
+
+  &--info {
+    border-color: var(--color-info-300, #93c5fd);
+    background-color: var(--color-info-50, #f0f9ff);
+  }
+
+  // Indicateur d'état non lu
+  &__indicator {
+    position: absolute;
+    top: 12px;
+    left: 8px;
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-primary-500, #6366f1);
+    border-radius: 50%;
+  }
+
+  // Image de la notification
+  &__image {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-sm, 6px);
+    overflow: hidden;
+
+    &-content {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  // Icône de type
+  &__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm, 6px);
+    background-color: var(--color-gray-100, #f7fafc);
+    color: var(--color-gray-600, #718096);
+
+    .notification-item--urgent & {
+      background-color: var(--color-danger-100, #fee2e2);
+      color: var(--color-danger-600, #dc2626);
+    }
+
+    .notification-item--success & {
+      background-color: var(--color-success-100, #dcfce7);
+      color: var(--color-success-600, #16a34a);
+    }
+
+    .notification-item--warning & {
+      background-color: var(--color-warning-100, #fef3c7);
+      color: var(--color-warning-600, #d97706);
+    }
+
+    .notification-item--info & {
+      background-color: var(--color-info-100, #dbeafe);
+      color: var(--color-info-600, #2563eb);
+    }
+  }
+
+  // Contenu principal
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // En-tête
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-sm, 8px);
+    margin-bottom: var(--spacing-xs, 4px);
+  }
+
+  &__title {
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--color-gray-900, #1a202c);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  &__timestamp {
+    font-size: var(--font-size-xs, 0.75rem);
+    color: var(--color-gray-500, #a0aec0);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  // Message
+  &__message {
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-700, #4a5568);
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  // Actions
+  &__actions {
+    margin-top: var(--spacing-sm, 8px);
+  }
+
+  &__action {
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+    font-size: var(--font-size-xs, 0.75rem);
+    font-weight: var(--font-weight-medium, 500);
+    color: var(--color-primary-600, #4f46e5);
+    background-color: transparent;
+    border: 1px solid var(--color-primary-300, #a5b4fc);
+    border-radius: var(--border-radius-sm, 6px);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms) ease-in-out;
+
+    &:hover {
+      background-color: var(--color-primary-50, #eef2ff);
+      border-color: var(--color-primary-500, #6366f1);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary-500, #6366f1);
+      outline-offset: 1px;
+    }
+  }
+
+  // Bouton de fermeture
+  &__close {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-sm, 6px);
+    color: var(--color-gray-400, #cbd5e0);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms) ease-in-out;
+
+    &:hover {
+      background-color: var(--color-gray-100, #f7fafc);
+      color: var(--color-gray-600, #718096);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary-500, #6366f1);
+      outline-offset: 1px;
+    }
+  }
+
+  // Badge de priorité
+  &__priority-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    font-size: var(--font-size-xs, 0.75rem);
+    font-weight: var(--font-weight-semibold, 600);
+    color: var(--color-danger-700, #b91c1c);
+    background-color: var(--color-danger-100, #fee2e2);
+    border: 1px solid var(--color-danger-300, #fca5a5);
+    border-radius: var(--border-radius-full, 9999px);
+  }
+
+  // États interactifs
+  &--clickable {
+    cursor: pointer;
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+      border-color: var(--color-border, #e2e8f0);
+    }
+  }
+
+  // Responsive
+  @media (max-width: 480px) {
+    padding: var(--spacing-sm, 8px);
+    gap: var(--spacing-sm, 8px);
+
+    &__image,
+    &__icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    &__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    &__timestamp {
+      align-self: flex-start;
+    }
+  }
+}

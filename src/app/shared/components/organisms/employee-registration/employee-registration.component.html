@@ -1,1 +1,396 @@
-<p>employee-registration works!</p>
+<div class="employee-registration">
+  <!-- En-tête -->
+  <header class="registration-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">
+          <app-icon name="user-plus" size="large"></app-icon>
+          Inscription Employé
+        </h1>
+        <p class="subtitle">Ajoutez un nouveau membre à votre équipe cinéma</p>
+      </div>
+      
+      <div class="header-actions">
+        <app-button variant="ghost" (clicked)="goToStep(1)">
+          <app-icon name="refresh-cw"></app-icon>
+          Recommencer
+        </app-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Indicateur de progression -->
+  <div class="progress-indicator">
+    <div class="progress-steps">
+      <div *ngFor="let step of [1, 2, 3]; let i = index" 
+           class="step-item" 
+           [class.active]="currentStep === step"
+           [class.completed]="currentStep > step"
+           (click)="goToStep(step)">
+        <div class="step-number">{{ step }}</div>
+        <div class="step-label">
+          {{ step === 1 ? 'Informations Personnelles' : 
+             step === 2 ? 'Informations Professionnelles' : 
+             'Documents & Accès' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire principal -->
+  <div class="registration-form">
+    <form [formGroup]="employeeForm" class="multi-step-form">
+      
+      <!-- Étape 1: Informations personnelles -->
+      <section *ngIf="currentStep === 1" class="form-step" [@fadeInOut]>
+        <div class="step-header">
+          <h2 class="step-title">
+            <app-icon name="user"></app-icon>
+            Informations Personnelles
+          </h2>
+          <p class="step-description">Renseignez les informations de base du nouvel employé</p>
+        </div>
+
+        <div class="form-section">
+          <div class="form-row">
+            <app-input
+              label="Prénom"
+              formControlName="firstName"
+              placeholder="Entrez le prénom"
+              [required]="true"
+              [errorMessage]="personalInfo.get('firstName')?.invalid && personalInfo.get('firstName')?.touched ? 'Le prénom est requis (min. 2 caractères)' : ''">
+            </app-input>
+
+            <app-input
+              label="Nom"
+              formControlName="lastName"
+              placeholder="Entrez le nom"
+              [required]="true"
+              [errorMessage]="personalInfo.get('lastName')?.invalid && personalInfo.get('lastName')?.touched ? 'Le nom est requis (min. 2 caractères)' : ''">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              label="Email"
+              formControlName="email"
+              type="email"
+              placeholder="email@exemple.com"
+              [required]="true"
+              [errorMessage]="personalInfo.get('email')?.invalid && personalInfo.get('email')?.touched ? 'Email invalide' : ''">
+            </app-input>
+
+            <app-input
+              label="Téléphone"
+              formControlName="phone"
+              placeholder="+33 1 23 45 67 89"
+              [required]="true"
+              [errorMessage]="personalInfo.get('phone')?.invalid && personalInfo.get('phone')?.touched ? 'Numéro de téléphone invalide' : ''">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-date-picker
+              label="Date de naissance"
+              formControlName="birthDate"
+              placeholder="JJ/MM/AAAA"
+              [required]="true">
+            </app-date-picker>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              label="Adresse"
+              formControlName="address"
+              placeholder="Numéro et rue"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              label="Ville"
+              formControlName="city"
+              placeholder="Nom de la ville"
+              [required]="true">
+            </app-input>
+
+            <app-input
+              label="Code postal"
+              formControlName="postalCode"
+              placeholder="75000"
+              [required]="true"
+              [errorMessage]="personalInfo.get('postalCode')?.invalid && personalInfo.get('postalCode')?.touched ? 'Code postal invalide (5 chiffres)' : ''">
+            </app-input>
+          </div>
+        </div>
+      </section>
+
+      <!-- Étape 2: Informations professionnelles -->
+      <section *ngIf="currentStep === 2" class="form-step" [@fadeInOut]>
+        <div class="step-header">
+          <h2 class="step-title">
+            <app-icon name="briefcase"></app-icon>
+            Informations Professionnelles
+          </h2>
+          <p class="step-description">Définissez le poste et les conditions de travail</p>
+        </div>
+
+        <div class="form-section">
+          <div class="form-row">
+            <app-select
+              label="Rôle"
+              formControlName="role"
+              [options]="roleOptions"
+              placeholder="Sélectionnez un rôle"
+              [required]="true">
+            </app-select>
+
+            <app-select
+              label="Cinéma"
+              formControlName="cinema"
+              [options]="cinemaOptions"
+              placeholder="Sélectionnez un cinéma"
+              [required]="true">
+            </app-select>
+          </div>
+
+          <div class="form-row">
+            <app-select
+              label="Département"
+              formControlName="department"
+              [options]="departmentOptions"
+              placeholder="Sélectionnez un département"
+              [required]="true">
+            </app-select>
+
+            <app-date-picker
+              label="Date d'embauche"
+              formControlName="hireDate"
+              placeholder="JJ/MM/AAAA"
+              [required]="true">
+            </app-date-picker>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              label="Salaire mensuel (€)"
+              formControlName="salary"
+              type="number"
+              placeholder="0.00"
+              [required]="true"
+              [errorMessage]="professionalInfo.get('salary')?.invalid && professionalInfo.get('salary')?.touched ? 'Salaire invalide' : ''">
+            </app-input>
+
+            <app-select
+              label="Type de contrat"
+              formControlName="contractType"
+              [options]="contractTypeOptions"
+              placeholder="Sélectionnez un type"
+              [required]="true">
+            </app-select>
+          </div>
+
+          <div class="form-row">
+            <app-select
+              label="Horaire de travail"
+              formControlName="workSchedule"
+              [options]="workScheduleOptions"
+              placeholder="Sélectionnez un horaire"
+              [required]="true">
+            </app-select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Étape 3: Documents et accès -->
+      <section *ngIf="currentStep === 3" class="form-step" [@fadeInOut]>
+        <div class="step-header">
+          <h2 class="step-title">
+            <app-icon name="file-text"></app-icon>
+            Documents & Accès
+          </h2>
+          <p class="step-description">Téléchargez les documents requis et configurez les accès</p>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-subtitle">Documents requis</h3>
+          
+          <div class="form-row">
+            <app-file-upload
+              label="Pièce d'identité"
+              formControlName="identityDocument"
+              accept=".pdf,.jpg,.png"
+              [required]="false"
+              (fileSelected)="onFileSelected($event, 'identityDocument')">
+            </app-file-upload>
+
+            <app-file-upload
+              label="CV"
+              formControlName="resume"
+              accept=".pdf,.doc,.docx"
+              [required]="false"
+              (fileSelected)="onFileSelected($event, 'resume')">
+            </app-file-upload>
+          </div>
+
+          <div class="form-row">
+            <app-file-upload
+              label="Contrat de travail"
+              formControlName="contract"
+              accept=".pdf"
+              [required]="false"
+              (fileSelected)="onFileSelected($event, 'contract')">
+            </app-file-upload>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-subtitle">Contact d'urgence</h3>
+          
+          <div class="form-row">
+            <app-input
+              label="Nom complet"
+              formControlName="name"
+              [formGroup]="emergencyContact"
+              placeholder="Nom et prénom"
+              [required]="true">
+            </app-input>
+
+            <app-input
+              label="Téléphone"
+              formControlName="phone"
+              [formGroup]="emergencyContact"
+              placeholder="+33 1 23 45 67 89"
+              [required]="true"
+              [errorMessage]="emergencyContact.get('phone')?.invalid && emergencyContact.get('phone')?.touched ? 'Numéro de téléphone invalide' : ''">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              label="Lien de parenté"
+              formControlName="relationship"
+              [formGroup]="emergencyContact"
+              placeholder="Conjoint, Parent, etc."
+              [required]="true">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-subtitle">Permissions système</h3>
+          
+          <div class="permissions-grid">
+            <app-checkbox
+              label="Accès au système"
+              formControlName="systemAccess"
+              [formGroup]="permissions">
+              Donne accès à l'application interne
+            </app-checkbox>
+
+            <app-checkbox
+              label="Accès financier"
+              formControlName="financialAccess"
+              [formGroup]="permissions">
+              Accès aux données financières et rapports
+            </app-checkbox>
+
+            <app-checkbox
+              label="Accès gestion"
+              formControlName="managementAccess"
+              [formGroup]="permissions">
+              Gestion des employés et planning
+            </app-checkbox>
+
+            <app-checkbox
+              label="Accès rapports"
+              formControlName="reportsAccess"
+              [formGroup]="permissions">
+              Génération et consultation des rapports
+            </app-checkbox>
+          </div>
+        </div>
+      </section>
+
+      <!-- Actions de navigation -->
+      <div class="form-actions">
+        <div class="actions-left">
+          <app-button 
+            *ngIf="currentStep > 1"
+            variant="ghost" 
+            (clicked)="previousStep()">
+            <app-icon name="arrow-left"></app-icon>
+            Précédent
+          </app-button>
+        </div>
+
+        <div class="actions-right">
+          <app-button 
+            *ngIf="currentStep < totalSteps"
+            variant="primary" 
+            (clicked)="nextStep()"
+            [disabled]="!isStepValid(currentStep)">
+            Suivant
+            <app-icon name="arrow-right"></app-icon>
+          </app-button>
+
+          <app-button 
+            *ngIf="currentStep === totalSteps"
+            variant="primary" 
+            (clicked)="onSubmit()"
+            [disabled]="!employeeForm.valid || isSubmitting"
+            [loading]="isSubmitting">
+            <app-icon name="save"></app-icon>
+            {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer l\'employé' }}
+          </app-button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Résumé latéral -->
+  <aside class="registration-summary">
+    <div class="summary-card">
+      <h3 class="summary-title">Résumé</h3>
+      
+      <div class="summary-section" *ngIf="personalInfo.valid">
+        <h4>Informations Personnelles</h4>
+        <div class="summary-item">
+          <strong>{{ personalInfo.get('firstName')?.value }} {{ personalInfo.get('lastName')?.value }}</strong>
+        </div>
+        <div class="summary-item">{{ personalInfo.get('email')?.value }}</div>
+        <div class="summary-item">{{ personalInfo.get('phone')?.value }}</div>
+      </div>
+
+      <div class="summary-section" *ngIf="professionalInfo.valid">
+        <h4>Informations Professionnelles</h4>
+        <div class="summary-item">
+          <app-badge *ngIf="professionalInfo.get('role')?.value" 
+                    [variant]="'primary'">
+            {{ getRoleDisplayName(professionalInfo.get('role')?.value) }}
+          </app-badge>
+        </div>
+        <div class="summary-item">{{ getCinemaDisplayName(professionalInfo.get('cinema')?.value) }}</div>
+        <div class="summary-item">{{ professionalInfo.get('department')?.value }}</div>
+      </div>
+
+      <div class="summary-section" *ngIf="documents.valid">
+        <h4>Documents & Accès</h4>
+        <div class="summary-item">
+          <app-icon name="check-circle" class="success"></app-icon>
+          Documents prêts
+        </div>
+        <div class="summary-item" *ngIf="permissions.get('systemAccess')?.value">
+          <app-icon name="shield" class="info"></app-icon>
+          Accès système activé
+        </div>
+      </div>
+
+      <div class="summary-help">
+        <h4>Besoin d'aide ?</h4>
+        <p>Contactez le support RH au 01 23 45 67 89 ou par email à rh@cinephoria.com</p>
+      </div>
+    </div>
+  </aside>
+</div>

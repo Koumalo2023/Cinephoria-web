@@ -1,0 +1,133 @@
+<div class="management-layout">
+  <!-- Header avec navigation adaptée aux gestionnaires -->
+  <app-header
+    [variant]="headerConfig.variant"
+    [showLogo]="headerConfig.showLogo"
+    [showNavigation]="headerConfig.showNavigation"
+    [showUserMenu]="headerConfig.showUserMenu"
+    [currentUser]="currentUser">
+  </app-header>
+
+  <!-- Contenu principal du layout management -->
+  <main class="management-main">
+    <!-- Barre latérale de navigation management -->
+    <aside class="management-sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-header">
+          <h3 class="sidebar-title">Gestion</h3>
+          <p class="sidebar-subtitle">Interface employé</p>
+        </div>
+
+        <ul class="sidebar-menu">
+          <!-- Tableau de bord -->
+          <li class="menu-item">
+            <a routerLink="/management/dashboard" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">📊</span>
+              <span class="menu-label">Tableau de bord</span>
+            </a>
+          </li>
+
+          <!-- Gestion des séances -->
+          <li class="menu-item">
+            <a routerLink="/management/showtimes" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🎬</span>
+              <span class="menu-label">Séances</span>
+            </a>
+          </li>
+
+          <!-- Gestion des réservations -->
+          <li class="menu-item">
+            <a routerLink="/management/reservations" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🎫</span>
+              <span class="menu-label">Réservations</span>
+            </a>
+          </li>
+
+          <!-- Gestion des salles -->
+          <li class="menu-item">
+            <a routerLink="/management/theaters" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🏢</span>
+              <span class="menu-label">Salles</span>
+            </a>
+          </li>
+
+          <!-- Gestion des incidents -->
+          <li class="menu-item">
+            <a routerLink="/management/incidents" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">⚠️</span>
+              <span class="menu-label">Incidents</span>
+              <span class="menu-badge">3</span>
+            </a>
+          </li>
+
+          <!-- Statistiques -->
+          <li class="menu-item">
+            <a routerLink="/management/statistics" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">📈</span>
+              <span class="menu-label">Statistiques</span>
+            </a>
+          </li>
+
+          <!-- Paramètres -->
+          <li class="menu-item">
+            <a routerLink="/management/settings" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">⚙️</span>
+              <span class="menu-label">Paramètres</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Section rapide d'actions -->
+        <div class="sidebar-actions">
+          <h4 class="actions-title">Actions rapides</h4>
+          <div class="action-buttons">
+            <button class="action-btn primary" (click)="onUserAction('create_showtime')">
+              <span class="action-icon">➕</span>
+              Nouvelle séance
+            </button>
+            <button class="action-btn secondary" (click)="onUserAction('report_incident')">
+              <span class="action-icon">📝</span>
+              Signaler incident
+            </button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Zone de contenu principale -->
+    <section class="management-content">
+      <!-- En-tête de page -->
+      <div class="content-header">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">Gestion</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-item active">Tableau de bord</span>
+        </div>
+        
+        <div class="content-actions">
+          <button class="btn btn-primary" (click)="onUserAction('refresh')">
+            <span class="btn-icon">🔄</span>
+            Actualiser
+          </button>
+          <button class="btn btn-secondary" (click)="onUserAction('help')">
+            <span class="btn-icon">❓</span>
+            Aide
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu dynamique des routes -->
+      <div class="content-area">
+        <router-outlet></router-outlet>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <app-footer
+    [variant]="footerConfig.variant"
+    [showCinemaInfo]="footerConfig.showCinemaInfo"
+    [showSocialLinks]="footerConfig.showSocialLinks"
+    [showLegalLinks]="footerConfig.showLegalLinks">
+  </app-footer>
+</div>

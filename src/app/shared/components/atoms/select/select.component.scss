@@ -1,0 +1,246 @@
+.select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.select-container {
+  position: relative;
+}
+
+.select {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: white;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  position: relative;
+  
+  &:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  // Variantes de validation
+  &--valid {
+    border-color: var(--color-success);
+    
+    &:focus-within {
+      border-color: var(--color-success);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+  }
+  
+  &--invalid {
+    border-color: var(--color-error);
+    
+    &:focus-within {
+      border-color: var(--color-error);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+  
+  // États
+  &--disabled {
+    background-color: var(--color-background-disabled);
+    border-color: var(--color-border-disabled);
+    cursor: not-allowed;
+    
+    .select__value {
+      color: var(--color-text-disabled);
+    }
+    
+    .select__arrow {
+      color: var(--color-text-disabled);
+    }
+  }
+  
+  &--open {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    
+    .select__arrow {
+      transform: rotate(180deg);
+    }
+  }
+  
+  // Tailles
+  &--small {
+    min-height: 2rem;
+    
+    .select__prefix {
+      padding: 0 0.5rem;
+    }
+    
+    .select__value {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+    }
+    
+    .select__arrow {
+      padding: 0 0.5rem;
+    }
+  }
+  
+  &--medium {
+    min-height: 2.5rem;
+    
+    .select__prefix {
+      padding: 0 0.75rem;
+    }
+    
+    .select__value {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    
+    .select__arrow {
+      padding: 0 0.75rem;
+    }
+  }
+  
+  &--large {
+    min-height: 3rem;
+    
+    .select__prefix {
+      padding: 0 1rem;
+    }
+    
+    .select__value {
+      padding: 0.75rem 1.25rem;
+      font-size: 1.125rem;
+    }
+    
+    .select__arrow {
+      padding: 0 1rem;
+    }
+  }
+  
+  // Avec préfixe
+  &--has-prefix {
+    .select__value {
+      padding-left: 0;
+    }
+  }
+}
+
+.select__label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.select__required {
+  color: var(--color-error);
+}
+
+.select__prefix {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border);
+}
+
+.select__value {
+  flex: 1;
+  text-align: left;
+  color: var(--color-text);
+  
+  &--placeholder {
+    color: var(--color-text-muted);
+  }
+}
+
+.select__arrow {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.2s ease-in-out;
+}
+
+.select__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  margin-top: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.select__option {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  border-bottom: 1px solid var(--color-border-light);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover:not(.select__option--disabled) {
+    background-color: var(--color-background-hover);
+  }
+  
+  &--selected {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+  
+  &--disabled {
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+    background-color: var(--color-background-disabled);
+    
+    &:hover {
+      background-color: var(--color-background-disabled);
+    }
+  }
+}
+
+.select__no-options {
+  padding: 0.75rem 1rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+}
+
+.select__helper {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.select__error {
+  font-size: 0.75rem;
+  color: var(--color-error);
+  margin-top: 0.25rem;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-primary-light: #eff6ff;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-text: #1f2937;
+  --color-text-muted: #6b7280;
+  --color-text-disabled: #9ca3af;
+  --color-border: #d1d5db;
+  --color-border-light: #e5e7eb;
+  --color-border-disabled: #e5e7eb;
+  --color-background-disabled: #f9fafb;
+  --color-background-hover: #f3f4f6;
+}

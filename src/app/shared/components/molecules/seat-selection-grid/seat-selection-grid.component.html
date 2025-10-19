@@ -1,1 +1,205 @@
-<p>seat-selection-grid works!</p>
+<div [class]="containerClasses">
+  <!-- État de chargement -->
+  <div
+    *ngIf="loading"
+    class="seat-selection-grid__loading"
+  >
+    <div class="seat-selection-grid__loading-content">
+      <app-icon name="spinner" size="large" [spin]="true"></app-icon>
+      <p class="seat-selection-grid__loading-text">{{ loadingMessage }}</p>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div
+    *ngIf="!loading && (!rows || rows.length === 0)"
+    class="seat-selection-grid__empty"
+  >
+    <app-icon name="seat" size="large"></app-icon>
+    <p class="seat-selection-grid__empty-text">{{ emptyMessage }}</p>
+  </div>
+
+  <!-- Contenu principal -->
+  <div
+    *ngIf="!loading && rows && rows.length > 0"
+    class="seat-selection-grid__content"
+  >
+    <!-- Écran -->
+    <div
+      *ngIf="showScreen"
+      class="seat-selection-grid__screen"
+    >
+      <div class="seat-selection-grid__screen-content">
+        {{ screenLabel }}
+      </div>
+    </div>
+
+    <!-- Grille de sièges -->
+    <div [class]="gridClasses">
+      <div
+        *ngFor="let row of rows"
+        [class]="getRowClasses(row)"
+        class="seat-selection-grid__row"
+      >
+        <!-- Label de rangée -->
+        <div
+          *ngIf="showRowLabels"
+          class="seat-selection-grid__row-label"
+        >
+          {{ row.row }}
+        </div>
+
+        <!-- Sièges de la rangée -->
+        <div class="seat-selection-grid__seats">
+          <button
+            *ngFor="let seat of row.seats"
+            class="seat-selection-grid__seat"
+            type="button"
+            [disabled]="seat.status !== 'available' || disabled"
+            (click)="onSeatSelect(seat)"
+          >
+            <app-seat
+              [type]="seat.type"
+              [state]="getSeatState(seat)"
+              [seatNumber]="seat.number.toString()"
+              [row]="seat.row"
+              [price]="seat.price || 0"
+              [disabled]="seat.status !== 'available'"
+            ></app-seat>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Légende -->
+    <div
+      *ngIf="showLegend"
+      class="seat-selection-grid__legend"
+    >
+      <h4 class="seat-selection-grid__legend-title">Légende</h4>
+      <div class="seat-selection-grid__legend-items">
+        <div class="seat-selection-grid__legend-item">
+          <app-seat
+            type="standard"
+            state="available"
+            seatNumber="1"
+            row="A"
+          ></app-seat>
+          <span>Standard</span>
+        </div>
+        <div class="seat-selection-grid__legend-item">
+          <app-seat
+            type="vip"
+            state="available"
+            seatNumber="2"
+            row="A"
+          ></app-seat>
+          <span>VIP</span>
+        </div>
+        <div class="seat-selection-grid__legend-item">
+          <app-seat
+            type="handicap"
+            state="available"
+            seatNumber="3"
+            row="A"
+          ></app-seat>
+          <span>Handicap</span>
+        </div>
+        <div class="seat-selection-grid__legend-item">
+          <app-seat
+            type="couple"
+            state="available"
+            seatNumber="4"
+            row="A"
+          ></app-seat>
+          <span>Couple</span>
+        </div>
+        <div class="seat-selection-grid__legend-item">
+          <app-seat
+            type="standard"
+            state="occupied"
+            seatNumber="5"
+            row="A"
+          ></app-seat>
+          <span>Occupé</span>
+        </div>
+        <div class="seat-selection-grid__legend-item">
+          <app-seat
+            type="standard"
+            state="selected"
+            seatNumber="6"
+            row="A"
+          ></app-seat>
+          <span>Sélectionné</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résumé de sélection -->
+    <div
+      *ngIf="selectedSeats.length > 0"
+      class="seat-selection-grid__summary"
+    >
+      <h4 class="seat-selection-grid__summary-title">
+        Sièges sélectionnés ({{ selectedSeats.length }}/{{ maxSeats }})
+      </h4>
+      
+      <!-- Message de limite atteinte -->
+      <div
+        *ngIf="isMaxSeatsReached"
+        class="seat-selection-grid__max-seats-warning"
+      >
+        <app-icon name="alert-circle" size="small"></app-icon>
+        <span>{{ maxSeatsReachedMessage }}</span>
+      </div>
+
+      <!-- Liste des sièges sélectionnés -->
+      <div class="seat-selection-grid__selected-seats">
+        <div
+          *ngFor="let seat of selectedSeats"
+          class="seat-selection-grid__selected-seat"
+        >
+          <app-badge
+            [variant]="getSeatTypeBadgeVariant(seat.type)"
+            [size]="'small'"
+          >
+            {{ seat.row }}{{ seat.number }}
+          </app-badge>
+          <span
+            *ngIf="showPrice && seat.price"
+            class="seat-selection-grid__seat-price"
+          >
+            {{ formatPrice(seat.price) }}
+          </span>
+          <button
+            type="button"
+            class="seat-selection-grid__remove-seat"
+            (click)="onSeatSelect(seat)"
+            [disabled]="disabled"
+          >
+            <app-icon name="x" size="small"></app-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Prix total -->
+      <div
+        *ngIf="showPrice"
+        class="seat-selection-grid__total-price"
+      >
+        <strong>Total : {{ formatPrice(currentSelection.totalPrice) }}</strong>
+      </div>
+
+      <!-- Bouton vider la sélection -->
+      <button
+        type="button"
+        class="seat-selection-grid__clear-button"
+        (click)="clearSelection()"
+        [disabled]="disabled"
+      >
+        <app-icon name="trash-2" size="small"></app-icon>
+        Vider la sélection
+      </button>
+    </div>
+  </div>
+</div>

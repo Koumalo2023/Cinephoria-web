@@ -1,1 +1,53 @@
-<p>form-field works!</p>
+<div
+  class="form-field"
+  [class]="getContainerClasses()"
+>
+  <!-- Label -->
+  <label
+    *ngIf="label"
+    class="form-field__label"
+    [class.form-field__label--required]="required"
+    [class.form-field__label--disabled]="disabled"
+  >
+    {{ label }}
+    <span
+      *ngIf="required"
+      class="form-field__required-indicator"
+      aria-hidden="true"
+    >
+      *
+    </span>
+  </label>
+
+  <!-- Contenu du champ (projection) -->
+  <div class="form-field__control">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div
+    *ngIf="hasError && errorMessage"
+    class="form-field__error"
+    role="alert"
+    aria-live="polite"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <!-- Indicateur de validation -->
+  <div
+    *ngIf="isValid && !hasError"
+    class="form-field__valid"
+    aria-hidden="true"
+  >
+    ✓
+  </div>
+
+  <!-- Message d'aide -->
+  <div
+    *ngIf="hint && !hasError"
+    class="form-field__hint"
+  >
+    {{ hint }}
+  </div>
+</div>

@@ -1,1 +1,227 @@
-<p>movie-filter-panel works!</p>
+<div class="movie-filter-panel" [class.expanded]="isExpanded">
+  <!-- En-tête du panneau de filtres -->
+  <div class="filter-header">
+    <div class="header-left">
+      <h3 class="filter-title">Filtres</h3>
+      <span class="active-filters-badge" *ngIf="getActiveFilterCount() > 0">
+        {{ getActiveFilterCount() }} actif(s)
+      </span>
+    </div>
+    <div class="header-right">
+      <app-button
+        variant="ghost"
+        size="small"
+        (clicked)="toggleExpanded()"
+        class="toggle-button">
+        <app-icon [name]="isExpanded ? 'chevron-up' : 'chevron-down'"></app-icon>
+        {{ isExpanded ? 'Réduire' : 'Étendre' }}
+      </app-button>
+      <app-button
+        variant="secondary"
+        size="small"
+        (clicked)="resetFilters()"
+        class="reset-button">
+        <app-icon name="refresh"></app-icon>
+        Réinitialiser
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Contenu principal des filtres -->
+  <div class="filter-content" *ngIf="isExpanded">
+    <!-- Recherche -->
+    <div class="filter-section">
+      <h4 class="section-title">Recherche</h4>
+      <app-input
+        placeholder="Rechercher un film..."
+        prefixIcon="search"
+        class="search-input"
+        (valueChange)="onSearchTermChange($event)">
+      </app-input>
+    </div>
+
+    <!-- Genres -->
+    <div class="filter-section" *ngIf="filterOptions.genres.length > 0">
+      <h4 class="section-title">Genres</h4>
+      <div class="chips-container">
+        <app-chip
+          *ngFor="let genre of filterOptions.genres"
+          [selected]="filterValues.selectedGenres.includes(genre)"
+          (click)="onGenreToggle(genre)"
+          class="filter-chip">
+          {{ genre }}
+        </app-chip>
+      </div>
+    </div>
+
+    <!-- Années -->
+    <div class="filter-section" *ngIf="filterOptions.years.length > 0">
+      <h4 class="section-title">Années de sortie</h4>
+      <div class="chips-container">
+        <app-chip
+          *ngFor="let year of filterOptions.years"
+          [selected]="filterValues.selectedYears.includes(year)"
+          (click)="onYearToggle(year)"
+          class="filter-chip">
+          {{ year }}
+        </app-chip>
+      </div>
+    </div>
+
+    <!-- Notation -->
+    <div class="filter-section">
+      <h4 class="section-title">Notation</h4>
+      <div class="rating-range">
+        <div class="range-inputs">
+          <div class="input-wrapper">
+            <label class="input-label">Min</label>
+            <input
+              type="number"
+              [min]="0"
+              [max]="5"
+              [value]="filterValues.minRating"
+              (input)="filterValues.minRating = +($any($event.target).value); onRatingChange()"
+              class="rating-input">
+          </div>
+          <span class="range-separator">à</span>
+          <div class="input-wrapper">
+            <label class="input-label">Max</label>
+            <input
+              type="number"
+              [min]="0"
+              [max]="5"
+              [value]="filterValues.maxRating"
+              (input)="filterValues.maxRating = +($any($event.target).value); onRatingChange()"
+              class="rating-input">
+          </div>
+        </div>
+        <div class="rating-display">
+          <span class="rating-text">
+            {{ filterValues.minRating }} - {{ filterValues.maxRating }} étoiles
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtres avancés -->
+    <div class="advanced-filters">
+      <app-button
+        variant="ghost"
+        size="small"
+        (clicked)="toggleAdvancedFilters()"
+        class="advanced-toggle">
+        <app-icon [name]="showAdvancedFilters ? 'chevron-up' : 'chevron-down'"></app-icon>
+        Filtres avancés
+      </app-button>
+
+      <div class="advanced-content" *ngIf="showAdvancedFilters">
+        <!-- Langues -->
+        <div class="filter-section" *ngIf="filterOptions.languages.length > 0">
+          <h4 class="section-title">Langues</h4>
+          <div class="chips-container">
+            <app-chip
+              *ngFor="let language of filterOptions.languages"
+              [selected]="filterValues.selectedLanguages.includes(language)"
+              (click)="onLanguageToggle(language)"
+              class="filter-chip">
+              {{ language }}
+            </app-chip>
+          </div>
+        </div>
+
+        <!-- Formats -->
+        <div class="filter-section" *ngIf="filterOptions.formats.length > 0">
+          <h4 class="section-title">Formats</h4>
+          <div class="chips-container">
+            <app-chip
+              *ngFor="let format of filterOptions.formats"
+              [selected]="filterValues.selectedFormats.includes(format)"
+              (click)="onFormatToggle(format)"
+              class="filter-chip">
+              {{ format }}
+            </app-chip>
+          </div>
+        </div>
+
+        <!-- Durées -->
+        <div class="filter-section" *ngIf="filterOptions.durations.length > 0">
+          <h4 class="section-title">Durées</h4>
+          <div class="chips-container">
+            <app-chip
+              *ngFor="let duration of filterOptions.durations"
+              [selected]="filterValues.selectedDurations.includes(duration)"
+              (click)="onDurationToggle(duration)"
+              class="filter-chip">
+              {{ duration }}
+            </app-chip>
+          </div>
+        </div>
+
+        <!-- Dates de sortie -->
+        <div class="filter-section">
+          <h4 class="section-title">Dates de sortie</h4>
+          <div class="date-range">
+            <div class="input-wrapper">
+              <label class="input-label">Du</label>
+              <input
+                type="date"
+                [value]="filterValues.releaseDateFrom ? filterValues.releaseDateFrom.toISOString().split('T')[0] : ''"
+                (change)="onDateFromChange($event)"
+                class="date-input">
+            </div>
+            <div class="input-wrapper">
+              <label class="input-label">Au</label>
+              <input
+                type="date"
+                [value]="filterValues.releaseDateTo ? filterValues.releaseDateTo.toISOString().split('T')[0] : ''"
+                (change)="onDateToChange($event)"
+                class="date-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- Disponibilité -->
+        <div class="filter-section">
+          <h4 class="section-title">Disponibilité</h4>
+          <div class="availability-options">
+            <div class="checkbox-wrapper">
+              <input
+                type="checkbox"
+                id="includeUpcoming"
+                [checked]="filterValues.includeUpcoming"
+                (change)="filterValues.includeUpcoming = $any($event.target).checked; onAvailabilityToggle()"
+                class="availability-checkbox">
+              <label for="includeUpcoming">Films à venir</label>
+            </div>
+            <div class="checkbox-wrapper">
+              <input
+                type="checkbox"
+                id="includeAvailable"
+                [checked]="filterValues.includeAvailable"
+                (change)="filterValues.includeAvailable = $any($event.target).checked; onAvailabilityToggle()"
+                class="availability-checkbox">
+              <label for="includeAvailable">Films disponibles</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions rapides (version réduite) -->
+  <div class="quick-actions" *ngIf="!isExpanded && getActiveFilterCount() > 0">
+    <div class="active-filters-preview">
+      <span class="preview-text">
+        {{ getActiveFilterCount() }} filtre(s) actif(s)
+      </span>
+      <app-button
+        variant="ghost"
+        size="small"
+        (clicked)="resetFilters()"
+        class="clear-all-button">
+        <app-icon name="close"></app-icon>
+        Tout effacer
+      </app-button>
+    </div>
+  </div>
+</div>

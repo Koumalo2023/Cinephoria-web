@@ -1,1 +1,307 @@
-<p>profile-tabs works!</p>
+<div class="{{ getContainerClasses().join(' ') }}">
+  <!-- Conteneur d'onglets pour le profil -->
+  <app-tab-container
+    [tabs]="profileTabs"
+    [activeTabId]="activeTab"
+    tabType="underline"
+    tabSize="md"
+    [fullWidth]="true"
+    (tabChange)="onTabChange($event)"
+  >
+    <!-- Onglet Informations personnelles -->
+    <div tabId="personal" *ngIf="showPersonalInfo">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="user" size="medium"></app-icon>
+            Informations personnelles
+          </h3>
+          <p class="section-description">
+            Gérez vos informations de profil et vos coordonnées
+          </p>
+        </div>
+
+        <div class="profile-form">
+          <!-- Formulaire d'informations personnelles -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nom complet</label>
+              <div class="form-value">
+                {{ profileData?.personalInfo?.fullName || 'Non renseigné' }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <div class="form-value">
+                {{ profileData?.personalInfo?.email || 'Non renseigné' }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Téléphone</label>
+              <div class="form-value">
+                {{ profileData?.personalInfo?.phone || 'Non renseigné' }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Date de naissance</label>
+              <div class="form-value">
+                {{ profileData?.personalInfo?.birthDate || 'Non renseigné' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <app-button
+              variant="primary"
+              (click)="onSavePersonalInfo(profileData?.personalInfo)"
+            >
+              <app-icon name="save" size="small"></app-icon>
+              Enregistrer les modifications
+            </app-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Notifications -->
+    <div tabId="notifications" *ngIf="showNotifications">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="bell" size="medium"></app-icon>
+            Paramètres de notifications
+          </h3>
+          <p class="section-description">
+            Contrôlez les notifications que vous recevez
+          </p>
+        </div>
+
+        <div class="notifications-settings">
+          <!-- Liste des paramètres de notifications -->
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">Notifications par email</h4>
+                <p class="setting-description">
+                  Recevez des notifications importantes par email
+                </p>
+              </div>
+              <div class="setting-control">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onUpdateNotifications({ email: true })"
+                >
+                  Activé
+                </app-button>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">Notifications push</h4>
+                <p class="setting-description">
+                  Recevez des notifications en temps réel
+                </p>
+              </div>
+              <div class="setting-control">
+                <app-button
+                  variant="secondary"
+                  size="small"
+                  (click)="onUpdateNotifications({ push: false })"
+                >
+                  Désactivé
+                </app-button>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">Nouvelles sorties</h4>
+                <p class="setting-description">
+                  Soyez informé des nouveaux films
+                </p>
+              </div>
+              <div class="setting-control">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onUpdateNotifications({ newReleases: true })"
+                >
+                  Activé
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Sécurité -->
+    <div tabId="security" *ngIf="showSecurity">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="shield" size="medium"></app-icon>
+            Paramètres de sécurité
+          </h3>
+          <p class="section-description">
+            Gérez la sécurité de votre compte
+          </p>
+        </div>
+
+        <div class="security-settings">
+          <div class="security-actions">
+            <div class="action-item">
+              <div class="action-info">
+                <h4 class="action-title">Changer le mot de passe</h4>
+                <p class="action-description">
+                  Mettez à jour votre mot de passe régulièrement
+                </p>
+              </div>
+              <div class="action-control">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onUpdateSecurity({ changePassword: true })"
+                >
+                  Modifier
+                </app-button>
+              </div>
+            </div>
+
+            <div class="action-item">
+              <div class="action-info">
+                <h4 class="action-title">Authentification à deux facteurs</h4>
+                <p class="action-description">
+                  Ajoutez une couche de sécurité supplémentaire
+                </p>
+              </div>
+              <div class="action-control">
+                <app-button
+                  variant="secondary"
+                  size="small"
+                  (click)="onUpdateSecurity({ twoFactor: false })"
+                >
+                  Activer
+                </app-button>
+              </div>
+            </div>
+
+            <div class="action-item">
+              <div class="action-info">
+                <h4 class="action-title">Sessions actives</h4>
+                <p class="action-description">
+                  Gérez vos sessions de connexion
+                </p>
+              </div>
+              <div class="action-control">
+                <app-button
+                  variant="ghost"
+                  size="small"
+                  (click)="onUpdateSecurity({ sessions: true })"
+                >
+                  Voir
+                </app-button>
+              </div>
+            </div>
+          </div>
+
+          @if (securityAlerts > 0) {
+            <div class="security-alerts">
+              <div class="alert-banner">
+                <app-icon name="exclamation-triangle" size="small"></app-icon>
+                <span>
+                  Vous avez {{ securityAlerts }} alerte(s) de sécurité en attente
+                </span>
+                <app-button
+                  variant="danger"
+                  size="small"
+                  (click)="onUpdateSecurity({ viewAlerts: true })"
+                >
+                  Voir les alertes
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Préférences -->
+    <div tabId="preferences" *ngIf="showPreferences">
+      <div class="tab-content-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <app-icon name="cog" size="medium"></app-icon>
+            Préférences utilisateur
+          </h3>
+          <p class="section-description">
+            Personnalisez votre expérience Cinephoria
+          </p>
+        </div>
+
+        <div class="preferences-settings">
+          <div class="preferences-grid">
+            <div class="preference-item">
+              <div class="preference-info">
+                <h4 class="preference-title">Langue</h4>
+                <p class="preference-description">
+                  Langue de l'interface
+                </p>
+              </div>
+              <div class="preference-control">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onUpdatePreferences({ language: 'fr' })"
+                >
+                  Français
+                </app-button>
+              </div>
+            </div>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <h4 class="preference-title">Thème</h4>
+                <p class="preference-description">
+                  Apparence de l'application
+                </p>
+              </div>
+              <div class="preference-control">
+                <app-button
+                  variant="secondary"
+                  size="small"
+                  (click)="onUpdatePreferences({ theme: 'dark' })"
+                >
+                  Mode sombre
+                </app-button>
+              </div>
+            </div>
+
+            <div class="preference-item">
+              <div class="preference-info">
+                <h4 class="preference-title">Région</h4>
+                <p class="preference-description">
+                  Pour les recommandations de films
+                </p>
+              </div>
+              <div class="preference-control">
+                <app-button
+                  variant="primary"
+                  size="small"
+                  (click)="onUpdatePreferences({ region: 'FR' })"
+                >
+                  France
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-tab-container>
+</div>

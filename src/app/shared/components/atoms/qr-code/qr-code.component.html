@@ -1,1 +1,39 @@
-<p>qr-code works!</p>
+<div class="qr-code-wrapper">
+  <div [class]="qrCodeClasses" class="qr-code__container">
+    <img
+      *ngIf="qrCodeDataUrl"
+      [src]="qrCodeDataUrl"
+      [alt]="'QR Code pour: ' + data"
+      class="qr-code__image">
+    
+    <div *ngIf="!qrCodeDataUrl" class="qr-code__placeholder">
+      <i class="fas fa-qrcode qr-code__placeholder-icon"></i>
+      <span class="qr-code__placeholder-text">
+        {{ data ? 'Génération du QR Code...' : 'Aucune donnée fournie' }}
+      </span>
+    </div>
+  </div>
+  
+  <div *ngIf="showDownload && qrCodeDataUrl" class="qr-code__actions">
+    <button
+      type="button"
+      class="qr-code__download"
+      (click)="downloadQRCode()">
+      <i class="fas fa-download"></i>
+      {{ downloadLabel }}
+    </button>
+    
+    <button
+      type="button"
+      class="qr-code__copy"
+      (click)="copyToClipboard()">
+      <i class="fas fa-copy"></i>
+      Copier les données
+    </button>
+  </div>
+  
+  <div *ngIf="data" class="qr-code__data">
+    <span class="qr-code__data-label">Données encodées:</span>
+    <code class="qr-code__data-content">{{ data }}</code>
+  </div>
+</div>

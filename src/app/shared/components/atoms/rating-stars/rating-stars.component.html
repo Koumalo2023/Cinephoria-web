@@ -1,0 +1,55 @@
+<div [class]="containerClasses">
+  <!-- Étoiles -->
+  <div class="rating-stars__container">
+    <div
+      *ngFor="let star of stars; let i = index"
+      class="rating-stars__star-wrapper"
+      (mouseenter)="onStarHover(i + 1)"
+      (mouseleave)="onStarLeave()"
+      (click)="onStarClick(i + 1)"
+    >
+      <!-- Étoile de fond (vide) -->
+      <svg
+        class="rating-stars__star rating-stars__star--empty"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+
+      <!-- Étoile de remplissage (pleine) -->
+      <svg
+        class="rating-stars__star rating-stars__star--fill"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        [style.clip-path]="'inset(0 ' + (100 - getStarFill(i)) + '% 0 0)'"
+      >
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Valeur affichée -->
+  <div *ngIf="showValue" class="rating-stars__value" [class]="ratingColor">
+    <span class="rating-stars__value-number">{{ formattedValue }}</span>
+    <span class="rating-stars__value-max">/{{ maxRating }}</span>
+  </div>
+
+  <!-- Indicateur d'interactivité -->
+  <div *ngIf="interactive && !disabled" class="rating-stars__hint">
+    <small class="rating-stars__hint-text">
+      Cliquez sur les étoiles pour noter
+    </small>
+  </div>
+
+  <!-- Indicateur de désactivation -->
+  <div *ngIf="disabled" class="rating-stars__disabled-hint">
+    <small class="rating-stars__hint-text">
+      Notation désactivée
+    </small>
+  </div>
+</div>

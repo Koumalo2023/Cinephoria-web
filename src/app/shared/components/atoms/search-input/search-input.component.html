@@ -1,1 +1,119 @@
-<p>search-input works!</p>
+<div class="search-input-wrapper">
+  <!-- Conteneur principal -->
+  <div [class]="wrapperClasses">
+    <!-- Icône de recherche -->
+    <div class="search-input__icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+    </div>
+
+    <!-- Input de recherche -->
+    <input
+      #searchInput
+      type="text"
+      class="search-input__input"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      (input)="onInput($event)"
+      (focus)="isOpen = showSuggestions && filteredSuggestions.length > 0"
+      (blur)="onTouched()"
+      aria-label="Champ de recherche"
+      aria-haspopup="listbox"
+      [attr.aria-expanded]="isOpen"
+      [attr.aria-activedescendant]="selectedSuggestionIndex >= 0 ? 'suggestion-' + selectedSuggestionIndex : null"
+    />
+
+    <!-- Indicateur de chargement -->
+    <div *ngIf="loading" class="search-input__loading">
+      <div class="search-input__spinner"></div>
+    </div>
+
+    <!-- Bouton clear -->
+    <button
+      *ngIf="isClearable && !loading"
+      type="button"
+      class="search-input__clear"
+      (click)="clearSearch()"
+      (keydown.enter)="clearSearch()"
+      (keydown.space)="clearSearch(); $event.preventDefault()"
+      aria-label="Effacer la recherche"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.707.708L7.293 8l-3.646 3.646.707.707L8 8.707z"/>
+      </svg>
+    </button>
+
+    <!-- Suggestions -->
+    <div *ngIf="isOpen && filteredSuggestions.length > 0" class="search-input__suggestions">
+      <ul
+        class="search-input__suggestions-list"
+        role="listbox"
+        aria-label="Suggestions de recherche"
+      >
+        <li
+          *ngFor="let suggestion of filteredSuggestions; let i = index"
+          [id]="'suggestion-' + i"
+          class="search-input__suggestion"
+          [class.search-input__suggestion--selected]="i === selectedSuggestionIndex"
+          role="option"
+          [attr.aria-selected]="i === selectedSuggestionIndex"
+          (click)="selectSuggestion(suggestion, i)"
+          (mouseenter)="selectedSuggestionIndex = i"
+        >
+          <!-- Catégorie si présente -->
+          <div *ngIf="suggestion.category" class="search-input__suggestion-category">
+            {{ suggestion.category }}
+          </div>
+          
+          <!-- Label de la suggestion -->
+          <div class="search-input__suggestion-label">
+            {{ suggestion.label }}
+          </div>
+
+          <!-- Indicateur de sélection clavier -->
+          <div
+            *ngIf="i === selectedSuggestionIndex"
+            class="search-input__suggestion-indicator"
+            aria-hidden="true"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <path d="M10.28 3.28L4.5 9.06 1.72 6.28a.75.75 0 00-1.06 1.06l3.25 3.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06z"/>
+            </svg>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Message "Aucun résultat" -->
+    <div
+      *ngIf="isOpen && filteredSuggestions.length === 0 && value && value.length >= minLength"
+      class="search-input__no-results"
+    >
+      <div class="search-input__no-results-message">
+        Aucun résultat trouvé pour "{{ value }}"
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateur de longueur minimale -->
+  <div
+    *ngIf="value && value.length < minLength"
+    class="search-input__min-length-hint"
+  >
+    <small class="search-input__hint-text">
+      Saisissez au moins {{ minLength }} caractères pour voir les suggestions
+    </small>
+  </div>
+
+  <!-- Indicateur de nombre de résultats -->
+  <div
+    *ngIf="filteredSuggestions.length > 0"
+    class="search-input__results-count"
+  >
+    <small class="search-input__count-text">
+      {{ filteredSuggestions.length }} résultat{{ filteredSuggestions.length > 1 ? 's' : '' }}
+    </small>
+  </div>
+</div>

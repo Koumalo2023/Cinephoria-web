@@ -1,1 +1,50 @@
-<p>select works!</p>
+<div class="select-wrapper">
+  <label *ngIf="label" class="select__label">
+    {{ label }}
+    <span *ngIf="required" class="select__required">*</span>
+  </label>
+  
+  <div class="select-container">
+    <div
+      [class]="selectClasses"
+      (click)="toggleDropdown()"
+      (blur)="onInputBlur($event)"
+      (focus)="onInputFocus($event)"
+      tabindex="0">
+      
+      <span *ngIf="prefixIcon" class="select__prefix">
+        <i [class]="prefixIcon"></i>
+      </span>
+      
+      <span class="select__value" [class.select__value--placeholder]="!selectedOption">
+        {{ displayValue }}
+      </span>
+      
+      <span class="select__arrow">
+        <i class="fas fa-chevron-down"></i>
+      </span>
+    </div>
+    
+    <div *ngIf="isOpen" class="select__dropdown">
+      <div
+        *ngFor="let option of options"
+        [class]="getOptionClasses(option)"
+        (click)="selectOption(option)"
+        (mousedown)="$event.preventDefault()">
+        {{ option.label }}
+      </div>
+      
+      <div *ngIf="options.length === 0" class="select__no-options">
+        Aucune option disponible
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="helperText && validationState !== 'invalid'" class="select__helper">
+    {{ helperText }}
+  </div>
+  
+  <div *ngIf="validationState === 'invalid' && errorMessage" class="select__error">
+    {{ errorMessage }}
+  </div>
+</div>

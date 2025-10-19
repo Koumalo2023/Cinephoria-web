@@ -1,0 +1,368 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px) 0;
+
+  // Alignements
+  &--left {
+    justify-content: flex-start;
+  }
+
+  &--center {
+    justify-content: center;
+  }
+
+  &--right {
+    justify-content: flex-end;
+  }
+
+  // Variantes
+  &--compact {
+    padding: var(--spacing-sm, 12px) 0;
+  }
+
+  &--minimal {
+    padding: var(--spacing-xs, 8px) 0;
+  }
+
+  // Navigation
+  &__navigation {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 12px);
+
+    &--small {
+      gap: var(--spacing-xs, 8px);
+    }
+
+    &--large {
+      gap: var(--spacing-md, 16px);
+    }
+  }
+
+  // Boutons de navigation
+  &__buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+
+    .pagination--small & {
+      gap: 4px;
+    }
+
+    .pagination--large & {
+      gap: var(--spacing-sm, 12px);
+    }
+  }
+
+  // Bouton de navigation
+  &__nav-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-weight-medium, 500);
+    color: var(--color-gray-700, #4a5568);
+    background-color: var(--color-white, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--border-radius-md, 8px);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms) ease-in-out;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-gray-50, #f9fafb);
+      border-color: var(--color-gray-300, #d2d6dc);
+      color: var(--color-gray-900, #1a202c);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary-500, #6366f1);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: var(--color-gray-400, #cbd5e0);
+      background-color: var(--color-gray-50, #f9fafb);
+      border-color: var(--color-gray-200, #edf2f7);
+      cursor: not-allowed;
+    }
+
+    // Tailles
+    &--small {
+      padding: 6px 10px;
+      font-size: var(--font-size-xs, 0.75rem);
+      gap: 4px;
+    }
+
+    &--large {
+      padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+      font-size: var(--font-size-md, 1rem);
+      gap: var(--spacing-sm, 12px);
+    }
+
+    // Variantes spécifiques
+    &--first,
+    &--last {
+      .pagination--compact &,
+      .pagination--minimal & {
+        display: none;
+      }
+    }
+  }
+
+  // Texte des boutons de navigation
+  &__nav-text {
+    .pagination--compact &,
+    .pagination--minimal & {
+      display: none;
+    }
+  }
+
+  // Pages
+  &__pages {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+
+    .pagination--small & {
+      gap: 4px;
+    }
+
+    .pagination--large & {
+      gap: var(--spacing-sm, 12px);
+    }
+  }
+
+  // Bouton de page
+  &__page-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-weight-medium, 500);
+    color: var(--color-gray-700, #4a5568);
+    background-color: var(--color-white, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--border-radius-md, 8px);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms) ease-in-out;
+
+    &:hover:not(:disabled):not(.pagination__page-button--active) {
+      background-color: var(--color-gray-50, #f9fafb);
+      border-color: var(--color-gray-300, #d2d6dc);
+      color: var(--color-gray-900, #1a202c);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary-500, #6366f1);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: var(--color-gray-400, #cbd5e0);
+      background-color: var(--color-gray-50, #f9fafb);
+      border-color: var(--color-gray-200, #edf2f7);
+      cursor: not-allowed;
+    }
+
+    // États
+    &--active {
+      background-color: var(--color-primary-500, #6366f1);
+      border-color: var(--color-primary-500, #6366f1);
+      color: var(--color-white, #ffffff);
+      font-weight: var(--font-weight-semibold, 600);
+
+      &:hover {
+        background-color: var(--color-primary-600, #4f46e5);
+        border-color: var(--color-primary-600, #4f46e5);
+        color: var(--color-white, #ffffff);
+      }
+    }
+
+    &--ellipsis {
+      background-color: transparent;
+      border-color: transparent;
+      cursor: default;
+
+      &:hover {
+        background-color: transparent;
+        border-color: transparent;
+        color: var(--color-gray-700, #4a5568);
+      }
+    }
+
+    // Tailles
+    &--small {
+      min-width: 28px;
+      height: 28px;
+      padding: 4px 8px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &--large {
+      min-width: 44px;
+      height: 44px;
+      padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+      font-size: var(--font-size-md, 1rem);
+    }
+  }
+
+  // Informations
+  &__info {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-600, #718096);
+
+    &--small {
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &--large {
+      font-size: var(--font-size-md, 1rem);
+    }
+
+    .pagination--compact &,
+    .pagination--minimal & {
+      display: none;
+    }
+  }
+
+  &__info-text {
+    white-space: nowrap;
+  }
+
+  // Contrôles de taille
+  &__size {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 8px);
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-600, #718096);
+
+    &--small {
+      font-size: var(--font-size-xs, 0.75rem);
+      gap: 4px;
+    }
+
+    &--large {
+      font-size: var(--font-size-md, 1rem);
+      gap: var(--spacing-sm, 12px);
+    }
+
+    .pagination--compact &,
+    .pagination--minimal & {
+      display: none;
+    }
+  }
+
+  &__size-label {
+    white-space: nowrap;
+  }
+
+  &__size-select {
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-gray-700, #4a5568);
+    background-color: var(--color-white, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--border-radius-md, 8px);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms) ease-in-out;
+
+    &:hover {
+      border-color: var(--color-gray-300, #d2d6dc);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary-500, #6366f1);
+      outline-offset: 2px;
+    }
+
+    .pagination--small & {
+      padding: 6px 10px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    .pagination--large & {
+      padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+      font-size: var(--font-size-md, 1rem);
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: var(--spacing-sm, 12px);
+    align-items: center;
+
+    &__navigation {
+      order: 2;
+    }
+
+    &__info {
+      order: 1;
+    }
+
+    &__size {
+      order: 3;
+    }
+
+    &__nav-text {
+      display: none;
+    }
+
+    &__page-button {
+      min-width: 32px;
+      height: 32px;
+      padding: 6px 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    &__pages {
+      gap: 2px;
+    }
+
+    &__page-button {
+      min-width: 28px;
+      height: 28px;
+      padding: 4px 6px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &__nav-button {
+      padding: 6px 8px;
+    }
+
+    &__info,
+    &__size {
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+  }
+
+  // Variante minimal
+  .pagination--minimal & {
+    &__pages {
+      gap: 2px;
+    }
+
+    &__page-button {
+      min-width: 24px;
+      height: 24px;
+      padding: 2px 4px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+
+    &__nav-button {
+      padding: 4px 6px;
+      font-size: var(--font-size-xs, 0.75rem);
+    }
+  }
+}

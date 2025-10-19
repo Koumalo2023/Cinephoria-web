@@ -1,1 +1,95 @@
-<p>movie-details-tabs works!</p>
+<div class="movie-details-tabs">
+  <div class="tabs-header">
+    <h2 class="tabs-title">Détails du film</h2>
+  </div>
+  
+  <div class="tabs-container">
+    <div class="tabs-navigation">
+      <button 
+        *ngFor="let tab of tabs" 
+        class="tab-button"
+        [class.active]="activeTab === tab.id"
+        (click)="setActiveTab(tab.id)">
+        <app-icon [name]="tab.icon" size="small"></app-icon>
+        <span>{{ tab.label }}</span>
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Onglet Synopsis -->
+      <div *ngIf="activeTab === 'synopsis'" class="tab-panel">
+        <div class="synopsis-section">
+          <h3>Synopsis</h3>
+          <p class="synopsis-text">{{ movieDetails?.synopsis || 'Aucun synopsis disponible' }}</p>
+          
+          <div class="movie-info-grid">
+            <div class="info-item">
+              <strong>Durée:</strong>
+              <span>{{ movieDetails?.duration || 'N/A' }} min</span>
+            </div>
+            <div class="info-item">
+              <strong>Genre:</strong>
+              <span>{{ movieDetails?.genre || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Réalisateur:</strong>
+              <span>{{ movieDetails?.director || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Date de sortie:</strong>
+              <span>{{ movieDetails?.releaseDate || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet Casting -->
+      <div *ngIf="activeTab === 'casting'" class="tab-panel">
+        <div class="casting-section">
+          <h3>Casting</h3>
+          <div class="cast-list">
+            <div *ngFor="let actor of movieDetails?.cast" class="cast-member">
+              <div class="actor-avatar">
+                <app-icon name="user" size="large"></app-icon>
+              </div>
+              <div class="actor-info">
+                <strong>{{ actor.name }}</strong>
+                <span class="character">{{ actor.character }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet Avis -->
+      <div *ngIf="activeTab === 'reviews'" class="tab-panel">
+        <div class="reviews-section">
+          <h3>Avis des spectateurs</h3>
+          <div class="reviews-list">
+            <div *ngFor="let review of movieDetails?.reviews" class="review-item">
+              <div class="review-header">
+                <div class="reviewer-info">
+                  <app-icon name="user" size="small"></app-icon>
+                  <span class="reviewer-name">{{ review.author }}</span>
+                </div>
+                <div class="review-rating">
+                  <app-rating-stars [rating]="review.rating" [interactive]="false"></app-rating-stars>
+                </div>
+              </div>
+              <p class="review-text">{{ review.comment }}</p>
+              <span class="review-date">{{ review.date }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet Séances -->
+      <div *ngIf="activeTab === 'showtimes'" class="tab-panel">
+        <div class="showtimes-section">
+          <h3>Séances disponibles</h3>
+          <app-showtime-selector [showtimes]="movieDetails?.showtimes || []"></app-showtime-selector>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

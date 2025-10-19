@@ -1,1 +1,35 @@
-<p>input works!</p>
+<div class="input-wrapper">
+  <label *ngIf="label" class="input__label">
+    {{ label }}
+    <span *ngIf="required" class="input__required">*</span>
+  </label>
+  
+  <div [class]="inputClasses">
+    <span *ngIf="prefixIcon" class="input__prefix">
+      <i [class]="prefixIcon"></i>
+    </span>
+    
+    <input
+      [type]="type"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      (input)="onInputChange($event)"
+      (blur)="onInputBlur($event)"
+      (focus)="onInputFocus($event)"
+      class="input__field">
+    
+    <span *ngIf="suffixIcon" class="input__suffix">
+      <i [class]="suffixIcon"></i>
+    </span>
+  </div>
+  
+  <div *ngIf="helperText && validationState !== 'invalid'" class="input__helper">
+    {{ helperText }}
+  </div>
+  
+  <div *ngIf="validationState === 'invalid' && errorMessage" class="input__error">
+    {{ errorMessage }}
+  </div>
+</div>

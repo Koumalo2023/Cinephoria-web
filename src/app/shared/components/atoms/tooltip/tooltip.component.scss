@@ -1,0 +1,137 @@
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip__trigger {
+  display: inline-flex;
+}
+
+.tooltip__content {
+  position: absolute;
+  z-index: 50;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  pointer-events: none;
+  
+  // Variantes
+  &.tooltip--default {
+    background-color: var(--color-gray-900);
+    color: white;
+  }
+  
+  &.tooltip--info {
+    background-color: var(--color-info);
+    color: white;
+  }
+  
+  &.tooltip--warning {
+    background-color: var(--color-warning);
+    color: white;
+  }
+  
+  &.tooltip--error {
+    background-color: var(--color-error);
+    color: white;
+  }
+  
+  // Positions
+  &.tooltip--top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-0.5rem);
+    
+    .tooltip__arrow {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: inherit;
+    }
+  }
+  
+  &.tooltip--bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(0.5rem);
+    
+    .tooltip__arrow {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: inherit;
+    }
+  }
+  
+  &.tooltip--left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-0.5rem);
+    
+    .tooltip__arrow {
+      right: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      border-left-color: inherit;
+    }
+  }
+  
+  &.tooltip--right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(0.5rem);
+    
+    .tooltip__arrow {
+      left: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      border-right-color: inherit;
+    }
+  }
+  
+  // État visible
+  &.tooltip--visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    
+    &.tooltip--bottom {
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    &.tooltip--left {
+      transform: translateY(-50%) translateX(0);
+    }
+    
+    &.tooltip--right {
+      transform: translateY(-50%) translateX(0);
+    }
+  }
+}
+
+.tooltip__arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 0.5rem solid transparent;
+  pointer-events: none;
+}
+
+.tooltip__text {
+  display: block;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-gray-900: #111827;
+  --color-info: #06b6d4;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}

@@ -1,1 +1,236 @@
-<p>reservation-summary works!</p>
+<div [class]="containerClasses">
+  <!-- État de chargement -->
+  <div
+    *ngIf="loading"
+    class="reservation-summary__loading"
+  >
+    <div class="reservation-summary__loading-content">
+      <app-icon name="spinner" size="large" [spin]="true"></app-icon>
+      <p class="reservation-summary__loading-text">{{ loadingMessage }}</p>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div
+    *ngIf="!loading && !reservation"
+    class="reservation-summary__empty"
+  >
+    <app-icon name="ticket" size="large"></app-icon>
+    <p class="reservation-summary__empty-text">{{ emptyMessage }}</p>
+  </div>
+
+  <!-- Contenu de la réservation -->
+  <div
+    *ngIf="!loading && reservation && isValidReservation"
+    [class]="contentClasses"
+  >
+    <!-- En-tête -->
+    <div class="reservation-summary__header">
+      <div class="reservation-summary__title-section">
+        <h2 class="reservation-summary__title">
+          Récapitulatif de réservation
+        </h2>
+        <app-badge
+          [variant]="getStatusBadgeVariant(reservation.status)"
+          [size]="'medium'"
+        >
+          {{ getStatusText(reservation.status) }}
+        </app-badge>
+      </div>
+      
+      <div class="reservation-summary__id">
+        Réf. #{{ reservation.id }}
+      </div>
+    </div>
+
+    <!-- Informations principales -->
+    <div class="reservation-summary__main">
+      <!-- Film -->
+      <div class="reservation-summary__movie">
+        <h3 class="reservation-summary__section-title">Film</h3>
+        <div class="reservation-summary__movie-details">
+          <div
+            *ngIf="reservation.movie.posterUrl"
+            class="reservation-summary__poster"
+          >
+            <img
+              [src]="reservation.movie.posterUrl"
+              [alt]="reservation.movie.title"
+              class="reservation-summary__poster-image"
+            >
+          </div>
+          <div class="reservation-summary__movie-info">
+            <h4 class="reservation-summary__movie-title">
+              {{ reservation.movie.title }}
+            </h4>
+            <div class="reservation-summary__movie-meta">
+              <span class="reservation-summary__duration">
+                {{ formatDuration(reservation.movie.duration) }}
+              </span>
+              <span class="reservation-summary__rating">
+                {{ reservation.movie.rating }}
+              </span>
+              <span class="reservation-summary__genres">
+                {{ reservation.movie.genre.join(', ') }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Séance -->
+      <div class="reservation-summary__showtime">
+        <h3 class="reservation-summary__section-title">Séance</h3>
+        <div class="reservation-summary__showtime-details">
+          <div class="reservation-summary__showtime-date">
+            <app-icon name="calendar" size="small"></app-icon>
+            {{ formatDate(reservation.showtime.date) }}
+          </div>
+          <div class="reservation-summary__showtime-time">
+            <app-icon name="clock" size="small"></app-icon>
+            {{ formatTime(reservation.showtime.time) }}
+          </div>
+          <div class="reservation-summary__showtime-format">
+            <app-icon name="film" size="small"></app-icon>
+            {{ reservation.showtime.format }}
+          </div>
+          <div class="reservation-summary__showtime-language">
+            <app-icon name="globe" size="small"></app-icon>
+            {{ reservation.showtime.language }}
+          </div>
+          <div class="reservation-summary__showtime-theater">
+            <app-icon name="map-pin" size="small"></app-icon>
+            Salle {{ reservation.showtime.theater }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Sièges -->
+      <div class="reservation-summary__seats">
+        <h3 class="reservation-summary__section-title">
+          Sièges ({{ totalSeats }})
+        </h3>
+        <div class="reservation-summary__seats-list">
+          <div
+            *ngFor="let seat of reservation.seats"
+            class="reservation-summary__seat"
+          >
+            <app-badge
+              [variant]="'secondary'"
+              [size]="'small'"
+            >
+              {{ seat.row }}{{ seat.number }}
+            </app-badge>
+            <span class="reservation-summary__seat-type">
+              {{ seat.type }}
+            </span>
+            <span class="reservation-summary__seat-price">
+              {{ formatPrice(seat.price) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails du prix -->
+      <div
+        *ngIf="showBreakdown"
+        class="reservation-summary__breakdown"
+      >
+        <h3 class="reservation-summary__section-title">Détail du prix</h3>
+        <div class="reservation-summary__breakdown-list">
+          <div class="reservation-summary__breakdown-item">
+            <span>Sièges ({{ totalSeats }})</span>
+            <span>{{ formatPrice(reservation.totalPrice) }}</span>
+          </div>
+          <div class="reservation-summary__breakdown-item">
+            <span>Frais de réservation</span>
+            <span>{{ formatPrice(reservation.bookingFee) }}</span>
+          </div>
+          <div class="reservation-summary__breakdown-item">
+            <span>Taxes</span>
+            <span>{{ formatPrice(reservation.taxes) }}</span>
+          </div>
+          <div class="reservation-summary__breakdown-total">
+            <span>Total</span>
+            <span class="reservation-summary__final-price">
+              {{ formatPrice(reservation.finalPrice) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Code -->
+      <div
+        *ngIf="showQRCode && reservation.qrCodeData"
+        class="reservation-summary__qrcode"
+      >
+        <h3 class="reservation-summary__section-title">Billet électronique</h3>
+        <div class="reservation-summary__qrcode-content">
+          <app-qr-code
+            [data]="getQRCodeData()"
+            [size]="size === 'small' ? 'small' : size === 'large' ? 'large' : 'medium'"
+          ></app-qr-code>
+          <p class="reservation-summary__qrcode-note">
+            Présentez ce code QR à l'entrée
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div
+      *ngIf="showActions"
+      class="reservation-summary__actions"
+    >
+      <app-button
+        *ngIf="canConfirm"
+        variant="primary"
+        [size]="size"
+        [disabled]="disabled"
+        (click)="onConfirm()"
+      >
+        {{ confirmLabel }}
+      </app-button>
+
+      <app-button
+        *ngIf="canModify"
+        variant="secondary"
+        [size]="size"
+        [disabled]="disabled"
+        (click)="onModify()"
+      >
+        {{ modifyLabel }}
+      </app-button>
+
+      <app-button
+        *ngIf="canCancel"
+        variant="danger"
+        [size]="size"
+        [disabled]="disabled"
+        (click)="onCancel()"
+      >
+        {{ cancelLabel }}
+      </app-button>
+
+      <app-button
+        variant="ghost"
+        [size]="size"
+        [disabled]="disabled"
+        (click)="onPrint()"
+      >
+        <app-icon name="printer" size="small"></app-icon>
+        {{ printLabel }}
+      </app-button>
+
+      <app-button
+        variant="ghost"
+        [size]="size"
+        [disabled]="disabled"
+        (click)="onShare()"
+      >
+        <app-icon name="share-2" size="small"></app-icon>
+        {{ shareLabel }}
+      </app-button>
+    </div>
+  </div>
+</div>

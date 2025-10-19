@@ -1,1 +1,254 @@
-<p>auth-form works!</p>
+<div [class]="getFormClasses()">
+  <!-- En-tête du formulaire -->
+  <header class="auth-form-header">
+    <div class="header-content">
+      <!-- Avatar utilisateur (si connecté) -->
+      <div class="user-avatar" *ngIf="userAvatar">
+        <app-avatar
+          [src]="userAvatar"
+          [alt]="userName || 'Utilisateur'"
+          size="large"
+        ></app-avatar>
+      </div>
+
+      <!-- Titre et sous-titre -->
+      <div class="header-text">
+        <h1 class="auth-title">{{ config.title }}</h1>
+        <p class="auth-subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Messages d'état -->
+  <div class="auth-messages">
+    <!-- Message d'erreur -->
+    <div class="error-message" *ngIf="errorMessage">
+      <app-icon name="alert-circle" size="small" class="error-icon"></app-icon>
+      <span class="error-text">{{ errorMessage }}</span>
+    </div>
+
+    <!-- Message de succès -->
+    <div class="success-message" *ngIf="successMessage">
+      <app-icon name="check-circle" size="small" class="success-icon"></app-icon>
+      <span class="success-text">{{ successMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Authentification sociale -->
+  <section class="social-auth-section" *ngIf="hasSocialLogin && isLoginMode">
+    <div class="social-auth-content">
+      <h3 class="social-title">Se connecter avec</h3>
+      <div class="provider-buttons">
+        <app-button
+          *ngFor="let provider of availableProviders"
+          [variant]="'secondary'"
+          [size]="'large'"
+          [class]="getProviderButtonClasses(provider)"
+          (clicked)="onProviderAuth(provider.id)"
+          [disabled]="loading"
+          class="provider-button"
+        >
+          <app-icon [name]="provider.icon" [size]="'small'"></app-icon>
+          <span class="provider-name">{{ provider.name }}</span>
+        </app-button>
+      </div>
+
+      <div class="divider">
+        <span class="divider-text">ou</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulaire principal -->
+  <main class="auth-form-content">
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="auth-form-main">
+      <!-- Mode inscription -->
+      <div class="form-row" *ngIf="isRegisterMode">
+        <div class="form-group">
+          <label for="firstName" class="form-label">Prénom *</label>
+          <app-input
+            id="firstName"
+            formControlName="firstName"
+            type="text"
+            placeholder="Votre prénom"
+            [required]="true"
+            [disabled]="loading"
+          ></app-input>
+          <div class="error-text" *ngIf="isFieldInvalid('firstName')">
+            {{ getFieldError('firstName') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName" class="form-label">Nom *</label>
+          <app-input
+            id="lastName"
+            formControlName="lastName"
+            type="text"
+            placeholder="Votre nom"
+            [required]="true"
+            [disabled]="loading"
+          ></app-input>
+          <div class="error-text" *ngIf="isFieldInvalid('lastName')">
+            {{ getFieldError('lastName') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Email (tous les modes sauf reset-password) -->
+      <div class="form-group" *ngIf="!isResetPasswordMode">
+        <label for="email" class="form-label">Adresse email *</label>
+        <app-input
+          id="email"
+          formControlName="email"
+          type="email"
+          placeholder="votre@email.com"
+          [required]="true"
+          [disabled]="loading"
+        ></app-input>
+        <div class="error-text" *ngIf="isFieldInvalid('email')">
+          {{ getFieldError('email') }}
+        </div>
+      </div>
+
+      <!-- Mot de passe (login, register, reset-password) -->
+      <div class="form-group" *ngIf="isLoginMode || isRegisterMode || isResetPasswordMode">
+        <label for="password" class="form-label">Mot de passe *</label>
+        <app-input
+          id="password"
+          formControlName="password"
+          type="text"
+          placeholder="Votre mot de passe"
+          [required]="true"
+          [disabled]="loading"
+        >
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            tabindex="-1"
+          >
+            <app-icon
+              [name]="showPassword ? 'eye-off' : 'eye'"
+              size="small"
+            ></app-icon>
+          </button>
+        </app-input>
+        <div class="error-text" *ngIf="isFieldInvalid('password')">
+          {{ getFieldError('password') }}
+        </div>
+        <div class="password-hint" *ngIf="isRegisterMode">
+          Minimum {{ config.minPasswordLength }} caractères
+        </div>
+      </div>
+
+      <!-- Confirmation du mot de passe (register, reset-password) -->
+      <div class="form-group" *ngIf="isRegisterMode || isResetPasswordMode">
+        <label for="confirmPassword" class="form-label">Confirmer le mot de passe *</label>
+        <app-input
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          type="text"
+          placeholder="Confirmez votre mot de passe"
+          [required]="true"
+          [disabled]="loading"
+        >
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()"
+            tabindex="-1"
+          >
+            <app-icon
+              [name]="showConfirmPassword ? 'eye-off' : 'eye'"
+              size="small"
+            ></app-icon>
+          </button>
+        </app-input>
+        <div class="error-text" *ngIf="isFieldInvalid('confirmPassword')">
+          {{ getFieldError('confirmPassword') }}
+        </div>
+      </div>
+
+      <!-- Se souvenir de moi (login) -->
+      <div class="form-options" *ngIf="config.showRememberMe && isLoginMode">
+        <app-checkbox
+          formControlName="rememberMe"
+          label="Se souvenir de moi"
+          [disabled]="loading"
+        ></app-checkbox>
+      </div>
+
+      <!-- Bouton de soumission -->
+      <div class="form-actions">
+        <app-button
+          type="submit"
+          [variant]="submitButtonVariant"
+          [size]="'large'"
+          [disabled]="loading || authForm.invalid"
+          [loading]="loading"
+          class="submit-button"
+        >
+          <app-icon name="log-in" size="small" *ngIf="isLoginMode"></app-icon>
+          <app-icon name="user-plus" size="small" *ngIf="isRegisterMode"></app-icon>
+          <app-icon name="mail" size="small" *ngIf="isForgotPasswordMode"></app-icon>
+          <app-icon name="refresh-cw" size="small" *ngIf="isResetPasswordMode"></app-icon>
+          {{ submitButtonText }}
+        </app-button>
+      </div>
+    </form>
+  </main>
+
+  <!-- Liens de navigation -->
+  <footer class="auth-form-footer">
+    <div class="footer-links">
+      <!-- Lien mot de passe oublié -->
+      <a
+        *ngIf="config.showForgotPassword && isLoginMode"
+        class="footer-link"
+        (click)="switchMode('forgot-password')"
+      >
+        Mot de passe oublié ?
+      </a>
+
+      <!-- Lien création de compte -->
+      <a
+        *ngIf="config.showSignUpLink && isLoginMode"
+        class="footer-link"
+        (click)="switchMode('register')"
+      >
+        Créer un compte
+      </a>
+
+      <!-- Lien connexion -->
+      <a
+        *ngIf="config.showLoginLink && (isRegisterMode || isForgotPasswordMode || isResetPasswordMode)"
+        class="footer-link"
+        (click)="switchMode('login')"
+      >
+        Se connecter
+      </a>
+
+      <!-- Lien réinitialisation mot de passe -->
+      <a
+        *ngIf="isForgotPasswordMode && config.showLoginLink"
+        class="footer-link"
+        (click)="switchMode('reset-password')"
+      >
+        J'ai déjà un code de réinitialisation
+      </a>
+    </div>
+
+    <!-- Informations légales -->
+    <div class="legal-notice" *ngIf="isRegisterMode">
+      <p class="legal-text">
+        En créant un compte, vous acceptez nos
+        <a href="/terms" class="legal-link">Conditions d'utilisation</a>
+        et notre
+        <a href="/privacy" class="legal-link">Politique de confidentialité</a>.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Mode réinitialisation de mot de passe (composant dédié) -->
+</div>

@@ -1,1 +1,100 @@
-<p>settings-page works!</p>
+<div class="settings-page">
+  <header class="settings-header">
+    <h1 class="settings-title">
+      <app-icon name="settings" size="large"></app-icon>
+      Paramètres
+    </h1>
+    <p class="settings-subtitle">Gérez vos préférences et paramètres personnels</p>
+  </header>
+
+  <div class="settings-container">
+    <!-- Navigation latérale -->
+    <nav class="settings-nav">
+      <ul class="nav-list">
+        <li *ngFor="let tab of tabs" class="nav-item">
+          <button 
+            class="nav-button" 
+            [class.active]="isTabActive(tab.id)"
+            (click)="selectTab(tab.id)"
+            type="button">
+            <app-icon [name]="tab.icon" class="nav-icon"></app-icon>
+            <span class="nav-label">{{ tab.label }}</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="settings-content">
+      <!-- Onglet Profil -->
+      <section *ngIf="activeTab === 'profile'" class="tab-content">
+        <h2 class="tab-title">Profil Utilisateur</h2>
+        <p class="tab-description">Gérez vos informations personnelles et vos préférences</p>
+        
+        <app-user-profile-form 
+          [profile]="userProfile"
+          (profileSaved)="onProfileSaved($event)">
+        </app-user-profile-form>
+      </section>
+
+      <!-- Onglet Notifications -->
+      <section *ngIf="activeTab === 'notifications'" class="tab-content">
+        <h2 class="tab-title">Paramètres de Notification</h2>
+        <p class="tab-description">Contrôlez comment et quand vous recevez des notifications</p>
+        
+        <app-notification-settings 
+          [settings]="notificationSettings"
+          (settingsChanged)="onNotificationSettingsChanged($event)">
+        </app-notification-settings>
+      </section>
+
+      <!-- Onglet Sécurité -->
+      <section *ngIf="activeTab === 'security'" class="tab-content">
+        <h2 class="tab-title">Sécurité et Confidentialité</h2>
+        <p class="tab-description">Gérez la sécurité de votre compte et vos paramètres de confidentialité</p>
+        
+        <app-security-settings></app-security-settings>
+      </section>
+
+      <!-- Onglet Système -->
+      <section *ngIf="activeTab === 'system'" class="tab-content">
+        <h2 class="tab-title">Paramètres Système</h2>
+        <p class="tab-description">Personnalisez le comportement de l'application</p>
+        
+        <app-system-settings-panel
+          [settings]="systemSettings"
+          [currentSettings]="currentSystemSettings"
+          [showCategories]="true"
+          [showReset]="true"
+          (settingChange)="onSystemSettingChange($event)"
+          (settingsSave)="onSystemSettingsSave($event)"
+          (settingsReset)="onSystemSettingsReset()">
+        </app-system-settings-panel>
+      </section>
+    </main>
+  </div>
+
+  <!-- Actions globales -->
+  <footer class="settings-footer">
+    <div class="footer-actions">
+      <app-button 
+        variant="secondary" 
+        (clicked)="onSystemSettingsReset()">
+        <app-icon name="refresh-cw"></app-icon>
+        Réinitialiser
+      </app-button>
+      
+      <div class="primary-actions">
+        <app-button variant="ghost">
+          <app-icon name="download"></app-icon>
+          Exporter
+        </app-button>
+        
+        <app-button variant="primary">
+          <app-icon name="save"></app-icon>
+          Sauvegarder tout
+        </app-button>
+      </div>
+    </div>
+  </footer>
+</div>

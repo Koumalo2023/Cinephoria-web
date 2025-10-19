@@ -1,0 +1,130 @@
+.checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+  
+  &:focus-within {
+    .checkbox__control {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  // États
+  &.checkbox--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    
+    .checkbox__control {
+      background-color: var(--color-background-disabled);
+      border-color: var(--color-border-disabled);
+    }
+  }
+  
+  // Tailles
+  &.checkbox--small {
+    .checkbox__control {
+      width: 1rem;
+      height: 1rem;
+    }
+    
+    .checkbox__label {
+      font-size: 0.875rem;
+    }
+    
+    .checkbox__checkmark,
+    .checkbox__indeterminate {
+      font-size: 0.75rem;
+    }
+  }
+  
+  &.checkbox--medium {
+    .checkbox__control {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    
+    .checkbox__label {
+      font-size: 1rem;
+    }
+    
+    .checkbox__checkmark,
+    .checkbox__indeterminate {
+      font-size: 0.875rem;
+    }
+  }
+  
+  &.checkbox--large {
+    .checkbox__control {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    .checkbox__label {
+      font-size: 1.125rem;
+    }
+    
+    .checkbox__checkmark,
+    .checkbox__indeterminate {
+      font-size: 1rem;
+    }
+  }
+}
+
+.checkbox__input {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+  border-radius: 0.25rem;
+  background-color: white;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  
+  .checkbox--checked &,
+  .checkbox--indeterminate & {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+  }
+  
+  &:hover:not(.checkbox--disabled) {
+    border-color: var(--color-primary);
+  }
+}
+
+.checkbox__checkmark,
+.checkbox__indeterminate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.checkbox__label {
+  color: var(--color-text);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.checkbox__required {
+  color: var(--color-error);
+  margin-left: 0.25rem;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-error: #ef4444;
+  --color-text: #1f2937;
+  --color-border: #d1d5db;
+  --color-border-disabled: #e5e7eb;
+  --color-background-disabled: #f9fafb;
+}

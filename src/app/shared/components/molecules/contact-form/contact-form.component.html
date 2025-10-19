@@ -1,1 +1,226 @@
-<p>contact-form works!</p>
+<form
+  [class]="containerClasses"
+  [formGroup]="contactForm"
+  (ngSubmit)="onSubmit()"
+  novalidate
+>
+  <div [class]="formClasses">
+    <!-- Champs nom et prénom -->
+    <div class="contact-form__row">
+      <div
+        [class]="getFieldClasses('firstName')"
+        class="contact-form__field contact-form__field--half"
+      >
+        <app-form-field
+          [label]="firstNameLabel"
+          [required]="true"
+          [errorMessage]="getErrorMessage('firstName')"
+          [hasError]="hasError('firstName')"
+          [isValid]="isValid('firstName')"
+        >
+          <app-input
+            type="text"
+            formControlName="firstName"
+            [placeholder]="'Votre prénom'"
+            [disabled]="loading || disabled"
+          ></app-input>
+        </app-form-field>
+      </div>
+
+      <div
+        [class]="getFieldClasses('lastName')"
+        class="contact-form__field contact-form__field--half"
+      >
+        <app-form-field
+          [label]="lastNameLabel"
+          [required]="true"
+          [errorMessage]="getErrorMessage('lastName')"
+          [hasError]="hasError('lastName')"
+          [isValid]="isValid('lastName')"
+        >
+          <app-input
+            type="text"
+            formControlName="lastName"
+            [placeholder]="'Votre nom'"
+            [disabled]="loading || disabled"
+          ></app-input>
+        </app-form-field>
+      </div>
+    </div>
+
+    <!-- Champ email -->
+    <div
+      [class]="getFieldClasses('email')"
+      class="contact-form__field"
+    >
+      <app-form-field
+        [label]="emailLabel"
+        [required]="true"
+        [errorMessage]="getErrorMessage('email')"
+        [hasError]="hasError('email')"
+        [isValid]="isValid('email')"
+      >
+        <app-input
+          type="email"
+          formControlName="email"
+          [placeholder]="'votre@email.com'"
+          [disabled]="loading || disabled"
+        ></app-input>
+      </app-form-field>
+    </div>
+
+    <!-- Champ téléphone (optionnel) -->
+    <div
+      *ngIf="showPhone"
+      [class]="getFieldClasses('phone')"
+      class="contact-form__field"
+    >
+      <app-form-field
+        [label]="phoneLabel"
+        [errorMessage]="getErrorMessage('phone')"
+        [hasError]="hasError('phone')"
+        [isValid]="isValid('phone')"
+      >
+        <app-input
+          type="tel"
+          formControlName="phone"
+          [placeholder]="'+33 1 23 45 67 89'"
+          [disabled]="loading || disabled"
+        ></app-input>
+      </app-form-field>
+    </div>
+
+    <!-- Champs entreprise et département (optionnels) -->
+    <div
+      *ngIf="showCompany || showDepartment"
+      class="contact-form__row"
+    >
+      <div
+        *ngIf="showCompany"
+        [class]="getFieldClasses('company')"
+        class="contact-form__field contact-form__field--half"
+      >
+        <app-form-field
+          [label]="companyLabel"
+          [errorMessage]="getErrorMessage('company')"
+          [hasError]="hasError('company')"
+          [isValid]="isValid('company')"
+        >
+          <app-input
+            type="text"
+            formControlName="company"
+            [placeholder]="'Nom de votre entreprise'"
+            [disabled]="loading || disabled"
+          ></app-input>
+        </app-form-field>
+      </div>
+
+      <div
+        *ngIf="showDepartment"
+        [class]="getFieldClasses('department')"
+        class="contact-form__field contact-form__field--half"
+      >
+        <app-form-field
+          [label]="departmentLabel"
+          [errorMessage]="getErrorMessage('department')"
+          [hasError]="hasError('department')"
+          [isValid]="isValid('department')"
+        >
+          <app-input
+            type="text"
+            formControlName="department"
+            [placeholder]="'Votre département'"
+            [disabled]="loading || disabled"
+          ></app-input>
+        </app-form-field>
+      </div>
+    </div>
+
+    <!-- Champ sujet -->
+    <div
+      [class]="getFieldClasses('subject')"
+      class="contact-form__field"
+    >
+      <app-form-field
+        [label]="subjectLabel"
+        [required]="true"
+        [errorMessage]="getErrorMessage('subject')"
+        [hasError]="hasError('subject')"
+        [isValid]="isValid('subject')"
+      >
+        <app-select
+          formControlName="subject"
+          [options]="subjects"
+          [placeholder]="'Choisissez un sujet'"
+          [disabled]="loading || disabled"
+        ></app-select>
+      </app-form-field>
+    </div>
+
+    <!-- Champ priorité (optionnel) -->
+    <div
+      *ngIf="showPriority"
+      [class]="getFieldClasses('priority')"
+      class="contact-form__field"
+    >
+      <app-form-field
+        [label]="priorityLabel"
+        [errorMessage]="getErrorMessage('priority')"
+        [hasError]="hasError('priority')"
+        [isValid]="isValid('priority')"
+      >
+        <app-select
+          formControlName="priority"
+          [options]="priorities"
+          [placeholder]="'Choisissez une priorité'"
+          [disabled]="loading || disabled"
+        ></app-select>
+      </app-form-field>
+    </div>
+
+    <!-- Champ message -->
+    <div
+      [class]="getFieldClasses('message')"
+      class="contact-form__field"
+    >
+      <app-form-field
+        [label]="messageLabel"
+        [required]="true"
+        [errorMessage]="getErrorMessage('message')"
+        [hasError]="hasError('message')"
+        [isValid]="isValid('message')"
+      >
+        <app-textarea
+          formControlName="message"
+          [placeholder]="'Décrivez votre demande en détail...'"
+          [rows]="6"
+          [maxLength]="1000"
+          [disabled]="loading || disabled"
+        ></app-textarea>
+      </app-form-field>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div [class]="actionsClasses">
+    <app-button
+      type="submit"
+      variant="primary"
+      [size]="size"
+      [loading]="loading"
+      [disabled]="!isFormValid"
+    >
+      {{ submitLabel }}
+    </app-button>
+
+    <app-button
+      type="button"
+      variant="secondary"
+      [size]="size"
+      [disabled]="loading || disabled"
+      (click)="onCancel()"
+    >
+      {{ cancelLabel }}
+    </app-button>
+  </div>
+</form>

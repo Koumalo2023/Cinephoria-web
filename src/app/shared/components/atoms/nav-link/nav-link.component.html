@@ -1,0 +1,81 @@
+<!-- Lien externe -->
+<a
+  *ngIf="href && !isRouterLink"
+  [class]="linkClasses"
+  [href]="href"
+  [target]="target"
+  [attr.rel]="isExternal ? 'noopener noreferrer' : null"
+  [attr.aria-current]="ariaCurrentValue"
+  [attr.aria-disabled]="disabled"
+  (click)="onClick($event)"
+>
+  <!-- Icône -->
+  <span *ngIf="icon && showIcon" class="nav-link__icon">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path [attr.d]="getIconPath(icon)"></path>
+    </svg>
+  </span>
+
+  <!-- Label -->
+  <span class="nav-link__label">{{ label }}</span>
+
+  <!-- Badge -->
+  <span *ngIf="badge && showBadge" class="nav-link__badge">
+    {{ badge }}
+  </span>
+</a>
+
+<!-- Lien router -->
+<a
+  *ngIf="isRouterLink"
+  [class]="linkClasses"
+  [routerLink]="routerLink"
+  [routerLinkActive]="'nav-link--active'"
+  [routerLinkActiveOptions]="{ exact: exact }"
+  [attr.aria-current]="ariaCurrentValue"
+  [attr.aria-disabled]="disabled"
+  (click)="onClick($event)"
+>
+  <!-- Icône -->
+  <span *ngIf="icon && showIcon" class="nav-link__icon">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path [attr.d]="getIconPath(icon)"></path>
+    </svg>
+  </span>
+
+  <!-- Label -->
+  <span class="nav-link__label">{{ label }}</span>
+
+  <!-- Badge -->
+  <span *ngIf="badge && showBadge" class="nav-link__badge">
+    {{ badge }}
+  </span>
+</a>
+
+<!-- Lien sans href (bouton) -->
+<a
+  *ngIf="!href && !isRouterLink"
+  [class]="linkClasses"
+  role="button"
+  tabindex="0"
+  [attr.aria-current]="ariaCurrentValue"
+  [attr.aria-disabled]="disabled"
+  (click)="onClick($event)"
+  (keydown.enter)="onClick($event)"
+  (keydown.space)="onClick($event); $event.preventDefault()"
+>
+  <!-- Icône -->
+  <span *ngIf="icon && showIcon" class="nav-link__icon">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path [attr.d]="getIconPath(icon)"></path>
+    </svg>
+  </span>
+
+  <!-- Label -->
+  <span class="nav-link__label">{{ label }}</span>
+
+  <!-- Badge -->
+  <span *ngIf="badge && showBadge" class="nav-link__badge">
+    {{ badge }}
+  </span>
+</a>

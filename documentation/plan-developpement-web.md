@@ -133,27 +133,27 @@ cinephoria-web/
 ### Composants Atomic Design (En cours d'implémentation)
 
 #### Atoms (Composants de base)
-- [ ] `Button` - Variantes primary/secondary/ghost/danger
-- [ ] `Input` - Champs texte avec validation
-- [ ] `PasswordInput` - Champ mot de passe avec toggle visibilité
-- [ ] `Select` - Listes déroulantes
-- [ ] `Checkbox/Radio` - Sélections
-- [ ] `Badge` - Étiquettes et compteurs
-- [ ] `Avatar` - Photos de profil
-- [ ] `Spinner` - Indicateurs de chargement
-- [ ] `Tooltip` - Aides contextuelles
-- [ ] `Icon` - Composant icône SVG
-- [ ] `ProgressBar` - Barres de progression
-- [ ] `Chip` - Étiquettes interactives
-- [ ] `FileUpload` - Upload d'images avec preview
-- [ ] `QRCode` - Génération et affichage QR Code
-- [ ] `SeatComponent` - Siège sélectionnable avec état
-- [ ] `RatingInput` - Notation étoiles interactive
-- [ ] `DatePicker` - Sélecteur de dates
-- [ ] `TimePicker` - Sélecteur d'heures
-- [ ] `SearchInput` - Champ recherche avec suggestions
-- [ ] `FilterToggle` - Toggle pour filtres
-- [ ] `ProgressIndicator` - Indicateur de progression multi-étapes
+- [ *] `Button` - Variantes primary/secondary/ghost/danger
+- [ *] `Input` - Champs texte avec validation
+- [ *] `PasswordInput` - Champ mot de passe avec toggle visibilité
+- [ *] `Select` - Listes déroulantes
+- [ *] `Checkbox/Radio` - Sélections
+- [ *] `Badge` - Étiquettes et compteurs
+- [ *] `Avatar` - Photos de profil
+- [ *] `Spinner` - Indicateurs de chargement
+- [ *] `Tooltip` - Aides contextuelles
+- [ *] `Icon` - Composant icône SVG
+- [ *] `ProgressBar` - Barres de progression
+- [ *] `Chip` - Étiquettes interactives
+- [ *] `FileUpload` - Upload d'images avec preview
+- [* ] `QRCode` - Génération et affichage QR Code
+- [ *] `SeatComponent` - Siège sélectionnable avec état
+- [ *] `RatingInput` - Notation étoiles interactive
+- [ *] `DatePicker` - Sélecteur de dates
+- [ *] `TimePicker` - Sélecteur d'heures
+- [ *] `SearchInput` - Champ recherche avec suggestions
+- [ *] `FilterToggle` - Toggle pour filtres
+- [ *] `ProgressIndicator` - Indicateur de progression multi-étapes
 
 **Composants Standalone Créés :**
 - ✅ `HomeComponent` - Page d'accueil avec présentation
@@ -162,63 +162,64 @@ cinephoria-web/
 - ✅ `NotFoundComponent` - Page 404 avec navigation
 
 #### Molecules (Assemblages)
-- [ ] `FormField` - Champs avec label/erreur
-- [ ] `SearchBar` - Barre de recherche
-- [ ] `NavLink` - Liens de navigation
-- [ ] `FilmCard` - Carte film avec actions
-- [ ] `MovieDetailsCard` - Carte détaillée film
-- [ ] `RatingStars` - Notation étoiles
-- [ ] `Seat` - Siège sélectionnable
-- [ ] `NotificationItem` - Élément notification
-- [ ] `QRCodeDisplay` - Affichage QR Code
-- [ ] `Breadcrumb` - Navigation hiérarchique
-- [ ] `Pagination` - Pagination de liste
-- [ ] `FilterPanel` - Panneau de filtres
-- [ ] `PasswordResetForm` - Formulaire réinitialisation MDP
-- [ ] `ContactForm` - Formulaire de contact
-- [ ] `ShowtimeSelector` - Sélecteur de séances
-- [ ] `SeatSelectionGrid` - Grille de sélection sièges
-- [ ] `ReservationSummary` - Récapitulatif réservation
-- [ ] `UserProfileForm` - Formulaire profil utilisateur
-- [ ] `NotificationSettings` - Paramètres notifications
-- [ ] `SecuritySettings` - Paramètres sécurité
-- [ ] `CinemaCard` - Carte cinéma avec infos
-- [ ] `TheaterCard` - Carte salle avec capacité
-- [ ] `QRCodeScanner` - Scanner QR Code (pour employés)
-- [ ] `SeatGridComponent` - Grille de sièges responsive
-- [ ] `SeatLegend` - Légende des types de sièges
-- [ ] `SeatCounter` - Compteur de sièges sélectionnés
-- [ ] `MovieFilterPanel` - Panneau filtres avancés
-- [ ] `MovieSortOptions` - Options de tri
-- [ ] `MovieRatingDisplay` - Affichage notation moyenne
-- [ ]`SystemSettingsPanel`(cinephoria-web/src/app/shared/components/molecules/system-settings-panel/)
+- [ *] `FormField` - Champs avec label/erreur
+- [ *] `SearchBar` - Barre de recherche
+- [ *] `NavLink` - Liens de navigation
+- [ *] `FilmCard` - Carte film avec actions
+- [ *] `MovieDetailsCard` - Carte détaillée film
+- [ *] `RatingStars` - Notation étoiles
+- [ *] `Seat` - Siège sélectionnable
+- [ *] `NotificationItem` - Élément notification
+- [* ] `QRCodeDisplay` - Affichage QR Code
+- [ *] `Breadcrumb` - Navigation hiérarchique
+- [ *] `Pagination` - Pagination de liste
+- [ *] `FilterPanel` - Panneau de filtres
+- [ *] `PasswordResetForm` - Formulaire réinitialisation MDP
+- [ *] `ContactForm` - Formulaire de contact
+- [ *] `ShowtimeSelector` - Sélecteur de séances
+- [ *] `SeatSelectionGrid` - Grille de sélection sièges
+- [ *] `ReservationSummary` - Récapitulatif réservation
+- [ *] `UserProfileForm` - Formulaire profil utilisateur
+- [ *] `NotificationSettings` - Paramètres notifications
+- [ *] `SecuritySettings` - Paramètres sécurité
+- [ *] `CinemaCard` - Carte cinéma avec infos
+- [ *] `TheaterCard` - Carte salle avec capacité
+- [ *] `QRCodeScanner` - Scanner QR Code (pour employés)
+- [ *] `SeatGridComponent` - Grille de sièges responsive
+- [ *] `SeatLegend` - Légende des types de sièges
+- [ *] `SeatCounter` - Compteur de sièges sélectionnés
+- [ *] `MovieFilterPanel` - Panneau filtres avancés
+- [* ] `MovieSortOptions` - Options de tri
+- [ *] `MovieRatingDisplay` - Affichage notation moyenne
+- [ *]`SystemSettingsPanel`(cinephoria-web/src/app/shared/components/molecules/system-settings-panel/)
 
+Recupère les models/interfaces dans les fichiers core.interfaces.ts et settings.interfaces.ts pour mettre a jour les fichier et corriger les erreur ci-dessous 
 #### Organisms (Blocs complexes)
-- [ ] `Header` - Navigation adaptative par rôle
-- [ ] `Footer` - Informations cinémas
-- [ ] `Sidebar` - Navigation admin/employé
-- [ ] `MovieList` - Catalogue avec filtres
-- [ ] `ReservationFlow` - Processus complet réservation
-- [ ] `AdminTable` - Tableaux de gestion
-- [ ] `AuthForm` - Formulaires authentification
-- [ ] `NotificationsCenter` - Centre notifications
-- [ ] `UserProfilePage` - Page profil utilisateur
-- [ ] `DashboardWidget` - Widgets de dashboard
-- [ ] `MovieDetailsPage` - Page détails film complète
-- [ ] `SettingsPage` - Page paramètres utilisateur
-- [ ] `CinemaManagement` - Gestion cinémas (admin)
-- [ ] `TheaterManagement` - Gestion salles (admin)
-- [ ] `ShowtimeManagement` - Gestion séances (admin/employé)
-- [ ] `EmployeeRegistration` - Inscription employés (admin)
-- [ ] `PasswordManagement` - Gestion mots de passe
-- [ ] `ContactPage` - Page contact avec formulaire
-- [ ] `TabContainer` - Système d'onglets générique
-- [ ] `ModalContainer` - Conteneur modal réutilisable
-- [ ] `ProfileTabsComponent` - Onglets profil utilisateur
-- [ ] `DashboardTabsComponent` - Onglets espace utilisateur
-- [ ] `ManagementTabsComponent` - Onglets administration
-- [ ] `MovieDetailsTabsComponent` - Onglets détails film
-- [ ]`AdvancedSettingsModalComponent`(cinephoria-web/src/app/shared/components/organisms/advanced-settings-modal/)
+- [ *] `Header` - Navigation adaptative par rôle
+- [ *] `Footer` - Informations cinémas
+- [ *] `Sidebar` - Navigation admin/employé
+- [ *] `MovieList` - Catalogue avec filtres
+- [ *] `ReservationFlow` - Processus complet réservation
+- [* ] `AdminTable` - Tableaux de gestion
+- [* ] `AuthForm` - Formulaires authentification
+- [ *] `NotificationsCenter` - Centre notifications
+- [* ] `UserProfilePage` - Page profil utilisateur
+- [ *] `DashboardWidget` - Widgets de dashboard
+- [ *] `MovieDetailsPage` - Page détails film complète
+- [ *] `SettingsPage` - Page paramètres utilisateur
+- [ *] `CinemaManagement` - Gestion cinémas (admin)
+- [ *] `TheaterManagement` - Gestion salles (admin)
+- [ *] `ShowtimeManagement` - Gestion séances (admin/employé)
+- [ *] `EmployeeRegistration` - Inscription employés (admin)
+- [ *] `PasswordManagement` - Gestion mots de passe
+- [* ] `ContactPage` - Page contact avec formulaire
+- [ *] `TabContainer` - Système d'onglets générique
+- [ *] `ModalContainer` - Conteneur modal réutilisable
+- [* ] `ProfileTabsComponent` - Onglets profil utilisateur
+- [ *] `DashboardTabsComponent` - Onglets espace utilisateur
+- [ *] `ManagementTabsComponent` - Onglets administration
+- [ *] `MovieDetailsTabsComponent` - Onglets détails film
+- [ *]`AdvancedSettingsModalComponent`(cinephoria-web/src/app/shared/components/organisms/advanced-settings-modal/)
 
 #### Templates (Layouts)
 - [ ] `MainLayout` - Layout principal public

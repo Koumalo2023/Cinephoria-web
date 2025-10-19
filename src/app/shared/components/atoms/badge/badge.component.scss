@@ -1,0 +1,143 @@
+.badge-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: middle;
+  
+  // Variantes
+  &.badge--primary {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  &.badge--secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+  
+  &.badge--success {
+    background-color: var(--color-success);
+    color: white;
+  }
+  
+  &.badge--warning {
+    background-color: var(--color-warning);
+    color: white;
+  }
+  
+  &.badge--error {
+    background-color: var(--color-error);
+    color: white;
+  }
+  
+  &.badge--info {
+    background-color: var(--color-info);
+    color: white;
+  }
+  
+  // Tailles
+  &.badge--small {
+    font-size: 0.75rem;
+    line-height: 1;
+    min-height: 1.25rem;
+    
+    &.badge--dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      min-height: 0.5rem;
+    }
+    
+    &.badge--count {
+      padding: 0.125rem 0.375rem;
+      min-width: 1.25rem;
+    }
+    
+    &:not(.badge--dot):not(.badge--count) {
+      padding: 0.125rem 0.5rem;
+    }
+  }
+  
+  &.badge--medium {
+    font-size: 0.875rem;
+    line-height: 1.25;
+    min-height: 1.5rem;
+    
+    &.badge--dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      min-height: 0.75rem;
+    }
+    
+    &.badge--count {
+      padding: 0.25rem 0.5rem;
+      min-width: 1.5rem;
+    }
+    
+    &:not(.badge--dot):not(.badge--count) {
+      padding: 0.25rem 0.75rem;
+    }
+  }
+  
+  &.badge--large {
+    font-size: 1rem;
+    line-height: 1.5;
+    min-height: 2rem;
+    
+    &.badge--dot {
+      width: 1rem;
+      height: 1rem;
+      min-height: 1rem;
+    }
+    
+    &.badge--count {
+      padding: 0.375rem 0.75rem;
+      min-width: 2rem;
+    }
+    
+    &:not(.badge--dot):not(.badge--count) {
+      padding: 0.375rem 1rem;
+    }
+  }
+  
+  // Types spécifiques
+  &.badge--dot {
+    border-radius: 50%;
+  }
+  
+  &.badge--count {
+    border-radius: 1rem;
+    font-weight: 600;
+  }
+}
+
+.badge__dot {
+  display: block;
+  border-radius: 50%;
+}
+
+.badge__count {
+  font-weight: 600;
+  text-align: center;
+}
+
+.badge__content {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// Variables CSS pour la cohérence
+:host {
+  --color-primary: #3b82f6;
+  --color-secondary: #f3f4f6;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #06b6d4;
+  --color-text: #1f2937;
+  --color-border: #d1d5db;
+}

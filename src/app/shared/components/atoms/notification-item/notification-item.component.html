@@ -1,0 +1,69 @@
+<div [class]="containerClasses" (click)="onNotificationClick()">
+  <!-- Indicateur d'état non lu -->
+  <div *ngIf="!notification.read" class="notification-item__indicator"></div>
+
+  <!-- Image de la notification (optionnelle) -->
+  <div *ngIf="hasImage" class="notification-item__image">
+    <img
+      [src]="notification.imageUrl"
+      [alt]="notification.title"
+      class="notification-item__image-content"
+      loading="lazy"
+    />
+  </div>
+
+  <!-- Icône de type -->
+  <div *ngIf="!hasImage" class="notification-item__icon">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+      <path [attr.d]="notificationIcon"></path>
+    </svg>
+  </div>
+
+  <!-- Contenu de la notification -->
+  <div class="notification-item__content">
+    <!-- En-tête -->
+    <div class="notification-item__header">
+      <h3 class="notification-item__title">{{ notification.title }}</h3>
+      
+      <!-- Timestamp -->
+      <span *ngIf="showTimestamp" class="notification-item__timestamp">
+        {{ formattedTimestamp }}
+      </span>
+    </div>
+
+    <!-- Message -->
+    <p class="notification-item__message">{{ notification.message }}</p>
+
+    <!-- Action (optionnelle) -->
+    <div *ngIf="hasAction && showActions" class="notification-item__actions">
+      <button
+        class="notification-item__action"
+        (click)="onAction($event)"
+        aria-label="Effectuer l'action"
+      >
+        {{ notification.action?.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Bouton de fermeture -->
+  <button
+    *ngIf="showClose"
+    class="notification-item__close"
+    (click)="onClose($event)"
+    aria-label="Fermer la notification"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+    </svg>
+  </button>
+
+  <!-- Indicateur de priorité -->
+  <div *ngIf="isUrgent" class="notification-item__priority-badge">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+      <path d="M6 8a1 1 0 100-2 1 1 0 000 2zM5.25 4.75a.75.75 0 011.5 0v1.5a.75.75 0 01-1.5 0v-1.5z"/>
+      <path d="M6 0a6 6 0 100 12A6 6 0 006 0zM1.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/>
+    </svg>
+    Urgent
+  </div>
+</div>
