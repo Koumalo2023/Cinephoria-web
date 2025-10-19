@@ -4,8 +4,7 @@
     [variant]="headerConfig.variant"
     [showLogo]="headerConfig.showLogo"
     [showNavigation]="headerConfig.showNavigation"
-    [showUserMenu]="headerConfig.showUserMenu"
-    [currentUser]="currentUser">
+    [showUserMenu]="headerConfig.showUserMenu">
   </app-header>
 
   <!-- Contenu principal du layout admin -->
@@ -71,15 +70,6 @@
             <a routerLink="/admin/movies" class="menu-link" routerLinkActive="active">
               <span class="menu-icon">🎬</span>
               <span class="menu-label">Films</span>
-            </a>
-          </li>
-
-          <!-- Gestion des incidents -->
-          <li class="menu-item">
-            <a routerLink="/admin/incidents" class="menu-link" routerLinkActive="active">
-              <span class="menu-icon">⚠️</span>
-              <span class="menu-label">Incidents</span>
-              <span class="menu-badge">{{ adminStats.pendingIncidents }}</span>
             </a>
           </li>
 

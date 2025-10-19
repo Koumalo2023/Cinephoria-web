@@ -58,9 +58,9 @@ export class ManagementLayoutComponent implements OnInit {
   };
 
   footerConfig = {
-    variant: 'default' as const,
-    showCinemaInfo: true,
-    showSocialLinks: true,
+    variant: 'compact' as const,
+    showCinemaInfo: false,
+    showSocialLinks: false,
     showLegalLinks: true
   };
 

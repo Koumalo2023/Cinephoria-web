@@ -11,29 +11,30 @@ import {
   ChangeUserPasswordDto,
   RequestPasswordResetDto,
   ResetPasswordDto,
-  ContactRequest
+  ContactRequest,
+  ApiLoginResponseDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly baseUrl = `${environment.apiUrl}/auth`;
+  private readonly baseUrl = `${environment.apiUrl}/Auth`;
 
   constructor(private http: HttpClient) {}
 
   /**
    * Connexion utilisateur
    */
-  login(credentials: LoginUserDto): Observable<LoginResponseDto> {
-    return this.http.post<LoginResponseDto>(`${this.baseUrl}/login`, credentials);
+  login(credentials: LoginUserDto): Observable<ApiLoginResponseDto> {
+    return this.http.post<ApiLoginResponseDto>(`${this.baseUrl}/login`, credentials);
   }
 
   /**
    * Inscription utilisateur
    */
-  register(userData: RegisterUserDto): Observable<LoginResponseDto> {
-    return this.http.post<LoginResponseDto>(`${this.baseUrl}/register`, userData);
+  register(userData: RegisterUserDto): Observable<ApiLoginResponseDto> {
+    return this.http.post<ApiLoginResponseDto>(`${this.baseUrl}/register`, userData);
   }
 
   /**

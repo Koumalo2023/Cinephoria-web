@@ -5,50 +5,25 @@ import { Router } from '@angular/router';
 
 // Composants atomiques
 import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
-import { AvatarComponent } from '../../atoms/avatar/avatar.component';
-
-// Composants molécules
-import { PasswordResetFormComponent } from '../../molecules/password-reset-form/password-reset-form.component';
 
 // Interfaces core
 import { LoginUserDto, RegisterUserDto, RequestPasswordResetDto } from '../../../../core/interfaces/core.interfaces';
 
 export type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-password';
-export type AuthProvider = 'email' | 'google' | 'facebook' | 'apple';
-
-export interface AuthCredentials {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
-  firstName?: string;
-  lastName?: string;
-  confirmPassword?: string;
-}
-
-export interface AuthProviderConfig {
-  id: AuthProvider;
-  name: string;
-  icon: string;
-  color: string;
-}
 
 export interface AuthFormConfig {
   mode: AuthMode;
   title: string;
   subtitle?: string;
   showRememberMe?: boolean;
-  showSocialLogin?: boolean;
   showForgotPassword?: boolean;
   showSignUpLink?: boolean;
   showLoginLink?: boolean;
   requireEmailVerification?: boolean;
   minPasswordLength?: number;
   maxPasswordLength?: number;
-  allowedProviders?: AuthProvider[];
 }
 
 @Component({
@@ -58,12 +33,8 @@ export interface AuthFormConfig {
     CommonModule,
     ReactiveFormsModule,
     ButtonComponent,
-    IconComponent,
     InputComponent,
-    CheckboxComponent,
-    BadgeComponent,
-    AvatarComponent,
-    PasswordResetFormComponent
+    CheckboxComponent
   ],
   templateUrl: './auth-form.component.html',
   styleUrls: ['./auth-form.component.scss']
@@ -74,36 +45,38 @@ export class AuthFormComponent implements OnInit {
     title: 'Connexion',
     subtitle: 'Connectez-vous à votre compte',
     showRememberMe: true,
-    showSocialLogin: true,
     showForgotPassword: true,
     showSignUpLink: true,
     showLoginLink: true,
     requireEmailVerification: false,
     minPasswordLength: 8,
-    maxPasswordLength: 128,
-    allowedProviders: ['email', 'google', 'facebook']
+    maxPasswordLength: 128
   };
-  @Input() loading: boolean = false;
+  @Input() set loading(value: boolean) {
+    this._loading = value;
+    if (value) {
+      this.disableForm();
+    } else {
+      this.enableForm();
+    }
+  }
+  get loading(): boolean {
+    return this._loading;
+  }
+  private _loading: boolean = false;
+  
   @Input() errorMessage: string = '';
   @Input() successMessage: string = '';
   @Input() userAvatar?: string;
   @Input() userName?: string;
 
   @Output() authSubmit = new EventEmitter<LoginUserDto | RegisterUserDto>();
-  @Output() providerAuth = new EventEmitter<AuthProvider>();
   @Output() modeChange = new EventEmitter<AuthMode>();
   @Output() passwordReset = new EventEmitter<RequestPasswordResetDto>();
 
   authForm!: FormGroup;
   showPassword = false;
   showConfirmPassword = false;
-
-  // Configuration des fournisseurs d'authentification
-  providers: AuthProviderConfig[] = [
-    { id: 'google', name: 'Google', icon: 'google', color: '#DB4437' },
-    { id: 'facebook', name: 'Facebook', icon: 'facebook', color: '#4267B2' },
-    { id: 'apple', name: 'Apple', icon: 'apple', color: '#000000' }
-  ];
 
   constructor(
     private fb: FormBuilder,
@@ -112,6 +85,11 @@ export class AuthFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
+    
+    // Gérer l'état de désactivation des champs selon le loading
+    if (this.loading) {
+      this.disableForm();
+    }
   }
 
   private initializeForm(): void {
@@ -194,12 +172,6 @@ export class AuthFormComponent implements OnInit {
     }
   }
 
-  // Authentification via fournisseur externe
-  onProviderAuth(provider: AuthProvider): void {
-    if (!this.loading) {
-      this.providerAuth.emit(provider);
-    }
-  }
 
   // Changement de mode
   switchMode(mode: AuthMode): void {
@@ -283,16 +255,6 @@ export class AuthFormComponent implements OnInit {
     return this.config.mode === 'forgot-password' ? 'secondary' : 'primary';
   }
 
-  get availableProviders(): AuthProviderConfig[] {
-    return this.providers.filter(provider => 
-      this.config.allowedProviders?.includes(provider.id)
-    );
-  }
-
-  get hasSocialLogin(): boolean {
-    return !!this.config.showSocialLogin && this.availableProviders.length > 0;
-  }
-
   // Classes CSS dynamiques
   getFormClasses(): string {
     const classes = ['auth-form'];
@@ -302,10 +264,6 @@ export class AuthFormComponent implements OnInit {
     return classes.join(' ');
   }
 
-  getProviderButtonClasses(provider: AuthProviderConfig): string {
-    return `provider-button provider-button--${provider.id}`;
-  }
-
   // Navigation
   navigateToHome(): void {
     this.router.navigate(['/']);
@@ -313,5 +271,19 @@ export class AuthFormComponent implements OnInit {
 
   navigateToProfile(): void {
     this.router.navigate(['/profile']);
+  }
+
+  // Désactiver tous les champs du formulaire
+  private disableForm(): void {
+    if (this.authForm) {
+      this.authForm.disable();
+    }
+  }
+
+  // Activer tous les champs du formulaire
+  private enableForm(): void {
+    if (this.authForm) {
+      this.authForm.enable();
+    }
   }
 }

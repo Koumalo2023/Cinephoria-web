@@ -53,7 +53,7 @@ export class SidebarComponent {
       id: 'dashboard',
       label: 'Tableau de bord',
       icon: 'home',
-      route: '/dashboard'
+      route: '/user/dashboard'
     },
     {
       id: 'movies',
@@ -65,8 +65,14 @@ export class SidebarComponent {
       id: 'reservations',
       label: 'Réservations',
       icon: 'ticket',
-      route: '/reservations',
+      route: '/user/reservations',
       badge: 5
+    },
+    {
+      id: 'profile',
+      label: 'Mon Profil',
+      icon: 'user',
+      route: '/user/profile'
     },
     {
       id: 'management',
@@ -77,7 +83,14 @@ export class SidebarComponent {
           id: 'users',
           label: 'Utilisateurs',
           icon: 'users',
-          route: '/management/users',
+          route: '/admin/users',
+          permissions: ['admin']
+        },
+        {
+          id: 'employees',
+          label: 'Employés',
+          icon: 'users',
+          route: '/admin/employees',
           permissions: ['admin']
         },
         {
@@ -93,15 +106,29 @@ export class SidebarComponent {
           icon: 'clock',
           route: '/management/showtimes',
           permissions: ['admin', 'employee']
+        },
+        {
+          id: 'reservations-mgmt',
+          label: 'Réservations',
+          icon: 'ticket',
+          route: '/management/reservations',
+          permissions: ['admin', 'employee']
+        },
+        {
+          id: 'statistics',
+          label: 'Statistiques',
+          icon: 'bar-chart',
+          route: '/management/statistics',
+          permissions: ['admin', 'employee']
+        },
+        {
+          id: 'settings',
+          label: 'Paramètres',
+          icon: 'settings',
+          route: '/management/settings',
+          permissions: ['admin', 'employee']
         }
       ]
-    },
-    {
-      id: 'reports',
-      label: 'Rapports',
-      icon: 'bar-chart',
-      route: '/reports',
-      permissions: ['admin']
     }
   ];
 

@@ -1,10 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 // Composants partagés
 import { HeaderComponent } from '../../shared/components/organisms/header/header.component';
 import { FooterComponent } from '../../shared/components/organisms/footer/footer.component';
+
+// Services
+import { UserStateService } from '../../core/services/auth/user-state.service';
 
 // Interfaces core
 import { AppUserDto } from '../../core/interfaces/core.interfaces';
@@ -23,31 +27,11 @@ import { UserRole } from '../../core/enums/user-role.enum';
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
 })
-export class MainLayoutComponent implements OnInit {
-  // Utilisateur simulé pour le layout principal (peut être null pour invité)
-  currentUser: AppUserDto | null = {
-    appUserId: 'user-12345',
-    firstName: 'Pierre',
-    lastName: 'Durand',
-    email: 'pierre.durand@email.com',
-    userName: 'pdurand',
-    emailConfirmed: true,
-    phoneNumber: '+33123456789',
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-10-18'),
-    hasApprovedTermsOfUse: true,
-    hiredDate: undefined,
-    position: '',
-    profilePictureUrl: '',
-    reportedIncidents: [],
-    resolvedByIncidents: [],
-    role: UserRole.User,
-    reservations: [],
-    movieRatings: [],
-    favoriteMovies: [],
-    userMovieHistories: [],
-    employeeFavorites: []
-  };
+export class MainLayoutComponent implements OnInit, OnDestroy {
+  // Utilisateur connecté (peut être null pour invité)
+  currentUser: AppUserDto | null = null;
+  
+  private userSubscription: Subscription | null = null;
 
   // Configuration du layout principal
   headerConfig = {
@@ -109,15 +93,26 @@ export class MainLayoutComponent implements OnInit {
     }
   ];
 
+  constructor(private userStateService: UserStateService) {}
+
   ngOnInit(): void {
-    // Initialisation du layout principal
-    console.log('Main Layout initialisé');
+    // S'abonner aux changements de l'utilisateur
+    this.userSubscription = this.userStateService.currentUser$.subscribe(
+      user => {
+        this.currentUser = user;
+      }
+    );
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   // Gestion de la déconnexion
   onLogout(): void {
-    console.log('Déconnexion de l\'utilisateur');
-    this.currentUser = null;
+    this.userStateService.logout();
   }
 
   // Gestion des actions utilisateur
@@ -167,7 +162,7 @@ export class MainLayoutComponent implements OnInit {
 
   // Vérifier si l'utilisateur est connecté
   get isAuthenticated(): boolean {
-    return !!this.currentUser;
+    return this.userStateService.isAuthenticated;
   }
 
   // Vérifier si on est sur la page d'accueil

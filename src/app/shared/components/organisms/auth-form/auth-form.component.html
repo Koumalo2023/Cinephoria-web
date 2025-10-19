@@ -2,15 +2,6 @@
   <!-- En-tête du formulaire -->
   <header class="auth-form-header">
     <div class="header-content">
-      <!-- Avatar utilisateur (si connecté) -->
-      <div class="user-avatar" *ngIf="userAvatar">
-        <app-avatar
-          [src]="userAvatar"
-          [alt]="userName || 'Utilisateur'"
-          size="large"
-        ></app-avatar>
-      </div>
-
       <!-- Titre et sous-titre -->
       <div class="header-text">
         <h1 class="auth-title">{{ config.title }}</h1>
@@ -23,41 +14,14 @@
   <div class="auth-messages">
     <!-- Message d'erreur -->
     <div class="error-message" *ngIf="errorMessage">
-      <app-icon name="alert-circle" size="small" class="error-icon"></app-icon>
       <span class="error-text">{{ errorMessage }}</span>
     </div>
 
     <!-- Message de succès -->
     <div class="success-message" *ngIf="successMessage">
-      <app-icon name="check-circle" size="small" class="success-icon"></app-icon>
       <span class="success-text">{{ successMessage }}</span>
     </div>
   </div>
-
-  <!-- Authentification sociale -->
-  <section class="social-auth-section" *ngIf="hasSocialLogin && isLoginMode">
-    <div class="social-auth-content">
-      <h3 class="social-title">Se connecter avec</h3>
-      <div class="provider-buttons">
-        <app-button
-          *ngFor="let provider of availableProviders"
-          [variant]="'secondary'"
-          [size]="'large'"
-          [class]="getProviderButtonClasses(provider)"
-          (clicked)="onProviderAuth(provider.id)"
-          [disabled]="loading"
-          class="provider-button"
-        >
-          <app-icon [name]="provider.icon" [size]="'small'"></app-icon>
-          <span class="provider-name">{{ provider.name }}</span>
-        </app-button>
-      </div>
-
-      <div class="divider">
-        <span class="divider-text">ou</span>
-      </div>
-    </div>
-  </section>
 
   <!-- Formulaire principal -->
   <main class="auth-form-content">
@@ -72,7 +36,6 @@
             type="text"
             placeholder="Votre prénom"
             [required]="true"
-            [disabled]="loading"
           ></app-input>
           <div class="error-text" *ngIf="isFieldInvalid('firstName')">
             {{ getFieldError('firstName') }}
@@ -87,7 +50,6 @@
             type="text"
             placeholder="Votre nom"
             [required]="true"
-            [disabled]="loading"
           ></app-input>
           <div class="error-text" *ngIf="isFieldInvalid('lastName')">
             {{ getFieldError('lastName') }}
@@ -104,7 +66,6 @@
           type="email"
           placeholder="votre@email.com"
           [required]="true"
-          [disabled]="loading"
         ></app-input>
         <div class="error-text" *ngIf="isFieldInvalid('email')">
           {{ getFieldError('email') }}
@@ -120,7 +81,6 @@
           type="text"
           placeholder="Votre mot de passe"
           [required]="true"
-          [disabled]="loading"
         >
           <button
             type="button"
@@ -128,10 +88,7 @@
             (click)="togglePasswordVisibility()"
             tabindex="-1"
           >
-            <app-icon
-              [name]="showPassword ? 'eye-off' : 'eye'"
-              size="small"
-            ></app-icon>
+            {{ showPassword ? '👁️' : '👁️‍🗨️' }}
           </button>
         </app-input>
         <div class="error-text" *ngIf="isFieldInvalid('password')">
@@ -151,7 +108,6 @@
           type="text"
           placeholder="Confirmez votre mot de passe"
           [required]="true"
-          [disabled]="loading"
         >
           <button
             type="button"
@@ -159,10 +115,7 @@
             (click)="toggleConfirmPasswordVisibility()"
             tabindex="-1"
           >
-            <app-icon
-              [name]="showConfirmPassword ? 'eye-off' : 'eye'"
-              size="small"
-            ></app-icon>
+            {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
           </button>
         </app-input>
         <div class="error-text" *ngIf="isFieldInvalid('confirmPassword')">
@@ -175,7 +128,6 @@
         <app-checkbox
           formControlName="rememberMe"
           label="Se souvenir de moi"
-          [disabled]="loading"
         ></app-checkbox>
       </div>
 
@@ -189,10 +141,6 @@
           [loading]="loading"
           class="submit-button"
         >
-          <app-icon name="log-in" size="small" *ngIf="isLoginMode"></app-icon>
-          <app-icon name="user-plus" size="small" *ngIf="isRegisterMode"></app-icon>
-          <app-icon name="mail" size="small" *ngIf="isForgotPasswordMode"></app-icon>
-          <app-icon name="refresh-cw" size="small" *ngIf="isResetPasswordMode"></app-icon>
           {{ submitButtonText }}
         </app-button>
       </div>

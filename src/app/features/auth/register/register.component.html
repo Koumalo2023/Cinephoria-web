@@ -1,1 +1,12 @@
-<p>register works!</p>
+<div class="register-page">
+  <!-- Formulaire d'authentification -->
+  <app-auth-form
+    [config]="authFormConfig"
+    [loading]="loading"
+    [errorMessage]="errorMessage"
+    [successMessage]="successMessage"
+    (authSubmit)="onAuthSubmit($event)"
+    (modeChange)="onModeChange($event)"
+    (passwordReset)="onPasswordReset($event)">
+  </app-auth-form>
+</div>
