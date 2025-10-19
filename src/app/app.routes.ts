@@ -171,6 +171,11 @@ export const routes: Routes = [
         title: 'Cinephoria - Gestion Réservations'
       },
       {
+        path: 'incidents',
+        loadComponent: () => import('./features/management/statistics/statistics.component').then(m => m.StatisticsComponent),
+        title: 'Cinephoria - Gestion Incidents'
+      },
+      {
         path: 'statistics',
         loadComponent: () => import('./features/management/statistics/statistics.component').then(m => m.StatisticsComponent),
         title: 'Cinephoria - Statistiques'
@@ -228,7 +233,7 @@ export const routes: Routes = [
       {
         path: 'cinemas',
         loadComponent: () => import('./features/management/cinema/cinema.component').then(m => m.CinemaComponent),
-        title: 'Cinephoria - Gestion Employés'
+        title: 'Cinephoria - Gestion Cinémas'
       },
       {
         path: 'statistics',
