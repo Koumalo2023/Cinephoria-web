@@ -56,15 +56,6 @@
             </a>
           </li>
 
-          <!-- Gestion des cinémas -->
-          <li class="menu-item">
-            <a routerLink="/admin/cinemas" class="menu-link" routerLinkActive="active">
-              <span class="menu-icon">🏢</span>
-              <span class="menu-label">Cinémas</span>
-              <span class="menu-badge">{{ adminStats.totalCinemas }}</span>
-            </a>
-          </li>
-
           <!-- Gestion des films -->
           <li class="menu-item">
             <a routerLink="/admin/movies" class="menu-link" routerLinkActive="active">
@@ -73,35 +64,35 @@
             </a>
           </li>
 
+          <!-- Gestion des salles -->
+          <li class="menu-item">
+            <a routerLink="/admin/theaters" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🏢</span>
+              <span class="menu-label">Salles</span>
+            </a>
+          </li>
+
+          <!-- Gestion des séances -->
+          <li class="menu-item">
+            <a routerLink="/admin/showtimes" class="menu-link" routerLinkActive="active">
+              <span class="menu-icon">🎬</span>
+              <span class="menu-label">Séances</span>
+            </a>
+          </li>
+
           <!-- Statistiques et rapports -->
           <li class="menu-item">
             <a routerLink="/admin/statistics" class="menu-link" routerLinkActive="active">
               <span class="menu-icon">📊</span>
-              <span class="menu-label">Rapports</span>
+              <span class="menu-label">Statistiques</span>
             </a>
           </li>
 
           <!-- Paramètres système -->
           <li class="menu-item">
-            <a routerLink="/admin/system" class="menu-link" routerLinkActive="active">
+            <a routerLink="/admin/settings" class="menu-link" routerLinkActive="active">
               <span class="menu-icon">⚙️</span>
-              <span class="menu-label">Système</span>
-            </a>
-          </li>
-
-          <!-- Sécurité -->
-          <li class="menu-item">
-            <a routerLink="/admin/security" class="menu-link" routerLinkActive="active">
-              <span class="menu-icon">🔒</span>
-              <span class="menu-label">Sécurité</span>
-            </a>
-          </li>
-
-          <!-- Logs système -->
-          <li class="menu-item">
-            <a routerLink="/admin/logs" class="menu-link" routerLinkActive="active">
-              <span class="menu-icon">📋</span>
-              <span class="menu-label">Logs</span>
+              <span class="menu-label">Paramètres</span>
             </a>
           </li>
         </ul>
