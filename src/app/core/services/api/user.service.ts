@@ -1,20 +1,20 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   AppUserDto,
-  EmployeeProfileDto,
+  ChangeEmployeePasswordDto,
   CreateEmployeeDto,
-  UpdateEmployeeDto,
-  ChangeEmployeePasswordDto
+  EmployeeProfileDto,
+  UpdateEmployeeDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private readonly baseUrl = `${environment.apiUrl}/users`;
+  private readonly baseUrl = `${environment.apiUrl}/Auth`;
 
   constructor(private http: HttpClient) {}
 

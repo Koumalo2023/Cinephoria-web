@@ -212,7 +212,7 @@ Ce document contient tous les endpoints disponibles dans l'API Cinephoria pour u
   - Response: [`CinemaDto`](interfaces.md#cinemadto)
 
 - **DELETE** `/api/cinema/{cinemaId}`
-  - Supprime un cinéma (Admin)
+  - Supprime un cinéma (Admin)  
   - Response: `{ message: string }`
 
 ## Salles

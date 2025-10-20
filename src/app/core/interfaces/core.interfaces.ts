@@ -1,6 +1,6 @@
-import { UserRole } from '../enums/user-role.enum';
-import { ReservationStatus } from '../enums/reservation-status.enum';
 import { MovieGenre } from '../enums/movie-genre.enum';
+import { ReservationStatus } from '../enums/reservation-status.enum';
+import { UserRole } from '../enums/user-role.enum';
 
 /**
  * Interfaces principales centralisées pour éviter les conflits d'exportation
@@ -805,4 +805,69 @@ export interface DashboardPeriod {
   value: string;
   startDate: Date;
   endDate: Date;
+}
+
+// =============================================
+// Interfaces pour les Incidents du Dashboard
+// =============================================
+
+/**
+ * Statistiques des incidents
+ */
+export interface IncidentStats {
+  totalIncidents: number;
+  openIncidents: number;
+  resolvedIncidents: number;
+  highPriorityIncidents: number;
+  averageResolutionTime: number;
+  incidentsChange: number;
+  resolutionRate: number;
+}
+
+/**
+ * Données du graphique d'évolution des incidents
+ */
+export interface IncidentChartData {
+  labels: string[];
+  data: number[];
+  total: number;
+  average: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+/**
+ * Type d'incident fréquent
+ */
+export interface IncidentType {
+  type: string;
+  count: number;
+  percentage: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+/**
+ * Incident récent
+ */
+export interface RecentIncident {
+  incidentId: number;
+  title: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  reportedBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+  resolutionTime?: number;
+}
+
+/**
+ * Log d'activité lié aux incidents
+ */
+export interface IncidentActivityLog {
+  id: string;
+  type: 'incident_created' | 'incident_updated' | 'incident_resolved' | 'incident_assigned';
+  title: string;
+  description: string;
+  timestamp: Date;
+  incidentId: number;
+  userName: string;
 }

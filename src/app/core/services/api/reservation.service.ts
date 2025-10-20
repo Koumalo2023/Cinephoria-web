@@ -1,138 +1,69 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-  UserReservationDto,
   CreateReservationDto,
-  UpdateReservationDto,
-  CancelReservationDto,
-  ReservationDto
+  SeatDto,
+  ShowtimeDto,
+  UserReservationDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationService {
-  private readonly baseUrl = `${environment.apiUrl}/reservations`;
+  private readonly baseUrl = `${environment.apiUrl}/reservation`;
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Récupérer toutes les réservations de l'utilisateur
+   * Obtenir les séances d'un film
    */
-  getUserReservations(): Observable<UserReservationDto[]> {
-    return this.http.get<UserReservationDto[]>(this.baseUrl);
+  getMovieSessions(movieId: number): Observable<ShowtimeDto[]> {
+    return this.http.get<ShowtimeDto[]>(`${this.baseUrl}/movie/${movieId}/sessions`);
   }
 
   /**
-   * Récupérer une réservation par son ID
+   * Obtenir les sièges disponibles pour une séance
    */
-  getReservationById(reservationId: number): Observable<UserReservationDto> {
-    return this.http.get<UserReservationDto>(`${this.baseUrl}/${reservationId}`);
+  getAvailableSeats(showtimeId: number): Observable<SeatDto[]> {
+    return this.http.get<SeatDto[]>(`${this.baseUrl}/showtime/${showtimeId}/seats`);
   }
 
   /**
-   * Créer une nouvelle réservation
+   * Obtenir les réservations d'un utilisateur
    */
-  createReservation(reservationData: CreateReservationDto): Observable<UserReservationDto> {
-    return this.http.post<UserReservationDto>(this.baseUrl, reservationData);
+  getUserReservations(userId: string): Observable<UserReservationDto[]> {
+    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/user/${userId}`);
   }
 
   /**
-   * Mettre à jour une réservation
+   * Obtenir les réservations d'une séance
    */
-  updateReservation(reservationId: number, reservationData: UpdateReservationDto): Observable<UserReservationDto> {
-    return this.http.put<UserReservationDto>(`${this.baseUrl}/${reservationId}`, reservationData);
+  getShowtimeReservations(showtimeId: number): Observable<UserReservationDto[]> {
+    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/showtime/${showtimeId}`);
+  }
+
+  /**
+   * Valider un QR code
+   */
+  validateQrCode(qrCodeData: string): Observable<string> {
+    return this.http.post<string>(`${this.baseUrl}/validate`, qrCodeData);
+  }
+
+  /**
+   * Créer une réservation
+   */
+  createReservation(reservationData: CreateReservationDto): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/create`, reservationData);
   }
 
   /**
    * Annuler une réservation
    */
-  cancelReservation(reservationId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${reservationId}`);
+  cancelReservation(reservationId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/cancel/${reservationId}`);
   }
 
-  /**
-   * Valider une réservation (QR Code)
-   */
-  validateReservation(reservationId: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${reservationId}/validate`, {});
-  }
-
-  /**
-   * Récupérer le QR Code d'une réservation
-   */
-  getReservationQrCode(reservationId: number): Observable<{ qrCode: string }> {
-    return this.http.get<{ qrCode: string }>(`${this.baseUrl}/${reservationId}/qr-code`);
-  }
-
-  /**
-   * Récupérer les réservations par statut
-   */
-  getReservationsByStatus(status: number): Observable<UserReservationDto[]> {
-    const params = new HttpParams().set('status', status.toString());
-    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/status`, { params });
-  }
-
-  /**
-   * Récupérer les réservations par date
-   */
-  getReservationsByDate(date: Date): Observable<UserReservationDto[]> {
-    const params = new HttpParams().set('date', date.toISOString());
-    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/date`, { params });
-  }
-
-  // =============================================
-  // Méthodes Admin/Employee
-  // =============================================
-
-  /**
-   * Récupérer toutes les réservations (Admin/Employee)
-   */
-  getAllReservations(): Observable<ReservationDto[]> {
-    return this.http.get<ReservationDto[]>(`${this.baseUrl}/all`);
-  }
-
-  /**
-   * Récupérer les réservations d'un utilisateur spécifique (Admin/Employee)
-   */
-  getUserReservationsById(userId: string): Observable<UserReservationDto[]> {
-    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/user/${userId}`);
-  }
-
-  /**
-   * Récupérer les réservations par cinéma (Admin/Employee)
-   */
-  getReservationsByCinema(cinemaId: number): Observable<UserReservationDto[]> {
-    const params = new HttpParams().set('cinemaId', cinemaId.toString());
-    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/cinema`, { params });
-  }
-
-  /**
-   * Récupérer les réservations par film (Admin/Employee)
-   */
-  getReservationsByMovie(movieId: number): Observable<UserReservationDto[]> {
-    const params = new HttpParams().set('movieId', movieId.toString());
-    return this.http.get<UserReservationDto[]>(`${this.baseUrl}/movie`, { params });
-  }
-
-  /**
-   * Récupérer les statistiques de réservations (Admin)
-   */
-  getReservationStats(): Observable<{
-    totalReservations: number;
-    validatedReservations: number;
-    pendingReservations: number;
-    cancelledReservations: number;
-    totalRevenue: number;
-  }> {
-    return this.http.get<{
-      totalReservations: number;
-      validatedReservations: number;
-      pendingReservations: number;
-      cancelledReservations: number;
-      totalRevenue: number;
-    }>(`${this.baseUrl}/stats`);
-  }
 }

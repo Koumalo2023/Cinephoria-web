@@ -3,10 +3,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 // Interfaces pour le dashboard
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../../environments/environment';
 import {
   ActivityLog,
   DashboardStats,
+  IncidentActivityLog,
+  IncidentChartData,
+  IncidentStats,
+  IncidentType,
+  RecentIncident,
   RecentReservation,
   ReservationChartData,
   TopFilm
@@ -55,5 +60,44 @@ export class AdminDashboardService {
    */
   getActivities(): Observable<ActivityLog[]> {
     return this.http.get<ActivityLog[]>(`${this.baseUrl}/activities`);
+  }
+
+  /**
+   * Récupère les statistiques globales des incidents
+   */
+  getIncidentStats(): Observable<IncidentStats> {
+    return this.http.get<IncidentStats>(`${this.baseUrl}/incidents/stats`);
+  }
+
+  /**
+   * Récupère les données du graphique d'évolution des incidents
+   */
+  getIncidentChartData(period: 'week' | 'month' | 'year' = 'month'): Observable<IncidentChartData> {
+    return this.http.get<IncidentChartData>(`${this.baseUrl}/incidents/chart`, {
+      params: { period }
+    });
+  }
+
+  /**
+   * Récupère les types d'incidents les plus fréquents
+   */
+  getTopIncidentTypes(): Observable<IncidentType[]> {
+    return this.http.get<IncidentType[]>(`${this.baseUrl}/incidents/top-types`);
+  }
+
+  /**
+   * Récupère les incidents récents
+   */
+  getRecentIncidents(limit: number = 10): Observable<RecentIncident[]> {
+    return this.http.get<RecentIncident[]>(`${this.baseUrl}/incidents/recent`, {
+      params: { limit: limit.toString() }
+    });
+  }
+
+  /**
+   * Récupère le journal des activités liées aux incidents
+   */
+  getIncidentActivities(): Observable<IncidentActivityLog[]> {
+    return this.http.get<IncidentActivityLog[]>(`${this.baseUrl}/incidents/activities`);
   }
 }
