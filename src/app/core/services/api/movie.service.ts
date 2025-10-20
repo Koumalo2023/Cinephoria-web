@@ -1,188 +1,242 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-  MovieDto,
-  MovieDetailsDto,
-  CreateMovieDto,
-  UpdateMovieDto,
-  MovieRatingDto,
-  CreateMovieRatingDto,
-  UpdateMovieRatingDto,
-  FilterMoviesRequestDto,
-  EmployeeFavoriteResponseDto,
   CreateEmployeeFavoriteDto,
-  UpdateEmployeeFavoriteDto
+  CreateMovieDto,
+  EmployeeFavoriteResponseDto,
+  FilterMoviesRequestDto,
+  MovieDetailsDto,
+  MovieDto,
+  MovieReviewDto,
+  ShowtimeDto,
+  UpdateEmployeeFavoriteDto,
+  UpdateMovieDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovieService {
-  private readonly baseUrl = `${environment.apiUrl}/movies`;
+  private readonly baseUrl = `${environment.apiUrl}/movie`;
 
   constructor(private http: HttpClient) {}
+
+  // =============================================
+  // Gestion des films
+  // =============================================
+
+  /**
+   * Récupérer les derniers films
+   */
+  getRecentMovies(): Observable<MovieDto[]> {
+    return this.http.get<MovieDto[]>(`${this.baseUrl}/recent`);
+  }
 
   /**
    * Récupérer tous les films
    */
   getAllMovies(): Observable<MovieDto[]> {
-    return this.http.get<MovieDto[]>(this.baseUrl);
+    return this.http.get<MovieDto[]>(`${this.baseUrl}/all`);
   }
 
   /**
-   * Récupérer un film par son ID
+   * Récupérer les détails d'un film
    */
   getMovieById(movieId: number): Observable<MovieDetailsDto> {
-    return this.http.get<MovieDetailsDto>(`${this.baseUrl}/${movieId}`);
+    return this.http.get<MovieDetailsDto>(`${this.baseUrl}/movie/${movieId}`);
   }
 
   /**
-   * Rechercher des films
+   * Récupérer les séances d'un film
    */
-  searchMovies(query: string): Observable<MovieDto[]> {
-    const params = new HttpParams().set('query', query);
-    return this.http.get<MovieDto[]>(`${this.baseUrl}/search`, { params });
+  getMovieSessions(movieId: number): Observable<ShowtimeDto[]> {
+    return this.http.get<ShowtimeDto[]>(`${this.baseUrl}/${movieId}/sessions`);
   }
 
   /**
    * Filtrer les films
    */
   filterMovies(filters: FilterMoviesRequestDto): Observable<MovieDto[]> {
-    let params = new HttpParams();
-    
-    if (filters.cinemaId) params = params.set('cinemaId', filters.cinemaId.toString());
-    if (filters.genre) params = params.set('genre', filters.genre.toString());
-    if (filters.date) params = params.set('date', filters.date.toISOString());
-    if (filters.year) params = params.set('year', filters.year.toString());
-    if (filters.director) params = params.set('director', filters.director);
-    if (filters.actor) params = params.set('actor', filters.actor);
-    if (filters.minimumAge) params = params.set('minimumAge', filters.minimumAge.toString());
-
-    return this.http.get<MovieDto[]>(`${this.baseUrl}/filter`, { params });
+    return this.http.post<MovieDto[]>(`${this.baseUrl}/filter`, filters);
   }
 
   /**
-   * Récupérer les films populaires
+   * Soumettre un avis sur un film
    */
-  getPopularMovies(): Observable<MovieDto[]> {
-    return this.http.get<MovieDto[]>(`${this.baseUrl}/popular`);
+  submitReview(reviewData: MovieReviewDto): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/review`, reviewData);
   }
 
   /**
-   * Récupérer les films à venir
+   * Récupérer l'historique des films consultés
    */
-  getUpcomingMovies(): Observable<MovieDto[]> {
-    return this.http.get<MovieDto[]>(`${this.baseUrl}/upcoming`);
+  getMovieHistory(limit?: number): Observable<MovieDto[]> {
+    const params = limit ? new HttpParams().set('limit', limit.toString()) : undefined;
+    return this.http.get<MovieDto[]>(`${this.baseUrl}/history`, { params });
   }
 
   /**
-   * Récupérer les films favoris de l'utilisateur
+   * Récupérer les films avec séances
+   */
+  getMoviesWithShowtimes(): Observable<MovieDto[]> {
+    return this.http.get<MovieDto[]>(`${this.baseUrl}/with-showtimes`);
+  }
+
+  /**
+   * Récupérer les films par cinéma
+   */
+  getMoviesByCinema(cinemaId: number): Observable<MovieDto[]> {
+    return this.http.get<MovieDto[]>(`${this.baseUrl}/cinema/${cinemaId}`);
+  }
+
+  // =============================================
+  // Méthodes Admin
+  // =============================================
+
+  /**
+   * Créer un nouveau film (Admin)
+   */
+  createMovie(movieData: CreateMovieDto): Observable<number> {
+    return this.http.post<number>(`${this.baseUrl}/create`, movieData);
+  }
+
+  /**
+   * Ajouter une affiche à un film (Admin)
+   */
+  addMoviePoster(movieId: number, posterUrl: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/${movieId}/poster`, posterUrl);
+  }
+
+  /**
+   * Supprimer une affiche d'un film (Admin)
+   */
+  removeMoviePoster(movieId: number, posterUrl: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/${movieId}/poster`, { body: posterUrl });
+  }
+
+  /**
+   * Mettre à jour un film (Admin)
+   */
+  updateMovie(movieData: UpdateMovieDto): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/update`, movieData);
+  }
+
+  /**
+   * Supprimer un film (Admin)
+   */
+  deleteMovie(movieId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/${movieId}`);
+  }
+
+  // =============================================
+  // Intégration TMDb
+  // =============================================
+
+  /**
+   * Rechercher des films dans TMDb
+   */
+  searchTMDb(searchRequest: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/tmdb/search`, searchRequest);
+  }
+
+  /**
+   * Importer un film depuis TMDb (Admin)
+   */
+  importFromTMDb(importRequest: any): Observable<number> {
+    return this.http.post<number>(`${this.baseUrl}/tmdb/import`, importRequest);
+  }
+
+  // =============================================
+  // Gestion des favoris utilisateur
+  // =============================================
+
+  /**
+   * Ajouter un film aux favoris
+   */
+  addToFavorites(movieId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/favorites/${movieId}`, {});
+  }
+
+  /**
+   * Supprimer un film des favoris
+   */
+  removeFromFavorites(movieId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/favorites/${movieId}`);
+  }
+
+  /**
+   * Récupérer les films favoris
    */
   getUserFavorites(): Observable<MovieDto[]> {
     return this.http.get<MovieDto[]>(`${this.baseUrl}/favorites`);
   }
 
   /**
-   * Ajouter un film aux favoris
+   * Vérifier si un film est dans les favoris
    */
-  addToFavorites(movieId: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${movieId}/favorite`, {});
-  }
-
-  /**
-   * Retirer un film des favoris
-   */
-  removeFromFavorites(movieId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${movieId}/favorite`);
-  }
-
-  /**
-   * Récupérer les notations d'un film
-   */
-  getMovieRatings(movieId: number): Observable<MovieRatingDto[]> {
-    return this.http.get<MovieRatingDto[]>(`${this.baseUrl}/${movieId}/ratings`);
-  }
-
-  /**
-   * Ajouter une notation à un film
-   */
-  addRating(movieId: number, ratingData: CreateMovieRatingDto): Observable<MovieRatingDto> {
-    return this.http.post<MovieRatingDto>(`${this.baseUrl}/${movieId}/ratings`, ratingData);
-  }
-
-  /**
-   * Mettre à jour une notation
-   */
-  updateRating(ratingId: number, ratingData: UpdateMovieRatingDto): Observable<MovieRatingDto> {
-    return this.http.put<MovieRatingDto>(`${this.baseUrl}/ratings/${ratingId}`, ratingData);
-  }
-
-  /**
-   * Supprimer une notation
-   */
-  deleteRating(ratingId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/ratings/${ratingId}`);
-  }
-
-  /**
-   * Récupérer l'historique des films de l'utilisateur
-   */
-  getUserMovieHistory(): Observable<MovieDto[]> {
-    return this.http.get<MovieDto[]>(`${this.baseUrl}/history`);
+  checkIsInFavorites(movieId: number): Observable<{ IsInFavorites: boolean }> {
+    return this.http.get<{ IsInFavorites: boolean }>(`${this.baseUrl}/favorites/${movieId}/check`);
   }
 
   // =============================================
-  // Méthodes Admin/Employee
+  // Gestion des coups de cœur employés
   // =============================================
 
   /**
-   * Créer un nouveau film (Admin/Employee)
+   * Créer un coup de cœur employé
    */
-  createMovie(movieData: CreateMovieDto): Observable<MovieDto> {
-    return this.http.post<MovieDto>(this.baseUrl, movieData);
+  createEmployeeFavorite(favoriteData: CreateEmployeeFavoriteDto): Observable<number> {
+    return this.http.post<number>(`${this.baseUrl}/employee-favorites`, favoriteData);
   }
 
   /**
-   * Mettre à jour un film (Admin/Employee)
+   * Mettre à jour un coup de cœur employé
    */
-  updateMovie(movieId: number, movieData: UpdateMovieDto): Observable<MovieDto> {
-    return this.http.put<MovieDto>(`${this.baseUrl}/${movieId}`, movieData);
+  updateEmployeeFavorite(employeeFavoriteId: number, favoriteData: UpdateEmployeeFavoriteDto): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/employee-favorites/${employeeFavoriteId}`, favoriteData);
   }
 
   /**
-   * Supprimer un film (Admin)
+   * Supprimer un coup de cœur employé
    */
-  deleteMovie(movieId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${movieId}`);
+  deleteEmployeeFavorite(employeeFavoriteId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/employee-favorites/${employeeFavoriteId}`);
   }
 
   /**
-   * Récupérer les favoris employés (Employee/Admin)
+   * Récupérer un coup de cœur par ID
    */
-  getEmployeeFavorites(): Observable<EmployeeFavoriteResponseDto[]> {
-    return this.http.get<EmployeeFavoriteResponseDto[]>(`${this.baseUrl}/employee-favorites`);
+  getEmployeeFavoriteById(employeeFavoriteId: number): Observable<EmployeeFavoriteResponseDto> {
+    return this.http.get<EmployeeFavoriteResponseDto>(`${this.baseUrl}/employee-favorites/${employeeFavoriteId}`);
   }
 
   /**
-   * Ajouter un favori employé (Employee/Admin)
+   * Récupérer les coups de cœur de l'employé connecté
    */
-  addEmployeeFavorite(favoriteData: CreateEmployeeFavoriteDto): Observable<EmployeeFavoriteResponseDto> {
-    return this.http.post<EmployeeFavoriteResponseDto>(`${this.baseUrl}/employee-favorites`, favoriteData);
+  getMyEmployeeFavorites(): Observable<EmployeeFavoriteResponseDto[]> {
+    return this.http.get<EmployeeFavoriteResponseDto[]>(`${this.baseUrl}/employee-favorites/my-favorites`);
   }
 
   /**
-   * Mettre à jour un favori employé (Employee/Admin)
+   * Récupérer les coups de cœur par film
    */
-  updateEmployeeFavorite(favoriteId: number, favoriteData: UpdateEmployeeFavoriteDto): Observable<EmployeeFavoriteResponseDto> {
-    return this.http.put<EmployeeFavoriteResponseDto>(`${this.baseUrl}/employee-favorites/${favoriteId}`, favoriteData);
+  getEmployeeFavoritesByMovie(movieId: number): Observable<EmployeeFavoriteResponseDto[]> {
+    return this.http.get<EmployeeFavoriteResponseDto[]>(`${this.baseUrl}/employee-favorites/movie/${movieId}`);
   }
 
   /**
-   * Supprimer un favori employé (Employee/Admin)
+   * Vérifier si un film est en coup de cœur
    */
-  deleteEmployeeFavorite(favoriteId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/employee-favorites/${favoriteId}`);
+  checkHasEmployeeFavorite(movieId: number): Observable<{ HasEmployeeFavorite: boolean }> {
+    return this.http.get<{ HasEmployeeFavorite: boolean }>(`${this.baseUrl}/employee-favorites/movie/${movieId}/check`);
+  }
+
+  /**
+   * Récupérer tous les coups de cœur actifs
+   */
+  getActiveEmployeeFavorites(): Observable<EmployeeFavoriteResponseDto[]> {
+    return this.http.get<EmployeeFavoriteResponseDto[]>(`${this.baseUrl}/employee-favorites/active`);
   }
 }
