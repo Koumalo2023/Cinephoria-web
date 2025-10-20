@@ -9,3 +9,4 @@ export { ReservationService } from './reservation.service';
 export { ManagementService } from './management.service';
 export { IncidentService } from './incident.service';
 export { UserService } from './user.service';
+export { AdminDashboardService } from './admin-dashboard.service';

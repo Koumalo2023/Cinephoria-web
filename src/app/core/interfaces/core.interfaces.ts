@@ -731,3 +731,78 @@ export interface IncidentStatusUpdateDto {
   status: number;
   resolvedAt?: Date;
 }
+
+// =============================================
+// Interfaces pour le Dashboard Admin
+// =============================================
+
+/**
+ * Statistiques du dashboard
+ */
+export interface DashboardStats {
+  totalRevenue: number;
+  totalReservations: number;
+  totalMovies: number;
+  totalUsers: number;
+  revenueChange: number;
+  reservationsChange: number;
+  moviesChange: number;
+  usersChange: number;
+}
+
+/**
+ * Données du graphique des réservations
+ */
+export interface ReservationChartData {
+  labels: string[];
+  data: number[];
+  total: number;
+  average: number;
+}
+
+/**
+ * Film populaire
+ */
+export interface TopFilm {
+  movieId: number;
+  title: string;
+  genre: string;
+  rating: number;
+  posterUrl: string;
+  reservations: number;
+}
+
+/**
+ * Réservation récente
+ */
+export interface RecentReservation {
+  reservationId: number;
+  movieTitle: string;
+  cinemaName: string;
+  userName: string;
+  totalPrice: number;
+  numberOfSeats: number;
+  showtime: Date;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+}
+
+/**
+ * Log d'activité
+ */
+export interface ActivityLog {
+  id: string;
+  type: 'reservation' | 'user_registration' | 'movie_added' | 'incident' | 'system';
+  title: string;
+  description: string;
+  timestamp: Date;
+}
+
+/**
+ * Période pour le dashboard
+ */
+export interface DashboardPeriod {
+  label: string;
+  value: string;
+  startDate: Date;
+  endDate: Date;
+}
