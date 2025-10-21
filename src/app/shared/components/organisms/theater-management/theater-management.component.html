@@ -36,23 +36,23 @@
     <div class="toolbar-left">
       <!-- Sélecteur de vue -->
       <div class="view-selector">
-        <app-button 
+        <app-button
           [variant]="activeView === 'theaters' ? 'primary' : 'ghost'"
           (clicked)="setView('theaters')">
           <app-icon name="home"></app-icon>
           Salles
         </app-button>
-        <app-button 
-          [variant]="activeView === 'layout' ? 'primary' : 'ghost'"
-          (clicked)="setView('layout')">
-          <app-icon name="grid"></app-icon>
-          Layouts
-        </app-button>
-        <app-button 
+        <app-button
           [variant]="activeView === 'seats' ? 'primary' : 'ghost'"
           (clicked)="setView('seats')">
           <app-icon name="chair"></app-icon>
           Sièges
+        </app-button>
+        <app-button
+          [variant]="activeView === 'seat-management' ? 'primary' : 'ghost'"
+          (clicked)="setView('seat-management')">
+          <app-icon name="settings"></app-icon>
+          Gestion sièges
         </app-button>
       </div>
     </div>
@@ -118,14 +118,14 @@
               <app-button 
                 variant="ghost" 
                 size="small"
-                (clicked)="onManageSeats(theater.id)">
+                (clicked)="onManageSeats(theater.theaterId.toString())">
                 <app-icon name="chair"></app-icon>
                 Sièges
               </app-button>
               <app-button 
                 variant="ghost" 
                 size="small"
-                (clicked)="deleteTheater(theater.id)">
+                (clicked)="deleteTheater(theater.theaterId.toString())">
                 <app-icon name="trash-2"></app-icon>
                 Supprimer
               </app-button>
@@ -145,106 +145,7 @@
         </div>
       </section>
 
-      <!-- Vue Layouts -->
-      <section *ngIf="activeView === 'layout'" class="view-section">
-        <div class="section-header">
-          <h2 class="section-title">Gestion des Layouts</h2>
-          <div class="section-info">
-            <span class="count-badge">{{ theaterLayouts.length }} layout(s)</span>
-            <app-button variant="primary" (clicked)="createNewLayout()">
-              <app-icon name="plus"></app-icon>
-              Nouveau layout
-            </app-button>
-          </div>
-        </div>
-
-        <!-- Liste des layouts -->
-        <div class="layouts-grid">
-          <div *ngFor="let layout of theaterLayouts" class="layout-card">
-            <div class="layout-header">
-              <h3 class="layout-name">{{ layout.name }}</h3>
-              <app-badge [variant]="'info'">
-                {{ layout.screenType }}
-              </app-badge>
-            </div>
-            
-            <div class="layout-details">
-              <div class="layout-stat">
-                <app-icon name="grid"></app-icon>
-                <span>{{ layout.rows }} rangées × {{ layout.seatsPerRow }} sièges</span>
-              </div>
-              <div class="layout-stat">
-                <app-icon name="users"></app-icon>
-                <span>{{ layout.totalSeats }} sièges totaux</span>
-              </div>
-              <div class="layout-stat">
-                <app-icon name="calendar"></app-icon>
-                <span>Créé le {{ layout.createdAt | date:'dd/MM/yyyy' }}</span>
-              </div>
-            </div>
-            
-            <div class="layout-facilities">
-              <app-chip
-                *ngFor="let facility of layout.facilities"
-                [variant]="'outline'">
-                {{ facility }}
-              </app-chip>
-            </div>
-            
-            <div class="layout-actions">
-              <app-button variant="ghost" size="small">
-                <app-icon name="edit"></app-icon>
-                Modifier
-              </app-button>
-              <app-button variant="ghost" size="small">
-                <app-icon name="copy"></app-icon>
-                Dupliquer
-              </app-button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Formulaire de création de layout -->
-        <div *ngIf="false" class="layout-form-container">
-          <h3>Créer un nouveau layout</h3>
-          <form [formGroup]="layoutForm" class="layout-form">
-            <div class="form-row">
-              <app-input
-                label="Nom du layout"
-                formControlName="name"
-                placeholder="Ex: Layout IMAX Standard">
-              </app-input>
-            </div>
-            
-            <div class="form-row">
-              <app-input
-                label="Nombre de rangées"
-                formControlName="rows"
-                type="number"
-                placeholder="Ex: 15">
-              </app-input>
-              
-              <app-input
-                label="Sièges par rangée"
-                formControlName="seatsPerRow"
-                type="number"
-                placeholder="Ex: 24">
-              </app-input>
-            </div>
-            
-            <div class="form-actions">
-              <app-button variant="ghost">
-                Annuler
-              </app-button>
-              <app-button variant="primary" (clicked)="saveLayout()">
-                <app-icon name="save"></app-icon>
-                Sauvegarder
-              </app-button>
-            </div>
-          </form>
-        </div>
-      </section>
-
+    
       <!-- Vue Sièges -->
       <section *ngIf="activeView === 'seats'" class="view-section">
         <div class="section-header">
@@ -261,13 +162,13 @@
         <!-- Salle sélectionnée -->
         <div *ngIf="selectedTheater" class="selected-theater">
           <h3>{{ selectedTheater.name }}</h3>
-          <p>{{ selectedTheater.cinemaName }} • {{ selectedTheater.capacity }} sièges</p>
+          <p>Cinéma ID: {{ selectedTheater.cinemaId }} • {{ selectedTheater.seatCount }} sièges</p>
         </div>
 
         <!-- Grille de sièges -->
         <div class="seats-container">
           <app-seat-grid
-            [seats]="seats"
+            [seats]="uiSeats"
             [selectedSeats]="selectedSeats"
             [maxSelection]="10"
             [showScreen]="true"
@@ -303,6 +204,44 @@
           </div>
         </div>
       </section>
+
+      <!-- Vue Gestion sièges -->
+      <section *ngIf="activeView === 'seat-management'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Gestion détaillée des sièges</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ seats.length }} siège(s)</span>
+            <app-button variant="ghost" (clicked)="setView('theaters')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour aux salles
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Salle sélectionnée -->
+        <div *ngIf="selectedTheater" class="selected-theater">
+          <h3>{{ selectedTheater.name }}</h3>
+          <p>Cinéma ID: {{ selectedTheater.cinemaId }} • {{ selectedTheater.seatCount }} sièges</p>
+        </div>
+
+        <!-- Liste des sièges avec gestion individuelle -->
+        <div class="seats-management-container">
+          <div *ngFor="let seat of seats" class="seat-item">
+            <app-seat-management
+              [seat]="seat"
+              [theaterId]="selectedTheater?.theaterId || null"
+              (seatUpdated)="loadTheaterSeats(selectedTheater?.theaterId || 0)">
+            </app-seat-management>
+          </div>
+        </div>
+
+        <!-- Message vide -->
+        <div *ngIf="seats.length === 0" class="empty-state">
+          <app-icon name="chair" size="large"></app-icon>
+          <h3>Aucun siège trouvé</h3>
+          <p>Aucun siège n'est disponible pour cette salle.</p>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -330,31 +269,22 @@
             <app-select
               label="Cinéma"
               formControlName="cinemaId"
-              [options]="[
-                { label: 'Cinéma Pathé Bellecour', value: '1' },
-                { label: 'UGC Ciné Cité Internationale', value: '2' },
-                { label: 'Cinéma Le Comœdia', value: '3' }
-              ]">
+              [options]="cinemaOptions">
             </app-select>
           </div>
           
           <div class="form-row">
             <app-input
               label="Capacité"
-              formControlName="capacity"
+              formControlName="seatCount"
               type="number"
               placeholder="Ex: 350">
             </app-input>
             
             <app-select
-              label="Type d'écran"
-              formControlName="screenType"
-              [options]="[
-                { label: 'IMAX', value: 'imax' },
-                { label: 'Dolby Cinema', value: 'dolby' },
-                { label: '4K Laser', value: '4k' },
-                { label: 'Standard', value: 'standard' }
-              ]">
+              label="Qualité de projection"
+              formControlName="projectionQuality"
+              [options]="projectionQualityOptions">
             </app-select>
           </div>
         </form>

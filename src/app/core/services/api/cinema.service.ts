@@ -3,16 +3,16 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-    CinemaDto,
-    CreateCinemaDto,
-    UpdateCinemaDto
+  CinemaDto,
+  CreateCinemaDto,
+  UpdateCinemaDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CinemaService {
-  private readonly baseUrl = `${environment.apiUrl}/cinemas`;
+  private readonly baseUrl = `${environment.apiUrl}/Cinemas`;
 
   constructor(private http: HttpClient) {}
 

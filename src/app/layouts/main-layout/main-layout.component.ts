@@ -1,18 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 // Composants partagés
-import { HeaderComponent } from '../../shared/components/organisms/header/header.component';
+import { ToastNotificationComponent } from '../../shared/components/atoms/toast-notification/toast-notification.component';
 import { FooterComponent } from '../../shared/components/organisms/footer/footer.component';
+import { HeaderComponent } from '../../shared/components/organisms/header/header.component';
 
 // Services
 import { UserStateService } from '../../core/services/auth/user-state.service';
 
 // Interfaces core
 import { AppUserDto } from '../../core/interfaces/core.interfaces';
-import { UserRole } from '../../core/enums/user-role.enum';
 
 @Component({
   selector: 'app-main-layout',
@@ -22,7 +22,8 @@ import { UserRole } from '../../core/enums/user-role.enum';
     RouterModule,
     RouterOutlet,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    ToastNotificationComponent
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']

@@ -1,0 +1,98 @@
+<div class="seat-management">
+  <!-- Affichage normal du siège -->
+  <div *ngIf="!isEditing" class="seat-display">
+    <div class="seat-info">
+      <div class="seat-header">
+        <app-icon [name]="seatIcon" size="small"></app-icon>
+        <span class="seat-number">{{ seat?.seatNumber }}</span>
+        <app-badge 
+          [variant]="seatStatusColor"
+          size="small">
+          {{ seatStatus }}
+        </app-badge>
+      </div>
+      
+      <div class="seat-details">
+        <div class="seat-property">
+          <span class="property-label">Accessible PMR:</span>
+          <span class="property-value">{{ seat?.isAccessible ? 'Oui' : 'Non' }}</span>
+        </div>
+        <div class="seat-property">
+          <span class="property-label">Disponible:</span>
+          <span class="property-value">{{ seat?.isAvailable ? 'Oui' : 'Non' }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="seat-actions">
+      <app-button 
+        variant="ghost" 
+        size="small"
+        (clicked)="toggleEdit()">
+        <app-icon name="edit"></app-icon>
+        Modifier
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Mode édition du siège -->
+  <div *ngIf="isEditing" class="seat-edit">
+    <div class="edit-header">
+      <h4>Modifier le siège {{ seat?.seatNumber }}</h4>
+      <app-button 
+        variant="ghost" 
+        size="small"
+        (clicked)="toggleEdit()">
+        <app-icon name="x"></app-icon>
+      </app-button>
+    </div>
+    
+    <div class="edit-actions">
+      <!-- Actions pour PMR -->
+      <div class="action-group">
+        <h5>Accessibilité PMR</h5>
+        <div class="action-buttons">
+          <app-button 
+            *ngIf="!seat?.isAccessible"
+            variant="secondary" 
+            size="small"
+            (clicked)="markAsHandicap()">
+            <app-icon name="wheelchair"></app-icon>
+            Marquer PMR
+          </app-button>
+          
+          <app-button 
+            *ngIf="seat?.isAccessible"
+            variant="secondary" 
+            size="small"
+            (clicked)="removeHandicap()">
+            <app-icon name="x"></app-icon>
+            Retirer PMR
+          </app-button>
+          
+          <app-button 
+            variant="secondary" 
+            size="small"
+            (clicked)="toggleAccessibility()">
+            <app-icon name="refresh-cw"></app-icon>
+            Basculer PMR
+          </app-button>
+        </div>
+      </div>
+      
+      <!-- Actions pour disponibilité -->
+      <div class="action-group">
+        <h5>Disponibilité</h5>
+        <div class="action-buttons">
+          <app-button 
+            variant="secondary" 
+            size="small"
+            (clicked)="toggleAvailability()">
+            <app-icon name="toggle-left"></app-icon>
+            {{ seat?.isAvailable ? 'Rendre indisponible' : 'Rendre disponible' }}
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

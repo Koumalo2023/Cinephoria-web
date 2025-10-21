@@ -8,8 +8,6 @@
     <div
       [class]="selectClasses"
       (click)="toggleDropdown()"
-      (blur)="onInputBlur($event)"
-      (focus)="onInputFocus($event)"
       tabindex="0">
       
       <span *ngIf="prefixIcon" class="select__prefix">
@@ -29,8 +27,7 @@
       <div
         *ngFor="let option of options"
         [class]="getOptionClasses(option)"
-        (click)="selectOption(option)"
-        (mousedown)="$event.preventDefault()">
+        (click)="selectOption(option)">
         {{ option.label }}
       </div>
       

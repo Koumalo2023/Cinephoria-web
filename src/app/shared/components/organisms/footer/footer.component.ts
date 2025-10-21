@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 // Interfaces core
@@ -31,7 +31,6 @@ export class FooterComponent implements OnInit {
       country: 'France',
       phoneNumber: '+33 1 42 68 53 01',
       openingHours: '10:00 - 23:00',
-      showtimes: [],
       theaters: []
     },
     {
@@ -42,7 +41,6 @@ export class FooterComponent implements OnInit {
       country: 'France',
       phoneNumber: '+33 4 78 42 53 01',
       openingHours: '10:00 - 23:00',
-      showtimes: [],
       theaters: []
     },
     {
@@ -53,7 +51,6 @@ export class FooterComponent implements OnInit {
       country: 'France',
       phoneNumber: '+33 4 91 54 53 01',
       openingHours: '10:00 - 23:00',
-      showtimes: [],
       theaters: []
     }
   ];

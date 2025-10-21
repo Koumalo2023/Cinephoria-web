@@ -3,10 +3,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-    AddHandicapSeatDto,
-    RemoveHandicapSeatDto,
-    SeatDto,
-    UpdateSeatDto
+  AddHandicapSeatDto,
+  CreateSeatDto,
+  RemoveHandicapSeatDto,
+  SeatDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
@@ -34,9 +34,10 @@ export class SeatsService {
   /**
    * Supprimer un siège pour personnes à mobilité réduite
    */
-  removeHandicapSeat(handicapSeatData: RemoveHandicapSeatDto): Observable<string> {
-    return this.http.delete<string>(`${this.baseUrl}/handicap-delete-seat`, {
-      body: handicapSeatData
+  removeHandicapSeat(handicapSeatData: RemoveHandicapSeatDto): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/handicap-delete-seat`, {
+      body: handicapSeatData,
+      responseType: 'text' as 'json' // Force le parsing comme texte
     });
   }
 
@@ -48,9 +49,10 @@ export class SeatsService {
   }
 
   /**
-   * Mettre à jour un siège
+   * Créer un siège
    */
-  updateSeat(seatData: UpdateSeatDto): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/update`, seatData);
+  createSeat(seatData: CreateSeatDto): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/create`, seatData);
   }
+
 }

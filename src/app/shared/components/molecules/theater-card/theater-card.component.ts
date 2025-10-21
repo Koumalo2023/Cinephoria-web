@@ -1,23 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent, ButtonVariant, ButtonSize } from '../../atoms/button/button.component';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { Observable, map, of } from 'rxjs';
+import { TheaterDto } from 'src/app/core/interfaces/core.interfaces';
+import { CinemaService } from 'src/app/core/services/api/cinema.service';
 import { BadgeComponent, BadgeVariant } from '../../atoms/badge/badge.component';
+import { ButtonComponent } from '../../atoms/button/button.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
-
-export interface Theater {
-  id: string;
-  name: string;
-  cinemaId: string;
-  cinemaName: string;
-  capacity: number;
-  screenType: string;
-  screenSize: string;
-  facilities: string[];
-  isAvailable: boolean;
-  currentOccupancy?: number;
-  nextShowtime?: string;
-  imageUrl?: string;
-}
 
 @Component({
   selector: 'app-theater-card',
@@ -27,16 +15,21 @@ export interface Theater {
   styleUrl: './theater-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TheaterCardComponent {
-  @Input() theater: Theater | null = null;
+export class TheaterCardComponent implements OnChanges {
+  private cinemaService = inject(CinemaService);
+  
+  @Input() theater: TheaterDto | null = null;
   @Input() showActions = true;
   @Output() theaterSelected = new EventEmitter<string>();
   @Output() manageSeats = new EventEmitter<string>();
   @Output() viewSchedule = new EventEmitter<string>();
 
+  cinemaName$: Observable<string> = of('Chargement...');
+
   get occupancyPercentage(): number {
-    if (!this.theater?.currentOccupancy || !this.theater?.capacity) return 0;
-    return Math.round((this.theater.currentOccupancy / this.theater.capacity) * 100);
+    // Pour l'instant, on utilise une valeur par défaut car TheaterDto n'a pas currentOccupancy
+    // À adapter selon les données réelles de l'API
+    return 0;
   }
 
   get occupancyStatus(): 'low' | 'medium' | 'high' | 'full' {
@@ -59,41 +52,126 @@ export class TheaterCardComponent {
   }
 
   get screenTypeIcon(): string {
-    const type = this.theater?.screenType.toLowerCase();
-    if (type?.includes('imax')) return 'star';
-    if (type?.includes('3d')) return 'camera';
-    if (type?.includes('dolby')) return 'bell';
-    return 'home';
+    const theater = this.theater;
+    if (!theater) return 'home';
+    
+    switch (theater.projectionQuality) {
+      case 0: // FourDX
+        return 'star';
+      case 1: // ThreeD
+        return 'camera';
+      case 2: // IMAX
+        return 'maximize';
+      case 3: // FourK
+        return 'high_quality';
+      case 4: // Standard2D
+        return 'tv';
+      case 5: // DolbyCinema
+        return 'theaters';
+      default:
+        return 'home';
+    }
   }
 
   onTheaterSelect(): void {
     if (this.theater) {
-      this.theaterSelected.emit(this.theater.id);
+      this.theaterSelected.emit(this.theater.theaterId.toString());
     }
   }
 
   onManageSeats(event: Event): void {
     event.stopPropagation();
     if (this.theater) {
-      this.manageSeats.emit(this.theater.id);
+      this.manageSeats.emit(this.theater.theaterId.toString());
     }
   }
 
   onViewSchedule(event: Event): void {
     event.stopPropagation();
     if (this.theater) {
-      this.viewSchedule.emit(this.theater.id);
+      this.viewSchedule.emit(this.theater.theaterId.toString());
+    }
+  }
+
+  getFacilities(): string[] {
+    const theater = this.theater;
+    const facilities: string[] = [];
+    
+    if (!theater) return facilities;
+    
+    switch (theater.projectionQuality) {
+      case 0: // FourDX
+        facilities.push('4DX');
+        break;
+      case 1: // ThreeD
+        facilities.push('3D');
+        break;
+      case 2: // IMAX
+        facilities.push('IMAX');
+        break;
+      case 3: // FourK
+        facilities.push('4K');
+        break;
+      case 4: // Standard2D
+        facilities.push('2D');
+        break;
+      case 5: // DolbyCinema
+        facilities.push('Dolby Cinema');
+        break;
+    }
+    
+    if (theater.isOperational) {
+      facilities.push('Opérationnel');
+    }
+    
+    return facilities;
+  }
+
+  getScreenTypeLabel(): string {
+    const theater = this.theater;
+    if (!theater) return 'Standard';
+    
+    switch (theater.projectionQuality) {
+      case 0: // FourDX
+        return '4DX';
+      case 1: // ThreeD
+        return '3D';
+      case 2: // IMAX
+        return 'IMAX';
+      case 3: // FourK
+        return '4K';
+      case 4: // Standard2D
+        return '2D Standard';
+      case 5: // DolbyCinema
+        return 'Dolby Cinema';
+      default:
+        return 'Standard';
     }
   }
 
   getFacilityIcon(facility: string): string {
     const icons: { [key: string]: string } = {
-      'Handicapé': 'user',
-      'Dolby Atmos': 'bell',
-      '4K': 'camera',
-      'Climatisation': 'home',
-      'Son Surround': 'bell'
+      '3D': 'camera',
+      '4DX': 'star',
+      'Dolby Atmos': 'bell'
     };
     return icons[facility] || 'home';
+  }
+
+  // Méthode pour obtenir le nom du cinéma
+  getCinemaName(cinemaId: number): Observable<string> {
+    return this.cinemaService.getAllCinemas().pipe(
+      map(cinemas => {
+        const cinema = cinemas.find(c => c.cinemaId === cinemaId);
+        return cinema ? cinema.name : `Cinéma ID: ${cinemaId}`;
+      })
+    );
+  }
+
+  // Méthode appelée quand le théâtre change
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['theater'] && this.theater?.cinemaId) {
+      this.cinemaName$ = this.getCinemaName(this.theater.cinemaId);
+    }
   }
 }

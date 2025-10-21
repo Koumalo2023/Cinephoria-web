@@ -1,20 +1,20 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 // Composants atomiques
-import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { AvatarComponent } from '../../atoms/avatar/avatar.component';
+import { BadgeComponent } from '../../atoms/badge/badge.component';
+import { ButtonComponent } from '../../atoms/button/button.component';
 import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
+import { IconComponent } from '../../atoms/icon/icon.component';
 
 // Composants molécules
-import { NotificationItemComponent, Notification as NotificationItem } from '../../atoms/notification-item/notification-item.component';
+import { Notification as NotificationItem, NotificationItemComponent } from '../../atoms/notification-item/notification-item.component';
 import { NotificationSettingsComponent } from '../../molecules/notification-settings/notification-settings.component';
 
-// Interfaces core
-import { NotificationSettingsDto } from '../../../../core/interfaces/settings.interfaces';
+// Services
+import { NotificationService, Notification as ServiceNotification } from 'src/app/core/services/notification.service';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error' | 'system';
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -88,7 +88,6 @@ export interface NotificationCenterConfig {
   styleUrls: ['./notifications-center.component.scss']
 })
 export class NotificationsCenterComponent implements OnInit, OnDestroy {
-  @Input() notifications: Notification[] = [];
   @Input() config: NotificationCenterConfig = {
     showUnreadCount: true,
     showSettings: true,
@@ -116,6 +115,7 @@ export class NotificationsCenterComponent implements OnInit, OnDestroy {
   @Output() markAllRead = new EventEmitter<void>();
   @Output() clearAll = new EventEmitter<void>();
 
+  notifications: Notification[] = [];
   selectedNotifications: Set<string> = new Set();
   currentFilter: NotificationFilter = {};
   showSettings = false;
@@ -125,8 +125,27 @@ export class NotificationsCenterComponent implements OnInit, OnDestroy {
 
   private refreshInterval?: any;
 
+  constructor(private notificationService: NotificationService) {}
+
   ngOnInit(): void {
     this.startAutoRefresh();
+    // Écouter les notifications du service
+    this.notificationService.notifications$.subscribe((serviceNotifications: ServiceNotification[]) => {
+      // Convertir les notifications du service vers notre format
+      this.notifications = serviceNotifications.map((notif: ServiceNotification) => ({
+        id: notif.id,
+        title: notif.title,
+        message: notif.message,
+        type: notif.type as NotificationType,
+        priority: 'medium',
+        status: 'unread',
+        timestamp: notif.timestamp,
+        action: notif.action ? {
+          label: notif.action.label,
+          handler: notif.action.callback
+        } : undefined
+      }));
+    });
   }
 
   ngOnDestroy(): void {
@@ -258,14 +277,17 @@ export class NotificationsCenterComponent implements OnInit, OnDestroy {
   // Actions sur les notifications
   onNotificationRead(notification: Notification): void {
     this.notificationRead.emit(notification);
+    this.notificationService.remove(notification.id);
   }
 
   onNotificationArchive(notification: Notification): void {
     this.notificationArchived.emit(notification);
+    this.notificationService.remove(notification.id);
   }
 
   onNotificationDelete(notification: Notification): void {
     this.notificationDeleted.emit(notification);
+    this.notificationService.remove(notification.id);
   }
 
   onNotificationAction(notification: Notification): void {
@@ -296,10 +318,12 @@ export class NotificationsCenterComponent implements OnInit, OnDestroy {
 
   onMarkAllRead(): void {
     this.markAllRead.emit();
+    this.notificationService.clearAll();
   }
 
   onClearAll(): void {
     this.clearAll.emit();
+    this.notificationService.clearAll();
   }
 
   // Filtres

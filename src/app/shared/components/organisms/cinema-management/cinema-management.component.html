@@ -118,17 +118,17 @@
                 <app-icon name="edit"></app-icon>
                 Modifier
               </app-button>
-              <app-button 
-                variant="ghost" 
+              <app-button
+                variant="ghost"
                 size="small"
-                (clicked)="setView('theaters')">
+                (clicked)="setView('theaters', cinema)">
                 <app-icon name="home"></app-icon>
                 Salles
               </app-button>
               <app-button 
                 variant="ghost" 
                 size="small"
-                (clicked)="deleteCinema(cinema.id)">
+                (clicked)="deleteCinema(cinema.cinemaId.toString())">
                 <app-icon name="trash-2"></app-icon>
                 Supprimer
               </app-button>
@@ -169,7 +169,7 @@
             <div *ngFor="let cinema of cinemas" class="cinema-option">
               <app-button
                 variant="secondary"
-                (clicked)="onCinemaSelected(cinema.id)">
+                (clicked)="onCinemaSelected(cinema.cinemaId.toString())">
                 {{ cinema.name }}
               </app-button>
             </div>
@@ -206,7 +206,7 @@
     </main>
   </div>
 
-  <!-- Modal d'édition (simplifié) -->
+  <!-- Modal d'édition de cinéma -->
   <div *ngIf="isEditing" class="edit-modal-overlay">
     <div class="edit-modal">
       <div class="modal-header">
@@ -242,9 +242,23 @@
             </app-input>
             
             <app-input
-              label="Code postal"
-              formControlName="postalCode"
-              placeholder="Ex: 69002">
+              label="Pays"
+              formControlName="country"
+              placeholder="Ex: France">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Numéro de téléphone"
+              formControlName="phoneNumber"
+              placeholder="Ex: +33 1 23 45 67 89">
+            </app-input>
+            
+            <app-input
+              label="Heures d'ouverture"
+              formControlName="openingHours"
+              placeholder="Ex: 9h-23h du lundi au dimanche">
             </app-input>
           </div>
         </form>

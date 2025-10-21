@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, HostListener, Input, Output } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface SelectOption {
   value: any;
@@ -107,6 +107,19 @@ export class SelectComponent implements ControlValueAccessor {
 
   closeDropdown(): void {
     this.isOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Fermer le dropdown si on clique en dehors
+    if (this.isOpen) {
+      const target = event.target as HTMLElement;
+      const clickedInside = target.closest('.select-container');
+      
+      if (!clickedInside) {
+        this.closeDropdown();
+      }
+    }
   }
 
   // ControlValueAccessor implementation

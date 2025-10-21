@@ -1,4 +1,5 @@
 import { MovieGenre } from '../enums/movie-genre.enum';
+import { ProjectionQuality } from '../enums/projection-quality.enum';
 import { ReservationStatus } from '../enums/reservation-status.enum';
 import { UserRole } from '../enums/user-role.enum';
 
@@ -119,11 +120,9 @@ export interface SeatDto {
   seatId: number;
   theaterId: number;
   seatNumber: string;
-  row: string;
-  column: number;
+  updatedAt: Date;
+  isAccessible: boolean;
   isAvailable: boolean;
-  isHandicapAccessible: boolean;
-  priceAdjustment: number;
 }
 
 /**
@@ -180,7 +179,6 @@ export interface CinemaDto {
   city: string;
   country: string;
   openingHours: string;
-  showtimes: ShowtimeDto[];
   theaters: TheaterDto[];
 }
 
@@ -190,12 +188,11 @@ export interface CinemaDto {
  */
 export interface TheaterDto {
   theaterId: number;
-  cinemaId: number;
   name: string;
-  capacity: number;
-  hasThreeD: boolean;
-  hasFourDX: boolean;
-  hasDolbyAtmos: boolean;
+  seatCount: number;
+  cinemaId: number;
+  isOperational: boolean;
+  projectionQuality: ProjectionQuality;
   seats: SeatDto[];
 }
 
@@ -632,12 +629,11 @@ export interface UpdateCinemaDto {
  * @see api-documentation.md#createtheaterdto
  */
 export interface CreateTheaterDto {
-  cinemaId: number;
   name: string;
-  capacity: number;
-  hasThreeD: boolean;
-  hasFourDX: boolean;
-  hasDolbyAtmos: boolean;
+  seatCount: number;
+  cinemaId: number;
+  isOperational: boolean;
+  projectionQuality: ProjectionQuality;
 }
 
 /**
@@ -647,10 +643,10 @@ export interface CreateTheaterDto {
 export interface UpdateTheaterDto {
   theaterId: number;
   name?: string;
-  capacity?: number;
-  hasThreeD?: boolean;
-  hasFourDX?: boolean;
-  hasDolbyAtmos?: boolean;
+  seatCount?: number;
+  cinemaId?: number;
+  isOperational?: boolean;
+  projectionQuality?: ProjectionQuality;
 }
 
 /**
@@ -660,10 +656,8 @@ export interface UpdateTheaterDto {
 export interface CreateSeatDto {
   theaterId: number;
   seatNumber: string;
-  row: string;
-  column: number;
-  isHandicapAccessible: boolean;
-  priceAdjustment: number;
+  isAccessible: boolean;
+  isAvailable: boolean;
 }
 
 /**
@@ -671,10 +665,84 @@ export interface CreateSeatDto {
  * @see api-documentation.md#updateseatdto
  */
 export interface UpdateSeatDto {
-  seatId: number;
+  theaterId: number;
+  seatNumber: string;
+  isAccessible: boolean;
+  isAvailable: boolean;
+}
+
+/**
+ * Interface pour la recherche de cinémas
+ */
+export interface SearchCinemasDto {
+  city?: string;
+  name?: string;
+  projectionQuality?: ProjectionQuality;
+  isOperational?: boolean;
+}
+
+/**
+ * Interface pour la recherche de salles
+ */
+export interface SearchTheatersDto {
+  cinemaId?: number;
+  name?: string;
+  projectionQuality?: ProjectionQuality;
+  isOperational?: boolean;
+  minSeatCount?: number;
+  maxSeatCount?: number;
+}
+
+/**
+ * Interface pour la recherche de sièges
+ */
+export interface SearchSeatsDto {
+  theaterId?: number;
+  row?: string;
   isAvailable?: boolean;
   isHandicapAccessible?: boolean;
-  priceAdjustment?: number;
+}
+
+/**
+ * Interface pour les statistiques de cinéma
+ */
+export interface CinemaStatsDto {
+  cinemaId: number;
+  name: string;
+  totalTheaters: number;
+  totalSeats: number;
+  operationalTheaters: number;
+  averageRating: number;
+  totalRevenue: number;
+  totalReservations: number;
+}
+
+/**
+ * Interface pour les statistiques de salle
+ */
+export interface TheaterStatsDto {
+  theaterId: number;
+  name: string;
+  seatCount: number;
+  projectionQuality: ProjectionQuality;
+  isOperational: boolean;
+  totalReservations: number;
+  occupancyRate: number;
+  revenue: number;
+  averageRating: number;
+}
+
+/**
+ * Interface pour les statistiques de sièges
+ */
+export interface SeatStatsDto {
+  theaterId: number;
+  totalSeats: number;
+  availableSeats: number;
+  handicapSeats: number;
+  occupancyRate: number;
+  premiumSeats: number;
+  standardSeats: number;
 }
 
 /**
@@ -870,4 +938,24 @@ export interface IncidentActivityLog {
   timestamp: Date;
   incidentId: number;
   userName: string;
+}
+
+// =============================================
+// Interfaces pour les Notifications
+// =============================================
+
+/**
+ * Interface pour une notification
+ */
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  timestamp: Date;
+  duration?: number;
+  action?: {
+    label: string;
+    callback: () => void;
+  };
 }

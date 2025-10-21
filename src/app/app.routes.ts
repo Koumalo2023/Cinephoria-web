@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { AuthGuard, RoleGuard } from './core/guards';
 import { UserRole } from './core/enums/user-role.enum';
+import { AuthGuard, RoleGuard } from './core/guards';
 
 export const routes: Routes = [
   // Routes publiques avec layout principal
@@ -117,7 +117,7 @@ export const routes: Routes = [
       },
       {
         path: 'theaters',
-        loadComponent: () => import('./features/management/theaters/theater-management.component').then(m => m.TheaterManagementComponent),
+        loadComponent: () => import('./features/management/theaters/theater.component').then(m => m.TheaterComponent),
         title: 'Cinephoria - Gestion Salles'
       },
       {
@@ -162,7 +162,7 @@ export const routes: Routes = [
       },
       {
         path: 'theaters',
-        loadComponent: () => import('./features/management/theaters/theater-management.component').then(m => m.TheaterManagementComponent),
+        loadComponent: () => import('./features/management/theaters/theater.component').then(m => m.TheaterComponent),
         title: 'Cinephoria - Gestion Salles'
       },
       {
@@ -217,7 +217,7 @@ export const routes: Routes = [
       },
       {
         path: 'theaters',
-        loadComponent: () => import('./features/management/theaters/theater-management.component').then(m => m.TheaterManagementComponent),
+        loadComponent: () => import('./features/management/theaters/theater.component').then(m => m.TheaterComponent),
         title: 'Cinephoria - Gestion Salles'
       },
       {
