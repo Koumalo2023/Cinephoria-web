@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 
 // Composants partagés
-import { HeaderComponent } from '../../shared/components/organisms/header/header.component';
+import { ToastNotificationComponent } from '../../shared/components/atoms/toast-notification/toast-notification.component';
 import { FooterComponent } from '../../shared/components/organisms/footer/footer.component';
+import { HeaderComponent } from '../../shared/components/organisms/header/header.component';
 
 // Interfaces core
-import { AppUserDto } from '../../core/interfaces/core.interfaces';
 import { UserRole } from '../../core/enums/user-role.enum';
+import { AppUserDto } from '../../core/interfaces/core.interfaces';
 
 @Component({
   selector: 'app-management-layout',
@@ -18,7 +19,8 @@ import { UserRole } from '../../core/enums/user-role.enum';
     RouterModule,
     RouterOutlet,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    ToastNotificationComponent
   ],
   templateUrl: './management-layout.component.html',
   styleUrls: ['./management-layout.component.scss']

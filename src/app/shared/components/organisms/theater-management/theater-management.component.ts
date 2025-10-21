@@ -1,32 +1,32 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { of } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 
 // Composants atomiques
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
+import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
+import { ChipComponent } from '../../atoms/chip/chip.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { SelectComponent } from '../../atoms/select/select.component';
-import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
-import { ChipComponent } from '../../atoms/chip/chip.component';
 
 // Composants molécules
-import { TheaterCardComponent, Theater } from '../../molecules/theater-card/theater-card.component';
-import { SeatGridComponent, Seat } from '../../molecules/seat-grid/seat-grid.component';
-import { FilterPanelComponent, FilterGroup, AppliedFilter } from '../../molecules/filter-panel/filter-panel.component';
+import { CinemaDto, CreateSeatDto, CreateTheaterDto, SeatDto, TheaterDto, UpdateTheaterDto } from 'src/app/core/interfaces/core.interfaces';
+import { AppliedFilter, FilterGroup, FilterPanelComponent } from '../../molecules/filter-panel/filter-panel.component';
+import { SeatGridComponent } from '../../molecules/seat-grid/seat-grid.component';
+import { SeatManagementComponent } from '../../molecules/seat-management/seat-management.component';
+import { TheaterCardComponent } from '../../molecules/theater-card/theater-card.component';
 
-export interface TheaterLayout {
-  id: string;
-  name: string;
-  rows: number;
-  seatsPerRow: number;
-  totalSeats: number;
-  screenType: string;
-  facilities: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Services
+import { CinemaService } from 'src/app/core/services/api/cinema.service';
+import { SeatsService } from 'src/app/core/services/api/seats.service';
+import { TheaterService } from 'src/app/core/services/api/theater.service';
+import { LoadingService } from 'src/app/core/services/loading.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
+
 
 export interface TheaterStats {
   totalTheaters: number;
@@ -51,6 +51,7 @@ export interface TheaterStats {
     ChipComponent,
     TheaterCardComponent,
     SeatGridComponent,
+    SeatManagementComponent,
     FilterPanelComponent
   ],
   templateUrl: './theater-management.component.html',
@@ -59,130 +60,33 @@ export interface TheaterStats {
   standalone: true
 })
 export class TheaterManagementComponent implements OnInit {
-  activeView: 'theaters' | 'layout' | 'seats' = 'theaters';
-  selectedTheater: Theater | null = null;
+  private theaterService = inject(TheaterService);
+  private cinemaService = inject(CinemaService);
+  private seatsService = inject(SeatsService);
+  private loadingService = inject(LoadingService);
+  private notificationService = inject(NotificationService);
+
+  activeView: 'theaters' | 'seats' | 'seat-management' = 'theaters';
+  selectedTheater: TheaterDto | null = null;
   isEditing: boolean = false;
   theaterForm: FormGroup;
-  layoutForm: FormGroup;
+  isLoading: boolean = false;
 
-  // Données de démonstration
-  theaters: Theater[] = [
-    {
-      id: 't1',
-      name: 'Salle 1 - IMAX',
-      cinemaId: '1',
-      cinemaName: 'Cinéma Pathé Bellecour',
-      capacity: 350,
-      screenType: 'IMAX',
-      screenSize: '22m x 16m',
-      facilities: ['IMAX', 'Dolby Atmos', '4K', 'Climatisation'],
-      isAvailable: true,
-      currentOccupancy: 120,
-      nextShowtime: '20:30'
-    },
-    {
-      id: 't2',
-      name: 'Salle 2 - Dolby',
-      cinemaId: '1',
-      cinemaName: 'Cinéma Pathé Bellecour',
-      capacity: 280,
-      screenType: 'Dolby Cinema',
-      screenSize: '18m x 12m',
-      facilities: ['Dolby Atmos', '4K', 'Fauteuils Premium'],
-      isAvailable: true,
-      currentOccupancy: 45,
-      nextShowtime: '19:15'
-    },
-    {
-      id: 't3',
-      name: 'Salle Premium',
-      cinemaId: '2',
-      cinemaName: 'UGC Ciné Cité Internationale',
-      capacity: 200,
-      screenType: '4K Laser',
-      screenSize: '15m x 10m',
-      facilities: ['4K', 'Son Surround', 'Fauteuils Premium', 'Service en salle'],
-      isAvailable: false,
-      currentOccupancy: 0,
-      nextShowtime: '21:00'
-    },
-    {
-      id: 't4',
-      name: 'Salle Art et Essai',
-      cinemaId: '3',
-      cinemaName: 'Cinéma Le Comœdia',
-      capacity: 150,
-      screenType: '2K Digital',
-      screenSize: '12m x 8m',
-      facilities: ['Art et Essai', 'Son Surround'],
-      isAvailable: true,
-      currentOccupancy: 80,
-      nextShowtime: '18:45'
-    }
-  ];
+  // Données réelles
+  theaters: TheaterDto[] = [];
+  cinemas: CinemaDto[] = []; // Liste des cinémas depuis l'API
+  seats: SeatDto[] = [];
+  uiSeats: any[] = []; // Sièges formatés pour l'interface utilisateur
 
-  theaterLayouts: TheaterLayout[] = [
-    {
-      id: 'l1',
-      name: 'Layout IMAX Standard',
-      rows: 15,
-      seatsPerRow: 24,
-      totalSeats: 360,
-      screenType: 'IMAX',
-      facilities: ['IMAX', 'Dolby Atmos'],
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-10-18')
-    },
-    {
-      id: 'l2',
-      name: 'Layout Premium Dolby',
-      rows: 14,
-      seatsPerRow: 20,
-      totalSeats: 280,
-      screenType: 'Dolby Cinema',
-      facilities: ['Dolby Atmos', 'Fauteuils Premium'],
-      createdAt: new Date('2024-02-20'),
-      updatedAt: new Date('2024-10-18')
-    }
-  ];
-
-  seats: Seat[] = [
-    // Rangée A
-    { id: 'A1', row: 'A', number: 1, type: 'standard', status: 'available', price: 12 },
-    { id: 'A2', row: 'A', number: 2, type: 'standard', status: 'available', price: 12 },
-    { id: 'A3', row: 'A', number: 3, type: 'standard', status: 'available', price: 12 },
-    { id: 'A4', row: 'A', number: 4, type: 'standard', status: 'available', price: 12 },
-    { id: 'A5', row: 'A', number: 5, type: 'standard', status: 'available', price: 12 },
-    { id: 'A6', row: 'A', number: 6, type: 'standard', status: 'available', price: 12 },
-    { id: 'A7', row: 'A', number: 7, type: 'standard', status: 'available', price: 12 },
-    { id: 'A8', row: 'A', number: 8, type: 'standard', status: 'available', price: 12 },
-    
-    // Rangée B (avec quelques sièges premium)
-    { id: 'B1', row: 'B', number: 1, type: 'premium', status: 'available', price: 18 },
-    { id: 'B2', row: 'B', number: 2, type: 'premium', status: 'available', price: 18 },
-    { id: 'B3', row: 'B', number: 3, type: 'premium', status: 'available', price: 18 },
-    { id: 'B4', row: 'B', number: 4, type: 'premium', status: 'available', price: 18 },
-    { id: 'B5', row: 'B', number: 5, type: 'premium', status: 'available', price: 18 },
-    { id: 'B6', row: 'B', number: 6, type: 'premium', status: 'available', price: 18 },
-    
-    // Rangée C (avec sièges handicapés)
-    { id: 'C1', row: 'C', number: 1, type: 'handicap', status: 'available', price: 10 },
-    { id: 'C2', row: 'C', number: 2, type: 'handicap', status: 'available', price: 10 },
-    { id: 'C3', row: 'C', number: 3, type: 'standard', status: 'occupied', price: 12 },
-    { id: 'C4', row: 'C', number: 4, type: 'standard', status: 'occupied', price: 12 },
-    { id: 'C5', row: 'C', number: 5, type: 'standard', status: 'blocked', price: 12 },
-    { id: 'C6', row: 'C', number: 6, type: 'standard', status: 'available', price: 12 }
-  ];
-
-  selectedSeats: Seat[] = [];
+  selectedSeats: any[] = [];
 
   stats: TheaterStats = {
-    totalTheaters: 4,
-    activeTheaters: 3,
-    totalSeats: 980,
-    availableSeats: 650,
-    occupancyRate: 66.3,
-    averageRating: 4.3
+    totalTheaters: 0,
+    activeTheaters: 0,
+    totalSeats: 0,
+    availableSeats: 0,
+    occupancyRate: 0,
+    averageRating: 0
   };
 
   filterGroups: FilterGroup[] = [
@@ -228,50 +132,42 @@ export class TheaterManagementComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.theaterForm = this.createTheaterForm();
-    this.layoutForm = this.createLayoutForm();
   }
 
   ngOnInit(): void {
-    // Initialiser les données
+    this.loadTheaters();
+    this.loadCinemas();
   }
 
   private createTheaterForm(): FormGroup {
     return this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       cinemaId: ['', Validators.required],
-      capacity: ['', [Validators.required, Validators.min(1)]],
-      screenType: ['', Validators.required],
-      screenSize: [''],
-      facilities: [[]],
-      isAvailable: [true]
+      seatCount: ['', [Validators.required, Validators.min(1)]],
+      projectionQuality: ['', Validators.required],
+      isOperational: [true]
     });
   }
 
-  private createLayoutForm(): FormGroup {
-    return this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      rows: ['', [Validators.required, Validators.min(1), Validators.max(30)]],
-      seatsPerRow: ['', [Validators.required, Validators.min(1), Validators.max(50)]],
-      screenType: ['', Validators.required],
-      facilities: [[]]
-    });
-  }
 
   // Gestion des vues
-  setView(view: 'theaters' | 'layout' | 'seats'): void {
+  setView(view: 'theaters' | 'seats' | 'seat-management'): void {
     this.activeView = view;
   }
 
   // Gestion des salles
   onTheaterSelected(theaterId: string): void {
-    this.selectedTheater = this.theaters.find(t => t.id === theaterId) || null;
+    this.selectedTheater = this.theaters.find(t => t.theaterId.toString() === theaterId) || null;
     console.log('Salle sélectionnée:', theaterId);
   }
 
   onManageSeats(theaterId: string): void {
-    this.selectedTheater = this.theaters.find(t => t.id === theaterId) || null;
-    this.setView('seats');
-    console.log('Gestion des sièges pour:', theaterId);
+    const id = parseInt(theaterId);
+    this.selectedTheater = this.theaters.find(t => t.theaterId === id) || null;
+    if (this.selectedTheater) {
+      this.loadTheaterSeats(id);
+      this.setView('seat-management');
+    }
   }
 
   onViewSchedule(theaterId: string): void {
@@ -279,17 +175,82 @@ export class TheaterManagementComponent implements OnInit {
   }
 
   // Gestion des sièges
-  onSeatSelected(seat: Seat): void {
+  onSeatSelected(seat: any): void {
     console.log('Siège sélectionné:', seat);
   }
 
-  onSeatDeselected(seat: Seat): void {
+  onSeatDeselected(seat: any): void {
     console.log('Siège désélectionné:', seat);
   }
 
-  onSelectionChanged(seats: Seat[]): void {
+  onSelectionChanged(seats: any[]): void {
     this.selectedSeats = seats;
     console.log('Sélection mise à jour:', seats);
+  }
+
+  // Mapper pour convertir SeatDto en interface UI pour SeatGridComponent
+  private mapSeatDtoToUiSeat(seatDto: SeatDto): any {
+    // Extraire la rangée et le numéro du seatNumber (ex: "A1" -> row: "A", number: 1)
+    const seatNumber = seatDto.seatNumber;
+    let row = 'A';
+    let number = 1;
+    
+    if (seatNumber && seatNumber.length > 0) {
+      row = seatNumber.charAt(0);
+      const numPart = seatNumber.substring(1);
+      number = parseInt(numPart) || 1;
+    }
+
+    return {
+      id: seatDto.seatId?.toString() || '',
+      row: row,
+      number: number,
+      type: seatDto.isAccessible ? 'handicap' : 'standard',
+      status: seatDto.isAvailable ? 'available' : 'occupied',
+      price: 0, // Prix par défaut, à adapter selon la logique métier
+      features: seatDto.isAccessible ? ['handicap'] : []
+    };
+  }
+
+  // Mapper pour convertir l'interface UI en SeatDto
+  private mapUiSeatToSeatDto(uiSeat: any, theaterId: number): Partial<CreateSeatDto> {
+    const seatNumber = `${uiSeat.row}${uiSeat.number}`;
+    
+    return {
+      theaterId: theaterId,
+      seatNumber: seatNumber,
+      isAccessible: uiSeat.type === 'handicap',
+      isAvailable: uiSeat.status === 'available'
+    };
+  }
+
+  // Charger et convertir les sièges pour l'interface utilisateur
+  private loadUiSeats(): void {
+    this.uiSeats = this.seats.map(seat => this.mapSeatDtoToUiSeat(seat));
+  }
+
+  // Chargement des sièges d'une salle
+  loadTheaterSeats(theaterId: number): void {
+    this.isLoading = true;
+    this.loadingService.start('seats-loading', 'Chargement des sièges...');
+    
+    this.seatsService.getTheaterSeats(theaterId)
+      .pipe(
+        tap(seats => {
+          this.seats = seats;
+          this.loadUiSeats(); // Convertir les sièges pour l'UI
+        }),
+        catchError(error => {
+          this.notificationService.error('Erreur', 'Erreur lors du chargement des sièges');
+          console.error('Erreur chargement sièges:', error);
+          return of([]);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+          this.loadingService.stop('seats-loading');
+        })
+      )
+      .subscribe();
   }
 
   // Filtres
@@ -341,18 +302,92 @@ export class TheaterManagementComponent implements OnInit {
     this.theaterForm.reset();
   }
 
-  editTheater(theater: Theater): void {
+  editTheater(theater: TheaterDto): void {
     console.log('Modifier la salle:', theater);
     this.selectedTheater = theater;
     this.isEditing = true;
-    this.theaterForm.patchValue(theater);
+    this.theaterForm.patchValue({
+      name: theater.name,
+      cinemaId: theater.cinemaId,
+      seatCount: theater.seatCount,
+      projectionQuality: theater.projectionQuality,
+      isOperational: theater.isOperational
+    });
   }
 
   saveTheater(): void {
     if (this.theaterForm.valid) {
       const formData = this.theaterForm.value;
-      console.log('Salle sauvegardée:', formData);
-      this.isEditing = false;
+      this.isLoading = true;
+      
+      if (this.selectedTheater) {
+        // Mise à jour d'une salle existante
+        const updateData: UpdateTheaterDto = {
+          theaterId: this.selectedTheater.theaterId,
+          name: formData.name,
+          seatCount: formData.seatCount,
+          cinemaId: formData.cinemaId,
+          isOperational: formData.isOperational,
+          projectionQuality: formData.projectionQuality
+        };
+        
+        this.loadingService.start('theater-update', 'Mise à jour de la salle...');
+        
+        this.theaterService.updateTheater(updateData)
+          .pipe(
+            tap(() => {
+              // Mettre à jour les données locales
+              const index = this.theaters.findIndex(t => t.theaterId === this.selectedTheater!.theaterId);
+              if (index !== -1) {
+                this.theaters[index] = { ...this.theaters[index], ...formData };
+              }
+              this.updateStats();
+              this.notificationService.success('Succès', 'Salle mise à jour avec succès');
+            }),
+            catchError(error => {
+              this.notificationService.error('Erreur', 'Erreur lors de la mise à jour de la salle');
+              console.error('Erreur mise à jour salle:', error);
+              return of(null);
+            }),
+            finalize(() => {
+              this.isLoading = false;
+              this.loadingService.stop('theater-update');
+              this.isEditing = false;
+            })
+          )
+          .subscribe();
+      } else {
+        // Création d'une nouvelle salle
+        const createData: CreateTheaterDto = {
+          name: formData.name,
+          seatCount: formData.seatCount,
+          cinemaId: formData.cinemaId,
+          isOperational: formData.isOperational,
+          projectionQuality: formData.projectionQuality
+        };
+        
+        this.loadingService.start('theater-create', 'Création de la salle...');
+        
+        this.theaterService.createTheater(createData)
+          .pipe(
+            tap((response: any) => {
+              // Recharger les salles pour obtenir le nouvel ID
+              this.loadTheaters();
+              this.notificationService.success('Succès', 'Salle créée avec succès');
+            }),
+            catchError(error => {
+              this.notificationService.error('Erreur', 'Erreur lors de la création de la salle');
+              console.error('Erreur création salle:', error);
+              return of(null);
+            }),
+            finalize(() => {
+              this.isLoading = false;
+              this.loadingService.stop('theater-create');
+              this.isEditing = false;
+            })
+          )
+          .subscribe();
+      }
     }
   }
 
@@ -362,28 +397,89 @@ export class TheaterManagementComponent implements OnInit {
   }
 
   deleteTheater(theaterId: string): void {
-    console.log('Supprimer la salle:', theaterId);
-    this.theaters = this.theaters.filter(t => t.id !== theaterId);
-    if (this.selectedTheater?.id === theaterId) {
-      this.selectedTheater = null;
-    }
+    const id = parseInt(theaterId);
+    this.isLoading = true;
+    this.loadingService.start('theater-delete', 'Suppression de la salle...');
+    
+    this.theaterService.deleteTheater(id)
+      .pipe(
+        tap(() => {
+          this.theaters = this.theaters.filter(t => t.theaterId !== id);
+          if (this.selectedTheater?.theaterId === id) {
+            this.selectedTheater = null;
+          }
+          this.updateStats();
+          this.notificationService.success('Succès', 'Salle supprimée avec succès');
+        }),
+        catchError(error => {
+          this.notificationService.error('Erreur', 'Erreur lors de la suppression de la salle');
+          console.error('Erreur suppression salle:', error);
+          return of(null);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+          this.loadingService.stop('theater-delete');
+        })
+      )
+      .subscribe();
   }
 
-  // Gestion des layouts
-  createNewLayout(): void {
-    console.log('Créer un nouveau layout');
-    this.layoutForm.reset();
-  }
-
-  saveLayout(): void {
-    if (this.layoutForm.valid) {
-      const formData = this.layoutForm.value;
-      console.log('Layout sauvegardé:', formData);
-    }
-  }
+  
 
   // Getters pour les données filtrées
-  get filteredTheaters(): Theater[] {
+  // Chargement des données
+  loadTheaters(): void {
+    this.isLoading = true;
+    this.loadingService.start('theaters-loading', 'Chargement des salles...');
+    
+    // Utiliser l'ID du cinéma 1 comme dans l'exemple Swagger
+    this.theaterService.getCinemaTheaters(1)
+      .pipe(
+        tap(theaters => {
+          this.theaters = theaters;
+          this.updateStats();
+        }),
+        catchError(error => {
+          this.notificationService.error('Erreur', 'Erreur lors du chargement des salles');
+          console.error('Erreur chargement salles:', error);
+          return of([]);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+          this.loadingService.stop('theaters-loading');
+        })
+      )
+      .subscribe();
+  }
+
+  // Charger la liste des cinémas depuis l'API
+  loadCinemas(): void {
+    this.cinemaService.getAllCinemas()
+      .pipe(
+        tap(cinemas => {
+          this.cinemas = cinemas;
+        }),
+        catchError(error => {
+          this.notificationService.error('Erreur', 'Erreur lors du chargement des cinémas');
+          console.error('Erreur chargement cinémas:', error);
+          return of([]);
+        })
+      )
+      .subscribe();
+  }
+
+  private updateStats(): void {
+    this.stats = {
+      totalTheaters: this.theaters.length,
+      activeTheaters: this.theaters.filter(t => t.isOperational).length,
+      totalSeats: this.theaters.reduce((sum, theater) => sum + theater.seatCount, 0),
+      availableSeats: this.theaters.reduce((sum, theater) => sum + theater.seatCount, 0), // À adapter selon les données réelles
+      occupancyRate: 0, // À calculer selon les données réelles
+      averageRating: 4.3 // Valeur par défaut
+    };
+  }
+
+  get filteredTheaters(): TheaterDto[] {
     let filtered = this.theaters;
 
     // Appliquer les filtres ici si nécessaire
@@ -392,12 +488,13 @@ export class TheaterManagementComponent implements OnInit {
     return filtered;
   }
 
-  getOccupancyPercentage(theater: Theater): number {
-    if (!theater.currentOccupancy || !theater.capacity) return 0;
-    return Math.round((theater.currentOccupancy / theater.capacity) * 100);
+  getOccupancyPercentage(theater: TheaterDto): number {
+    // Pour l'instant, on utilise une valeur par défaut car TheaterDto n'a pas currentOccupancy
+    // À adapter selon les données réelles de l'API
+    return 0;
   }
 
-  getOccupancyStatus(theater: Theater): 'low' | 'medium' | 'high' | 'full' {
+  getOccupancyStatus(theater: TheaterDto): 'low' | 'medium' | 'high' | 'full' {
     const percentage = this.getOccupancyPercentage(theater);
     if (percentage === 0) return 'low';
     if (percentage < 30) return 'low';
@@ -407,6 +504,79 @@ export class TheaterManagementComponent implements OnInit {
   }
 
   getTotalPrice(): number {
-    return this.selectedSeats.reduce((total, seat) => total + seat.price, 0);
+    // Pour l'instant, retourner 0 car SeatDto n'a pas de propriété price
+    // À adapter selon les données réelles de l'API
+    return 0;
+  }
+
+  // Méthodes utilitaires pour adapter les données DTO aux besoins UI
+  private getScreenTypeFromDto(theater: TheaterDto): string {
+    switch (theater.projectionQuality) {
+      case 0: // FourDX
+        return '4DX';
+      case 1: // ThreeD
+        return '3D';
+      case 2: // IMAX
+        return 'IMAX';
+      case 3: // FourK
+        return '4K';
+      case 4: // Standard2D
+        return '2D Standard';
+      case 5: // DolbyCinema
+        return 'Dolby Cinema';
+      default:
+        return 'Standard';
+    }
+  }
+
+  // Options pour ProjectionQuality
+  get projectionQualityOptions(): any[] {
+    return [
+      { label: '4DX', value: 0 },
+      { label: '3D', value: 1 },
+      { label: 'IMAX', value: 2 },
+      { label: '4K', value: 3 },
+      { label: '2D Standard', value: 4 },
+      { label: 'Dolby Cinema', value: 5 }
+    ];
+  }
+
+  // Options pour les cinémas
+  get cinemaOptions(): any[] {
+    return this.cinemas.map(cinema => ({
+      label: cinema.name,
+      value: cinema.cinemaId
+    }));
+  }
+
+  private getFacilitiesFromDto(theater: TheaterDto): string[] {
+    const facilities: string[] = [];
+    
+    switch (theater.projectionQuality) {
+      case 0: // FourDX
+        facilities.push('4DX');
+        break;
+      case 1: // ThreeD
+        facilities.push('3D');
+        break;
+      case 2: // IMAX
+        facilities.push('IMAX');
+        break;
+      case 3: // FourK
+        facilities.push('4K');
+        break;
+      case 4: // Standard2D
+        facilities.push('2D');
+        break;
+      case 5: // DolbyCinema
+        facilities.push('Dolby Cinema');
+        break;
+    }
+    
+    if (theater.isOperational) {
+      facilities.push('Opérationnel');
+    }
+    
+    return facilities;
   }
 }

@@ -1,7 +1,6 @@
 <div 
   class="theater-card" 
-  [class.available]="theater?.isAvailable"
-  [class.unavailable]="!theater?.isAvailable"
+  [class.available]="true"
   (click)="onTheaterSelect()">
   
   <!-- En-tête de la carte -->
@@ -9,18 +8,18 @@
     <div class="theater-info">
       <h3 class="theater-name">{{ theater?.name }}</h3>
       <div class="theater-meta">
-        <span class="cinema-name">{{ theater?.cinemaName }}</span>
-        <app-badge 
-          [variant]="theater?.isAvailable ? 'success' : 'error'"
+        <span class="cinema-name">{{ cinemaName$ | async }}</span>
+        <app-badge
+          variant="success"
           size="small">
-          {{ theater?.isAvailable ? 'Disponible' : 'Indisponible' }}
+          Disponible
         </app-badge>
       </div>
     </div>
     
     <div class="theater-capacity">
       <div class="capacity-info">
-        <span class="capacity-number">{{ theater?.capacity }}</span>
+        <span class="capacity-number">{{ theater?.seatCount }}</span>
         <span class="capacity-label">sièges</span>
       </div>
     </div>
@@ -30,18 +29,18 @@
   <div class="theater-details">
     <div class="detail-row">
       <div class="detail-item">
-        <app-icon name="screenTypeIcon" size="small"></app-icon>
-        <span class="detail-text">{{ theater?.screenType }}</span>
+        <app-icon [name]="screenTypeIcon" size="small"></app-icon>
+        <span class="detail-text">{{ getScreenTypeLabel() }}</span>
       </div>
       
       <div class="detail-item">
-        <app-icon name="camera" size="small"></app-icon>
-        <span class="detail-text">{{ theater?.screenSize }}</span>
+        <app-icon name="users" size="small"></app-icon>
+        <span class="detail-text">{{ theater?.seatCount }} places</span>
       </div>
     </div>
 
     <!-- Occupation actuelle -->
-    <div class="occupancy-section" *ngIf="theater?.currentOccupancy !== undefined">
+    <div class="occupancy-section">
       <div class="occupancy-header">
         <span class="occupancy-label">Occupation actuelle</span>
         <app-badge 
@@ -60,22 +59,22 @@
       </div>
       
       <div class="occupancy-numbers">
-        <span>{{ theater?.currentOccupancy }} / {{ theater?.capacity }} sièges</span>
+        <span>0 / {{ theater?.seatCount }} sièges</span>
       </div>
     </div>
 
     <!-- Prochaine séance -->
-    <div class="next-showtime" *ngIf="theater?.nextShowtime">
+    <div class="next-showtime">
       <app-icon name="calendar" size="small"></app-icon>
-      <span class="showtime-text">Prochaine séance: {{ theater?.nextShowtime }}</span>
+      <span class="showtime-text">Aucune séance programmée</span>
     </div>
 
     <!-- Équipements -->
-    <div class="facilities-section" *ngIf="theater?.facilities?.length">
+    <div class="facilities-section" *ngIf="getFacilities().length">
       <div class="facilities-title">Équipements :</div>
       <div class="facilities-list">
         <app-badge 
-          *ngFor="let facility of theater?.facilities"
+          *ngFor="let facility of getFacilities()"
           [variant]="'info'" 
           size="small">
           <app-icon [name]="getFacilityIcon(facility)" size="xs"></app-icon>
@@ -98,7 +97,7 @@
       variant="secondary" 
       size="small"
       (clicked)="onManageSeats($event)"
-      [disabled]="!theater?.isAvailable">
+      [disabled]="false">
       Gérer sièges
     </app-button>
   </div>

@@ -1,0 +1,163 @@
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px;
+  width: 100%;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 12px;
+  animation: slideIn 0.3s ease-out;
+  border-left: 4px solid transparent;
+  
+  &.toast-success {
+    background-color: #f0f9f0;
+    border-left-color: #10b981;
+    color: #065f46;
+    
+    .toast-icon {
+      background-color: #10b981;
+    }
+  }
+  
+  &.toast-error {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+    color: #7f1d1d;
+    
+    .toast-icon {
+      background-color: #ef4444;
+    }
+  }
+  
+  &.toast-warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #78350f;
+    
+    .toast-icon {
+      background-color: #f59e0b;
+    }
+  }
+  
+  &.toast-info {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+    color: #1e3a8a;
+    
+    .toast-icon {
+      background-color: #3b82f6;
+    }
+  }
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 12px;
+  flex-shrink: 0;
+  color: white;
+  font-size: 12px;
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.toast-message {
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  margin-left: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+  
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  span {
+    display: block;
+    font-size: 16px;
+    line-height: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast.slide-out {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .toast {
+    padding: 12px;
+  }
+  
+  .toast-title {
+    font-size: 13px;
+  }
+  
+  .toast-message {
+    font-size: 12px;
+  }
+}

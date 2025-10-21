@@ -3,14 +3,15 @@
   [class.expanded]="isExpanded"
   (click)="onCardClick()">
   
-  <!-- Image du cinéma -->
-  <div class="cinema-image" *ngIf="cinema?.imageUrl">
-    <img [src]="cinema?.imageUrl" [alt]="cinema?.name">
+  <!-- Image du cinéma (placeholder pour l'instant) -->
+  <div class="cinema-image">
+    <div class="image-placeholder">
+      🎬
+    </div>
     <div class="image-overlay">
       <button 
         class="btn-favorite"
-        (click)="onFavoriteClick($event)"
-        [class.favorited]="cinema?.isFavorite">
+        (click)="onFavoriteClick($event)">
         ♥
       </button>
     </div>
@@ -24,10 +25,7 @@
         <h3 class="cinema-name">{{ cinema?.name }}</h3>
         <div class="cinema-meta">
           <span class="cinema-location">
-            📍 {{ cinema?.city }} • {{ cinema?.postalCode }}
-          </span>
-          <span class="cinema-distance" *ngIf="cinema?.distance">
-            • {{ cinema?.distance }} km
+            📍 {{ cinema?.city }}, {{ cinema?.country }}
           </span>
         </div>
       </div>
@@ -42,84 +40,45 @@
       </div>
     </div>
 
-    <!-- Évaluation -->
-    <div class="cinema-rating">
-      <div class="stars">
-        <span 
-          *ngFor="let star of getRatingStars()" 
-          class="star"
-          [class.filled]="star <= (cinema?.rating || 0)">
-          ★
-        </span>
-      </div>
-      <span class="rating-value">{{ cinema?.rating?.toFixed(1) }}</span>
+    <!-- Adresse -->
+    <div class="cinema-address">
+      <strong>📍 Adresse :</strong> {{ cinema?.address }}
     </div>
 
     <!-- Horaires d'ouverture -->
     <div class="opening-hours">
       <div class="today-hours">
-        <strong>Aujourd'hui :</strong> {{ getTodayOpeningHours() }}
+        <strong>Horaires :</strong> {{ getTodayOpeningHours() }}
       </div>
       <button 
         class="btn-show-hours"
         (click)="toggleDetails($event)">
-        {{ isExpanded ? 'Masquer' : 'Voir tous les horaires' }}
+        {{ isExpanded ? 'Masquer' : 'Voir détails' }}
       </button>
     </div>
 
-    <!-- Horaires détaillés (expandable) -->
-    <div class="detailed-hours" *ngIf="isExpanded">
-      <div class="hours-grid">
-        <div class="hour-item">
-          <span class="day">Lundi</span>
-          <span class="time">{{ cinema?.openingHours?.monday }}</span>
-        </div>
-        <div class="hour-item">
-          <span class="day">Mardi</span>
-          <span class="time">{{ cinema?.openingHours?.tuesday }}</span>
-        </div>
-        <div class="hour-item">
-          <span class="day">Mercredi</span>
-          <span class="time">{{ cinema?.openingHours?.wednesday }}</span>
-        </div>
-        <div class="hour-item">
-          <span class="day">Jeudi</span>
-          <span class="time">{{ cinema?.openingHours?.thursday }}</span>
-        </div>
-        <div class="hour-item">
-          <span class="day">Vendredi</span>
-          <span class="time">{{ cinema?.openingHours?.friday }}</span>
-        </div>
-        <div class="hour-item">
-          <span class="day">Samedi</span>
-          <span class="time">{{ cinema?.openingHours?.saturday }}</span>
-        </div>
-        <div class="hour-item">
-          <span class="day">Dimanche</span>
-          <span class="time">{{ cinema?.openingHours?.sunday }}</span>
-        </div>
+    <!-- Informations détaillées (expandable) -->
+    <div class="detailed-info" *ngIf="isExpanded">
+      <div class="info-section">
+        <strong>Téléphone :</strong> {{ cinema?.phoneNumber }}
+      </div>
+      <div class="info-section">
+        <strong>Ville :</strong> {{ cinema?.city }}
+      </div>
+      <div class="info-section">
+        <strong>Pays :</strong> {{ cinema?.country }}
       </div>
     </div>
 
     <!-- Équipements -->
-    <div class="cinema-facilities" *ngIf="cinema?.facilities?.length">
+    <div class="cinema-facilities" *ngIf="getFacilities().length">
       <div class="facilities-title">Équipements :</div>
       <div class="facilities-list">
         <span
-          *ngFor="let facility of cinema?.facilities || []"
+          *ngFor="let facility of getFacilities()"
           class="facility-item">
           {{ getFacilityIcon(facility) }} {{ facility }}
         </span>
-      </div>
-    </div>
-
-    <!-- Informations de contact -->
-    <div class="cinema-contact" *ngIf="cinema?.phone || cinema?.email">
-      <div class="contact-info" *ngIf="cinema?.phone">
-        <strong>📞</strong> {{ cinema?.phone }}
-      </div>
-      <div class="contact-info" *ngIf="cinema?.email">
-        <strong>✉️</strong> {{ cinema?.email }}
       </div>
     </div>
 
@@ -128,7 +87,7 @@
       <button 
         class="btn-primary"
         (click)="onCardClick()">
-        Voir les séances
+        Voir les salles
       </button>
       <button 
         class="btn-secondary"

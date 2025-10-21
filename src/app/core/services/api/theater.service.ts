@@ -3,19 +3,26 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-    CreateTheaterDto,
-    IncidentDto,
-    TheaterDto,
-    UpdateTheaterDto
+  CreateTheaterDto,
+  IncidentDto,
+  TheaterDto,
+  UpdateTheaterDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TheaterService {
-  private readonly baseUrl = `${environment.apiUrl}/theater`;
+  private readonly baseUrl = `${environment.apiUrl}/Theater`;
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * Obtenir toutes les salles
+   */
+  getAllTheaters(): Observable<TheaterDto[]> {
+    return this.http.get<TheaterDto[]>(`${this.baseUrl}`);
+  }
 
   /**
    * Obtenir les salles d'un cinéma

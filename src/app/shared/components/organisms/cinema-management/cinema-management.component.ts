@@ -1,19 +1,28 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { of } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 
 // Composants atomiques
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
+import { ChipComponent } from '../../atoms/chip/chip.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { SearchInputComponent } from '../../atoms/search-input/search-input.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
-import { ChipComponent } from '../../atoms/chip/chip.component';
 
 // Composants molécules
-import { CinemaCardComponent, Cinema } from '../../molecules/cinema-card/cinema-card.component';
-import { TheaterCardComponent, Theater } from '../../molecules/theater-card/theater-card.component';
-import { FilterPanelComponent, FilterGroup, AppliedFilter } from '../../molecules/filter-panel/filter-panel.component';
+import { CinemaDto, CreateCinemaDto, TheaterDto, UpdateCinemaDto } from 'src/app/core/interfaces/core.interfaces';
+import { CinemaCardComponent } from '../../molecules/cinema-card/cinema-card.component';
+import { AppliedFilter, FilterGroup, FilterPanelComponent } from '../../molecules/filter-panel/filter-panel.component';
+import { TheaterCardComponent } from '../../molecules/theater-card/theater-card.component';
+
+// Services
+import { CinemaService } from 'src/app/core/services/api/cinema.service';
+import { TheaterService } from 'src/app/core/services/api/theater.service';
+import { LoadingService } from 'src/app/core/services/loading.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 export interface CinemaStats {
   totalCinemas: number;
@@ -44,133 +53,28 @@ export interface CinemaStats {
   standalone: true
 })
 export class CinemaManagementComponent implements OnInit {
+  private cinemaService = inject(CinemaService);
+  private theaterService = inject(TheaterService);
+  private loadingService = inject(LoadingService);
+  private notificationService = inject(NotificationService);
+
   activeView: 'cinemas' | 'theaters' = 'cinemas';
   searchTerm: string = '';
-  selectedCinema: Cinema | null = null;
+  selectedCinema: CinemaDto | null = null;
   isEditing: boolean = false;
   cinemaForm: FormGroup;
+  isLoading: boolean = false;
 
-  // Données de démonstration
-  cinemas: Cinema[] = [
-    {
-      id: '1',
-      name: 'Cinéma Pathé Bellecour',
-      address: 'Place Bellecour',
-      city: 'Lyon',
-      postalCode: '69002',
-      phone: '+33 4 78 37 83 83',
-      email: 'bellecour@pathe.fr',
-      openingHours: {
-        monday: '10:00-23:00',
-        tuesday: '10:00-23:00',
-        wednesday: '10:00-23:00',
-        thursday: '10:00-23:00',
-        friday: '10:00-00:00',
-        saturday: '10:00-00:00',
-        sunday: '10:00-23:00'
-      },
-      facilities: ['3D', 'IMAX', 'Dolby Atmos', 'Handicapé', 'Parking', 'Restauration'],
-      imageUrl: '/assets/cinemas/pathe-bellecour.jpg',
-      rating: 4.5,
-      distance: 1.2,
-      isFavorite: true
-    },
-    {
-      id: '2',
-      name: 'UGC Ciné Cité Internationale',
-      address: 'Cité Internationale',
-      city: 'Lyon',
-      postalCode: '69006',
-      phone: '+33 8 92 70 00 00',
-      email: 'internationale@ugc.fr',
-      openingHours: {
-        monday: '11:00-23:00',
-        tuesday: '11:00-23:00',
-        wednesday: '11:00-23:00',
-        thursday: '11:00-23:00',
-        friday: '11:00-00:00',
-        saturday: '11:00-00:00',
-        sunday: '11:00-23:00'
-      },
-      facilities: ['4K', 'Dolby Atmos', 'Handicapé', 'WiFi', 'Climatisation'],
-      imageUrl: '/assets/cinemas/ugc-internationale.jpg',
-      rating: 4.2,
-      distance: 3.5,
-      isFavorite: false
-    },
-    {
-      id: '3',
-      name: 'Cinéma Le Comœdia',
-      address: '13 Avenue Berthelot',
-      city: 'Lyon',
-      postalCode: '69007',
-      phone: '+33 4 72 76 18 18',
-      email: 'contact@lecomecia.com',
-      openingHours: {
-        monday: '14:00-23:00',
-        tuesday: '14:00-23:00',
-        wednesday: '14:00-23:00',
-        thursday: '14:00-23:00',
-        friday: '14:00-00:00',
-        saturday: '14:00-00:00',
-        sunday: '14:00-23:00'
-      },
-      facilities: ['Art et Essai', 'Handicapé', 'Restauration'],
-      imageUrl: '/assets/cinemas/comecia.jpg',
-      rating: 4.7,
-      distance: 2.8,
-      isFavorite: true
-    }
-  ];
-
-  theaters: Theater[] = [
-    {
-      id: 't1',
-      name: 'Salle 1 - IMAX',
-      cinemaId: '1',
-      cinemaName: 'Cinéma Pathé Bellecour',
-      capacity: 350,
-      screenType: 'IMAX',
-      screenSize: '22m x 16m',
-      facilities: ['IMAX', 'Dolby Atmos', '4K'],
-      isAvailable: true,
-      currentOccupancy: 120,
-      nextShowtime: '20:30'
-    },
-    {
-      id: 't2',
-      name: 'Salle 2 - Dolby',
-      cinemaId: '1',
-      cinemaName: 'Cinéma Pathé Bellecour',
-      capacity: 280,
-      screenType: 'Dolby Cinema',
-      screenSize: '18m x 12m',
-      facilities: ['Dolby Atmos', '4K', 'Climatisation'],
-      isAvailable: true,
-      currentOccupancy: 45,
-      nextShowtime: '19:15'
-    },
-    {
-      id: 't3',
-      name: 'Salle Premium',
-      cinemaId: '2',
-      cinemaName: 'UGC Ciné Cité Internationale',
-      capacity: 200,
-      screenType: '4K Laser',
-      screenSize: '15m x 10m',
-      facilities: ['4K', 'Son Surround', 'Fauteuils Premium'],
-      isAvailable: false,
-      currentOccupancy: 0,
-      nextShowtime: '21:00'
-    }
-  ];
+  // Données réelles
+  cinemas: CinemaDto[] = [];
+  theaters: TheaterDto[] = [];
 
   stats: CinemaStats = {
-    totalCinemas: 3,
-    activeCinemas: 3,
-    totalTheaters: 12,
-    averageRating: 4.5,
-    totalCapacity: 2850
+    totalCinemas: 0,
+    activeCinemas: 0,
+    totalTheaters: 0,
+    averageRating: 0,
+    totalCapacity: 0
   };
 
   filterGroups: FilterGroup[] = [
@@ -220,7 +124,7 @@ export class CinemaManagementComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Initialiser les données
+    this.loadCinemas();
   }
 
   private createCinemaForm(): FormGroup {
@@ -228,24 +132,31 @@ export class CinemaManagementComponent implements OnInit {
       name: [''],
       address: [''],
       city: [''],
-      postalCode: [''],
-      phone: [''],
-      email: [''],
-      openingHours: this.fb.group({
-        monday: ['10:00-23:00'],
-        tuesday: ['10:00-23:00'],
-        wednesday: ['10:00-23:00'],
-        thursday: ['10:00-23:00'],
-        friday: ['10:00-00:00'],
-        saturday: ['10:00-00:00'],
-        sunday: ['10:00-23:00']
-      })
+      country: ['France'],
+      phoneNumber: [''],
+      openingHours: ['']
     });
   }
 
   // Gestion des vues
-  setView(view: 'cinemas' | 'theaters'): void {
+  setView(view: 'cinemas' | 'theaters', cinema?: CinemaDto): void {
     this.activeView = view;
+    
+    // Si on passe à la vue salles
+    if (view === 'theaters') {
+      if (cinema) {
+        // Si un cinéma spécifique est fourni, le sélectionner et extraire ses salles
+        this.selectedCinema = cinema;
+        this.loadTheaters(cinema.cinemaId);
+      } else if (this.selectedCinema) {
+        // Si un cinéma est déjà sélectionné, extraire ses salles
+        this.loadTheaters(this.selectedCinema.cinemaId);
+      } else if (this.cinemas.length > 0) {
+        // Si aucun cinéma n'est sélectionné mais il y a des cinémas, sélectionner le premier
+        this.selectedCinema = this.cinemas[0];
+        this.loadTheaters(this.selectedCinema.cinemaId);
+      }
+    }
   }
 
   // Recherche
@@ -256,15 +167,19 @@ export class CinemaManagementComponent implements OnInit {
 
   // Gestion des cinémas
   onCinemaSelected(cinemaId: string): void {
-    this.selectedCinema = this.cinemas.find(c => c.id === cinemaId) || null;
+    this.selectedCinema = this.cinemas.find(c => c.cinemaId.toString() === cinemaId) || null;
     console.log('Cinéma sélectionné:', cinemaId);
+    
+    // Extraire les salles du cinéma sélectionné (déjà incluses dans les données)
+    if (this.selectedCinema) {
+      this.loadTheaters(this.selectedCinema.cinemaId);
+    }
   }
 
   onCinemaFavoriteToggled(cinemaId: string): void {
-    const cinema = this.cinemas.find(c => c.id === cinemaId);
+    const cinema = this.cinemas.find(c => c.cinemaId.toString() === cinemaId);
     if (cinema) {
-      cinema.isFavorite = !cinema.isFavorite;
-      console.log('Favori modifié:', cinemaId, cinema.isFavorite);
+      console.log('Favori modifié:', cinemaId);
     }
   }
 
@@ -335,7 +250,7 @@ export class CinemaManagementComponent implements OnInit {
     this.cinemaForm.reset();
   }
 
-  editCinema(cinema: Cinema): void {
+  editCinema(cinema: CinemaDto): void {
     console.log('Modifier le cinéma:', cinema);
     this.selectedCinema = cinema;
     this.isEditing = true;
@@ -345,8 +260,78 @@ export class CinemaManagementComponent implements OnInit {
   saveCinema(): void {
     if (this.cinemaForm.valid) {
       const formData = this.cinemaForm.value;
-      console.log('Cinéma sauvegardé:', formData);
-      this.isEditing = false;
+      this.isLoading = true;
+      
+      if (this.selectedCinema) {
+        // Mise à jour d'un cinéma existant
+        const updateData: UpdateCinemaDto = {
+          cinemaId: this.selectedCinema.cinemaId,
+          name: formData.name,
+          address: formData.address,
+          phoneNumber: formData.phoneNumber,
+          city: formData.city,
+          country: formData.country,
+          openingHours: formData.openingHours
+        };
+        
+        this.loadingService.start('cinema-update', 'Mise à jour du cinéma...');
+        
+        this.cinemaService.updateCinema(updateData)
+          .pipe(
+            tap(() => {
+              // Mettre à jour les données locales
+              const index = this.cinemas.findIndex(c => c.cinemaId === this.selectedCinema!.cinemaId);
+              if (index !== -1) {
+                this.cinemas[index] = { ...this.cinemas[index], ...formData };
+              }
+              this.updateStats();
+              this.notificationService.success('Succès', 'Cinéma mis à jour avec succès');
+            }),
+            catchError(error => {
+              this.notificationService.error('Erreur', 'Erreur lors de la mise à jour du cinéma');
+              console.error('Erreur mise à jour cinéma:', error);
+              return of(null);
+            }),
+            finalize(() => {
+              this.isLoading = false;
+              this.loadingService.stop('cinema-update');
+              this.isEditing = false;
+            })
+          )
+          .subscribe();
+      } else {
+        // Création d'un nouveau cinéma
+        const createData: CreateCinemaDto = {
+          name: formData.name,
+          address: formData.address,
+          phoneNumber: formData.phoneNumber,
+          city: formData.city,
+          country: formData.country,
+          openingHours: formData.openingHours
+        };
+        
+        this.loadingService.start('cinema-create', 'Création du cinéma...');
+        
+        this.cinemaService.createCinema(createData)
+          .pipe(
+            tap((response: any) => {
+              // Recharger les cinémas pour obtenir le nouvel ID
+              this.loadCinemas();
+              this.notificationService.success('Succès', 'Cinéma créé avec succès');
+            }),
+            catchError(error => {
+              this.notificationService.error('Erreur', 'Erreur lors de la création du cinéma');
+              console.error('Erreur création cinéma:', error);
+              return of(null);
+            }),
+            finalize(() => {
+              this.isLoading = false;
+              this.loadingService.stop('cinema-create');
+              this.isEditing = false;
+            })
+          )
+          .subscribe();
+      }
     }
   }
 
@@ -355,16 +340,118 @@ export class CinemaManagementComponent implements OnInit {
     this.selectedCinema = null;
   }
 
-  deleteCinema(cinemaId: string): void {
-    console.log('Supprimer le cinéma:', cinemaId);
-    this.cinemas = this.cinemas.filter(c => c.id !== cinemaId);
-    if (this.selectedCinema?.id === cinemaId) {
-      this.selectedCinema = null;
+  // Chargement des données
+  loadCinemas(): void {
+    this.isLoading = true;
+    this.loadingService.start('cinemas-loading', 'Chargement des cinémas...');
+    
+    console.log('Début du chargement des cinémas...');
+    
+    this.cinemaService.getAllCinemas()
+      .pipe(
+        tap(cinemas => {
+          console.log('Cinémas chargés avec salles incluses:', cinemas);
+          this.cinemas = cinemas;
+          
+          // Extraire toutes les salles de tous les cinémas pour les statistiques
+          this.theaters = this.getAllTheatersFromCinemas();
+          this.updateStats();
+          
+          // Si nous avons des cinémas et que nous sommes en vue salles, sélectionner le premier cinéma
+          if (cinemas.length > 0 && this.activeView === 'theaters' && !this.selectedCinema) {
+            this.selectedCinema = cinemas[0];
+          }
+        }),
+        catchError(error => {
+          console.error('Erreur détaillée chargement cinémas:', error);
+          this.notificationService.error('Erreur', `Erreur lors du chargement des cinémas: ${error.message || 'Erreur inconnue'}`);
+          return of([]);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+          this.loadingService.stop('cinemas-loading');
+        })
+      )
+      .subscribe();
+  }
+
+  loadTheaters(cinemaId: number): void {
+    // Maintenant que les salles sont incluses dans les données des cinémas,
+    // nous pouvons simplement les extraire sans appel API supplémentaire
+    const cinema = this.cinemas.find(c => c.cinemaId === cinemaId);
+    if (cinema && cinema.theaters) {
+      console.log('Salles extraites du cinéma:', cinema.theaters);
+      this.theaters = cinema.theaters;
+      this.updateStats();
+    } else {
+      console.log('Aucune salle trouvée pour le cinéma ID:', cinemaId);
+      this.theaters = [];
+      this.updateStats();
     }
   }
 
+  deleteCinema(cinemaId: string): void {
+    const id = parseInt(cinemaId);
+    this.isLoading = true;
+    this.loadingService.start('cinema-delete', 'Suppression du cinéma...');
+    
+    this.cinemaService.deleteCinema(id)
+      .pipe(
+        tap(() => {
+          this.cinemas = this.cinemas.filter(c => c.cinemaId !== id);
+          if (this.selectedCinema?.cinemaId === id) {
+            this.selectedCinema = null;
+          }
+          this.updateStats();
+          this.notificationService.success('Succès', 'Cinéma supprimé avec succès');
+        }),
+        catchError(error => {
+          this.notificationService.error('Erreur', 'Erreur lors de la suppression du cinéma');
+          console.error('Erreur suppression cinéma:', error);
+          return of(null);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+          this.loadingService.stop('cinema-delete');
+        })
+      )
+      .subscribe();
+  }
+
+  private updateStats(): void {
+    this.stats = {
+      totalCinemas: this.cinemas.length,
+      activeCinemas: this.cinemas.filter(c => c.theaters?.length > 0).length,
+      totalTheaters: this.theaters.length,
+      averageRating: this.calculateAverageRating(),
+      totalCapacity: this.calculateTotalCapacity()
+    };
+  }
+
+  // Méthode pour extraire toutes les salles de tous les cinémas
+  private getAllTheatersFromCinemas(): TheaterDto[] {
+    const allTheaters: TheaterDto[] = [];
+    this.cinemas.forEach(cinema => {
+      if (cinema.theaters && cinema.theaters.length > 0) {
+        allTheaters.push(...cinema.theaters);
+      }
+    });
+    return allTheaters;
+  }
+
+  private calculateAverageRating(): number {
+    if (this.cinemas.length === 0) return 0;
+    // Pour l'instant, on retourne une valeur par défaut car averageRating n'existe pas dans CinemaDto
+    // Cette propriété pourrait être ajoutée dans l'interface si nécessaire
+    return 4.5; // Valeur par défaut
+  }
+
+  private calculateTotalCapacity(): number {
+    return this.theaters.reduce((sum, theater) => sum + theater.seatCount, 0);
+  }
+
   // Getters pour les données filtrées
-  get filteredCinemas(): Cinema[] {
+  get filteredCinemas(): CinemaDto[] {
     let filtered = this.cinemas;
 
     if (this.searchTerm) {
@@ -377,11 +464,11 @@ export class CinemaManagementComponent implements OnInit {
     return filtered;
   }
 
-  get filteredTheaters(): Theater[] {
+  get filteredTheaters(): TheaterDto[] {
     let filtered = this.theaters;
 
     if (this.selectedCinema) {
-      filtered = filtered.filter(theater => theater.cinemaId === this.selectedCinema?.id);
+      filtered = filtered.filter(theater => theater.cinemaId.toString() === this.selectedCinema?.cinemaId.toString());
     }
 
     if (this.searchTerm) {
