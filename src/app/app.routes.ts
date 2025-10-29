@@ -19,6 +19,11 @@ export const routes: Routes = [
         title: 'Cinephoria - Films'
       },
       {
+        path: 'movies/:id',
+        loadComponent: () => import('./features/public/movie-detail/movie-detail.component').then(m => m.MovieDetailComponent),
+        title: 'Cinephoria - Détail Film'
+      },
+      {
         path: 'contact',
         loadComponent: () => import('./features/public/contact/contact.component').then(m => m.ContactComponent),
         title: 'Cinephoria - Contact'

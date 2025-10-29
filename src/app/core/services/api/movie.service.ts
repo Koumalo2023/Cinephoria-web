@@ -11,6 +11,9 @@ import {
   MovieDto,
   MovieReviewDto,
   ShowtimeDto,
+  TMDbImportRequestDto,
+  TMDbSearchRequestDto,
+  TMDbSearchResponse,
   UpdateEmployeeFavoriteDto,
   UpdateMovieDto
 } from '../../interfaces/core.interfaces';
@@ -19,7 +22,7 @@ import {
   providedIn: 'root'
 })
 export class MovieService {
-  private readonly baseUrl = `${environment.apiUrl}/movie`;
+  private readonly baseUrl = `${environment.apiUrl}/Movie`;
 
   constructor(private http: HttpClient) {}
 
@@ -137,14 +140,14 @@ export class MovieService {
   /**
    * Rechercher des films dans TMDb
    */
-  searchTMDb(searchRequest: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/tmdb/search`, searchRequest);
+  searchTMDb(searchRequest: TMDbSearchRequestDto): Observable<TMDbSearchResponse> {
+    return this.http.post<TMDbSearchResponse>(`${this.baseUrl}/tmdb/search`, searchRequest);
   }
 
   /**
    * Importer un film depuis TMDb (Admin)
    */
-  importFromTMDb(importRequest: any): Observable<number> {
+  importFromTMDb(importRequest: TMDbImportRequestDto): Observable<number> {
     return this.http.post<number>(`${this.baseUrl}/tmdb/import`, importRequest);
   }
 
