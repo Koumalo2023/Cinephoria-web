@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-// import { RouterModule } from '@angular/router';
 import { Subject, forkJoin, of } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 
@@ -23,6 +22,7 @@ import { CinemaService } from 'src/app/core/services/api/cinema.service';
 import { MovieService } from 'src/app/core/services/api/movie.service';
 import { ShowtimeService } from 'src/app/core/services/api/showtime.service';
 import { TheaterService } from 'src/app/core/services/api/theater.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 // Composants réutilisables
 import { BadgeComponent } from 'src/app/shared/components/atoms/badge/badge.component';
@@ -82,6 +82,7 @@ export class ShowtimeComponent implements OnInit, OnDestroy {
   private movieService = inject(MovieService);
   private theaterService = inject(TheaterService);
   private cinemaService = inject(CinemaService);
+  private notificationService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
 
   // États
@@ -601,7 +602,8 @@ export class ShowtimeComponent implements OnInit, OnDestroy {
     this.showFormModal = false;
     this.operationError = null;
     this.loadInitialData();
-    // TODO: Afficher notification de succès
+    // Afficher notification de succès
+    this.notificationService.success('Opération réussie', message, 5000);
   }
 
   private handleOperationError(message: string, error: any): void {
@@ -609,7 +611,8 @@ export class ShowtimeComponent implements OnInit, OnDestroy {
     this.submitting = false;
     this.operationError = this.extractErrorMessage(error);
     this.cdr.detectChanges();
-    // TODO: Afficher notification d'erreur
+    // Afficher notification d'erreur
+    this.notificationService.error('Erreur', this.extractErrorMessage(error), 6000);
   }
 
   private extractErrorMessage(error: any): string {
