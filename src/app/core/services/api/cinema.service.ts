@@ -34,7 +34,7 @@ export class CinemaService {
    * Récupérer un cinéma par ID
    */
   getCinemaById(cinemaId: number): Observable<CinemaDto> {
-    return this.http.get<CinemaDto>(`${this.baseUrl}/cinema/${cinemaId}`);
+    return this.http.get<CinemaDto>(`${this.baseUrl}/${cinemaId}`);
   }
 
   /**
@@ -48,6 +48,6 @@ export class CinemaService {
    * Supprimer un cinéma
    */
   deleteCinema(cinemaId: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/cinema/${cinemaId}`);
+    return this.http.delete<any>(`${this.baseUrl}/delete/${cinemaId}`);
   }
 }

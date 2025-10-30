@@ -84,6 +84,12 @@ export class ErrorInterceptor implements HttpInterceptor {
    * Gérer les erreurs spécifiques du serveur
    */
   private handleServerError(error: HttpErrorResponse): void {
+    // Ne pas rediriger pour les erreurs d'API (requêtes vers /api/)
+    if (error.url && error.url.includes('/api/')) {
+      // Pour les erreurs d'API, on laisse le composant gérer l'erreur
+      return;
+    }
+
     switch (error.status) {
       case 401:
         // Token expiré ou invalide - déconnecter l'utilisateur

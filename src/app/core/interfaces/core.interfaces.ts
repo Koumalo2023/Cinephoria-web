@@ -702,11 +702,11 @@ export interface CreateShowtimeDto {
   movieId: number;
   theaterId: number;
   cinemaId: number;
-  startTime: Date;
+  startTime: string; // Format ISO 8601
   quality: ProjectionQuality;
-  price: number;
-  priceAdjustment?: number;
-  isPromotion?: boolean;
+  endTime: string; // Format ISO 8601
+  priceAdjustment: number;
+  isPromotion: boolean;
 }
 
 /**
@@ -715,14 +715,14 @@ export interface CreateShowtimeDto {
  */
 export interface UpdateShowtimeDto {
   showtimeId: number;
-  movieId?: number;
-  theaterId?: number;
-  cinemaId?: number;
-  startTime?: Date;
-  quality?: ProjectionQuality;
-  price?: number;
-  priceAdjustment?: number;
-  isPromotion?: boolean;
+  movieId: number;
+  theaterId: number;
+  cinemaId: number;
+  startTime: string; // Format ISO 8601
+  quality: ProjectionQuality;
+  endTime: string; // Format ISO 8601
+  priceAdjustment: number;
+  isPromotion: boolean;
 }
 
 /**

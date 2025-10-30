@@ -19,7 +19,7 @@
       [step]="step"
       (change)="onTimeChange($event)"
       (click)="togglePicker()"
-      aria-label="{{ label || 'Sélectionner une heure' }}"
+      [attr.aria-label]="label || 'Sélectionner une heure'"
       aria-haspopup="true"
       [attr.aria-expanded]="isOpen"
     />

@@ -1,0 +1,298 @@
+<!-- Header et Statistiques -->
+<div class="showtime-management">
+  <header class="showtime-header">
+    <div class="header-content">
+      <h1 class="page-title">Gestion des Séances</h1>
+      <p class="page-subtitle">Gérez les séances de films dans vos cinémas</p>
+    </div>
+    <div class="header-actions">
+      <app-button 
+        variant="primary" 
+        size="medium"
+        (click)="openCreateForm()">
+        <i class="icon-plus"></i>
+        Nouvelle Séance
+      </app-button>
+    </div>
+  </header>
+
+  <!-- Statistiques Rapides -->
+  <div class="stats-grid" *ngIf="!loading">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.totalShowtimes }}</div>
+      <div class="stat-label">Séances Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.todayShowtimes }}</div>
+      <div class="stat-label">Aujourd'hui</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.upcomingShowtimes }}</div>
+      <div class="stat-label">À Venir</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.averageOccupancy | number:'1.0-1' }}%</div>
+      <div class="stat-label">Occupation Moyenne</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.totalRevenue | number:'1.0-0' }}€</div>
+      <div class="stat-label">Revenus Total</div>
+    </div>
+  </div>
+
+  <!-- Barre de Recherche et Filtres -->
+  <div class="filters-section">
+    <div class="search-container">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher par film, salle ou cinéma..."
+        #searchInput
+        (input)="onSearch(searchInput.value)">
+    </div>
+    
+    <div class="filters-container">
+      <!-- Filtres simples - à étendre avec un composant dédié -->
+      <div class="filter-group">
+        <select class="filter-select" (change)="onCinemaFilterChange($event)">
+          <option value="">Tous les cinémas</option>
+          <option *ngFor="let cinema of cinemas" [value]="cinema.cinemaId">
+            {{ cinema.name }}
+          </option>
+        </select>
+        
+        <select class="filter-select" (change)="onMovieFilterChange($event)">
+          <option value="">Tous les films</option>
+          <option *ngFor="let movie of movies" [value]="movie.movieId">
+            {{ movie.title }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des Séances -->
+  <div class="showtimes-container">
+    <!-- État de chargement -->
+    <div *ngIf="loading" class="loading-state">
+      <app-spinner size="large"></app-spinner>
+      <p>Chargement des séances...</p>
+    </div>
+
+    <!-- État vide -->
+    <div *ngIf="!loading && filteredShowtimes.length === 0" class="empty-state">
+      <div class="empty-icon">🎬</div>
+      <h3>Aucune séance trouvée</h3>
+      <p>Aucune séance ne correspond à vos critères de recherche.</p>
+      <app-button variant="primary" (click)="openCreateForm()">
+        Créer une séance
+      </app-button>
+    </div>
+
+    <!-- Liste des séances -->
+    <div *ngIf="!loading && filteredShowtimes.length > 0" class="showtimes-table">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Film</th>
+            <th>Cinéma</th>
+            <th>Salle</th>
+            <th>Date & Heure</th>
+            <th>Qualité</th>
+            <th>Prix</th>
+            <th>Occupation</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let showtime of paginatedShowtimes" class="showtime-row">
+            <td class="movie-cell">
+              <div class="movie-info">
+                <strong>{{ getMovieTitle(showtime.movieId) }}</strong>
+              </div>
+            </td>
+            <td class="cinema-cell">
+              {{ getCinemaName(showtime.cinemaId) }}
+            </td>
+            <td class="theater-cell">
+              {{ getTheaterName(showtime.theaterId) }}
+            </td>
+            <td class="datetime-cell">
+              {{ formatDate(showtime.startTime) }}
+            </td>
+            <td class="quality-cell">
+              <app-badge [variant]="'info'">
+                {{ getProjectionQualityLabel(showtime.quality) }}
+              </app-badge>
+            </td>
+            <td class="price-cell">
+              <div class="price-info">
+                <span class="base-price">{{ formatPrice(showtime.price) }}</span>
+                <span *ngIf="showtime.priceAdjustment > 0" class="adjustment">
+                  +{{ formatPrice(showtime.priceAdjustment) }}
+                </span>
+                <span *ngIf="showtime.isPromotion" class="promotion-badge">
+                  PROMO
+                </span>
+              </div>
+            </td>
+            <td class="occupancy-cell">
+              <div class="occupancy-info">
+                <app-badge [variant]="getOccupancyBadgeVariant(showtime)">
+                  {{ getOccupancyPercentage(showtime) | number:'1.0-0' }}%
+                </app-badge>
+                <div class="occupancy-details">
+                  {{ getTotalSeats(showtime) }} /
+                  {{ getTheaterCapacity(showtime.theaterId) }} places
+                </div>
+              </div>
+            </td>
+            <td class="status-cell">
+              <app-badge [variant]="getShowtimeStatus(showtime).variant">
+                {{ getShowtimeStatus(showtime).label }}
+              </app-badge>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <app-button 
+                  variant="secondary" 
+                  size="small"
+                  (click)="openEditForm(showtime)">
+                  <i class="icon-edit"></i>
+                  Modifier
+                </app-button>
+                <app-button 
+                  variant="danger" 
+                  size="small"
+                  (click)="deleteShowtime(showtime)">
+                  <i class="icon-trash"></i>
+                  Supprimer
+                </app-button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination-container" *ngIf="filteredShowtimes.length > pageSize">
+        <app-pagination
+          [currentPage]="currentPage"
+          [pageSize]="pageSize"
+          [totalItems]="totalItems"
+          (pageChange)="onPageChange($event)">
+        </app-pagination>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Création/Édition -->
+  <div *ngIf="showFormModal" class="modal-overlay" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Modifier la Séance' : 'Nouvelle Séance' }}</h2>
+        <button class="close-button" (click)="closeForm()">×</button>
+      </div>
+
+      <form [formGroup]="showtimeForm" (ngSubmit)="onSubmit()" class="modal-form">
+        <div class="form-grid">
+          <!-- Film -->
+          <app-form-field label="Film" [required]="true">
+            <app-select
+              formControlName="movieId"
+              placeholder="Sélectionnez un film"
+              [options]="movieOptions">
+            </app-select>
+          </app-form-field>
+
+          <!-- Cinéma -->
+          <app-form-field label="Cinéma" [required]="true">
+            <app-select
+              formControlName="cinemaId"
+              placeholder="Sélectionnez un cinéma"
+              [options]="cinemaOptions"
+              (change)="onCinemaChange($event)">
+            </app-select>
+          </app-form-field>
+
+          <!-- Salle -->
+          <app-form-field label="Salle" [required]="true">
+            <app-select
+              formControlName="theaterId"
+              placeholder="Sélectionnez une salle"
+              [options]="theaterOptions">
+            </app-select>
+          </app-form-field>
+
+          <!-- Date et Heure -->
+          <app-form-field label="Date et Heure" [required]="true">
+            <app-date-picker
+              formControlName="startTime"
+              placeholder="Sélectionnez la date et l'heure"
+              mode="datetime">
+            </app-date-picker>
+          </app-form-field>
+
+          <!-- Qualité de Projection -->
+          <app-form-field label="Qualité de Projection" [required]="true">
+            <app-select
+              formControlName="quality"
+              placeholder="Sélectionnez la qualité"
+              [options]="projectionQualityOptions">
+            </app-select>
+          </app-form-field>
+
+          <!-- Ajustement de Prix -->
+          <app-form-field label="Ajustement de Prix" [required]="true">
+            <input
+              type="number"
+              class="form-input"
+              formControlName="priceAdjustment"
+              placeholder="0.00"
+              step="0.01"
+              min="0">
+          </app-form-field>
+
+          <!-- Promotion -->
+          <div class="form-group">
+            <label class="form-label">Promotion</label>
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isPromotion">
+              <span class="checkbox-custom"></span>
+              Séance en promotion
+            </label>
+          </div>
+        </div>
+
+        <!-- Message d'erreur d'opération -->
+        <div *ngIf="operationError" class="error-message operation-error">
+          <i class="icon-error"></i>
+          {{ operationError }}
+        </div>
+
+        <div class="form-actions">
+          <app-button
+            type="button"
+            variant="secondary"
+            (click)="closeForm()"
+            [disabled]="submitting">
+            Annuler
+          </app-button>
+          <app-button
+            type="submit"
+            variant="primary"
+            [disabled]="showtimeForm.invalid || submitting">
+            <span *ngIf="!submitting">
+              {{ isEditing ? 'Modifier' : 'Créer' }} la Séance
+            </span>
+            <span *ngIf="submitting">
+              <app-spinner size="small"></app-spinner>
+              {{ isEditing ? 'Modification...' : 'Création...' }}
+            </span>
+          </app-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -3,16 +3,16 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-    CreateShowtimeDto,
-    ShowtimeDto,
-    UpdateShowtimeDto
+  CreateShowtimeDto,
+  ShowtimeDto,
+  UpdateShowtimeDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShowtimeService {
-  private readonly baseUrl = `${environment.apiUrl}/showtime`;
+  private readonly baseUrl = `${environment.apiUrl}/Showtime`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,0 +1,654 @@
+.showtime-management {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.showtime-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+
+  .header-content {
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .page-subtitle {
+      font-size: 1rem;
+      color: #64748b;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+}
+
+/* Statistiques */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  .stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+}
+
+/* Filtres et Recherche */
+.filters-section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .search-container {
+    margin-bottom: 1rem;
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+      }
+
+      &::placeholder {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .filters-container {
+    .filter-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+
+      .filter-select {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        background: white;
+        font-size: 0.875rem;
+        color: #374151;
+
+        &:focus {
+          outline: none;
+          border-color: #1e40af;
+          box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+      }
+    }
+  }
+}
+
+/* Conteneur des séances */
+.showtimes-container {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* États de chargement et vide */
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* Tableau des séances */
+.showtimes-table {
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    tbody {
+      .showtime-row {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background: #f8fafc;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        td {
+          padding: 1rem;
+          vertical-align: top;
+
+          &.movie-cell {
+            .movie-info {
+              strong {
+                color: #1e293b;
+                font-weight: 600;
+              }
+            }
+          }
+
+          &.cinema-cell,
+          &.theater-cell {
+            color: #64748b;
+            font-size: 0.875rem;
+          }
+
+          &.datetime-cell {
+            font-weight: 500;
+            color: #1e293b;
+          }
+
+          &.quality-cell {
+            .badge {
+              font-size: 0.75rem;
+            }
+          }
+
+          &.price-cell {
+            .price-info {
+              .base-price {
+                font-weight: 600;
+                color: #1e293b;
+              }
+
+              .adjustment {
+                font-size: 0.75rem;
+                color: #059669;
+                margin-left: 0.25rem;
+              }
+
+              .promotion-badge {
+                display: inline-block;
+                background: #fef3c7;
+                color: #92400e;
+                font-size: 0.625rem;
+                font-weight: 600;
+                padding: 0.125rem 0.375rem;
+                border-radius: 4px;
+                margin-left: 0.5rem;
+                text-transform: uppercase;
+              }
+            }
+          }
+
+          &.occupancy-cell {
+            .occupancy-info {
+              .occupancy-details {
+                font-size: 0.75rem;
+                color: #64748b;
+                margin-top: 0.25rem;
+              }
+            }
+          }
+
+          &.status-cell {
+            .badge {
+              font-size: 0.75rem;
+            }
+          }
+
+          &.actions-cell {
+            .action-buttons {
+              display: flex;
+              gap: 0.5rem;
+
+              button {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Pagination */
+.pagination-container {
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid #e2e8f0;
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #1e293b;
+      }
+
+      .close-button {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #64748b;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background: #f1f5f9;
+        }
+      }
+    }
+
+    .modal-form {
+      padding: 2rem;
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+
+        app-form-field {
+          grid-column: span 2;
+
+          &:nth-child(-n+3) {
+            grid-column: span 1;
+          }
+
+          .datetime-inputs {
+            display: flex;
+            gap: 1rem;
+
+            app-date-picker,
+            app-time-picker {
+              flex: 1;
+            }
+          }
+
+          .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #374151;
+
+            input[type="checkbox"] {
+              display: none;
+            }
+
+            .checkbox-custom {
+              width: 1.25rem;
+              height: 1.25rem;
+              border: 2px solid #d1d5db;
+              border-radius: 4px;
+              position: relative;
+              transition: all 0.2s;
+
+              &::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0);
+                width: 0.75rem;
+                height: 0.75rem;
+                background: #1e40af;
+                border-radius: 2px;
+                transition: transform 0.2s;
+              }
+            }
+
+            input[type="checkbox"]:checked + .checkbox-custom {
+              border-color: #1e40af;
+
+              &::after {
+                transform: translate(-50%, -50%) scale(1);
+              }
+            }
+          }
+
+          .error-message {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+          }
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .showtime-management {
+    padding: 1rem;
+  }
+
+  .showtime-header {
+    flex-direction: column;
+    gap: 1rem;
+
+    .header-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .filters-section {
+    .filters-container {
+      .filter-group {
+        .filter-select {
+          min-width: 100%;
+        }
+      }
+    }
+  }
+
+  .showtimes-table {
+    .table {
+      thead {
+        display: none;
+      }
+
+      tbody {
+        .showtime-row {
+          display: block;
+          padding: 1rem;
+          border-bottom: 1px solid #e2e8f0;
+
+          td {
+            display: block;
+            padding: 0.5rem 0;
+            border: none;
+
+            &.actions-cell {
+              .action-buttons {
+                justify-content: flex-end;
+              }
+            }
+
+            &::before {
+              content: attr(data-label);
+              font-weight: 600;
+              color: #374151;
+              display: block;
+              font-size: 0.75rem;
+              text-transform: uppercase;
+              margin-bottom: 0.25rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .modal-overlay {
+    padding: 1rem;
+
+    .modal-content {
+      .modal-form {
+        .form-grid {
+          grid-template-columns: 1fr;
+
+          app-form-field {
+            grid-column: span 1;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Animation pour les transitions */
+.showtime-row {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.stat-card {
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.operation-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  i {
+    font-size: 1.125rem;
+  }
+}
+
+/* Styles pour les formulaires HTML natifs */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-label .required {
+  color: #e74c3c;
+}
+
+.form-select,
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.operation-error {
+  background-color: #fdf2f2;
+  border: 1px solid #fbb;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Styles spécifiques pour la modale avec formulaires natifs */
+.modal-form {
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    .form-group {
+      grid-column: span 2;
+
+      &:nth-child(-n+3) {
+        grid-column: span 1;
+      }
+
+      .datetime-inputs {
+        display: flex;
+        gap: 1rem;
+
+        .form-input {
+          flex: 1;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive pour les formulaires natifs */
+@media (max-width: 768px) {
+  .modal-form {
+    .form-grid {
+      grid-template-columns: 1fr;
+
+      .form-group {
+        grid-column: span 1;
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@ export class TheaterService {
    * Obtenir toutes les salles
    */
   getAllTheaters(): Observable<TheaterDto[]> {
-    return this.http.get<TheaterDto[]>(`${this.baseUrl}`);
+    return this.http.get<TheaterDto[]>(`${this.baseUrl}/all`);
   }
 
   /**
