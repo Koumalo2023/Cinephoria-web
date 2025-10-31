@@ -1,22 +1,35 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+// Interfaces API
+import { AppUserDto, CinemaDto, MovieDto, SeatDto, ShowtimeDto } from 'src/app/core/interfaces/core.interfaces';
+
+// Services
+import { UserStateService } from 'src/app/core/services/auth/user-state.service';
+
+// Utilitaires de conversion
+import {
+  groupShowtimesByDate,
+  organizeSeatsByRow
+} from 'src/app/core/utils/data-converters.util';
+
 // Composants atomiques
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
-import { SelectComponent } from '../../atoms/select/select.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ProgressIndicatorComponent, ProgressStep } from '../../atoms/progress-indicator/progress-indicator.component';
+import { SelectComponent } from '../../atoms/select/select.component';
 
 // Composants molécules
-import { SeatGridComponent, Seat as GridSeat } from '../../molecules/seat-grid/seat-grid.component';
-import { SeatLegendComponent } from '../../molecules/seat-legend/seat-legend.component';
-import { SeatCounterComponent } from '../../molecules/seat-counter/seat-counter.component';
-import { ReservationSummaryComponent, ReservationDetails } from '../../molecules/reservation-summary/reservation-summary.component';
+import { CinemaCardComponent } from '../../molecules/cinema-card/cinema-card.component';
+import { FilmCardComponent } from '../../molecules/film-card/film-card.component';
 import { QRCodeDisplayComponent } from '../../molecules/qr-code-display/qr-code-display.component';
+import { ReservationDetails, ReservationSummaryComponent } from '../../molecules/reservation-summary/reservation-summary.component';
+import { SeatRow as GridSeatRow, SeatSelectionGridComponent } from '../../molecules/seat-selection-grid/seat-selection-grid.component';
+import { ShowtimeGroup, ShowtimeSelectorComponent } from '../../molecules/showtime-selector/showtime-selector.component';
 
 export interface ReservationStep {
   id: string;
@@ -26,26 +39,11 @@ export interface ReservationStep {
   active: boolean;
 }
 
-// Interface compatible avec SeatGridComponent
-export interface Seat extends GridSeat {
-  // Hérite de GridSeat qui inclut déjà les propriétés nécessaires
-}
-
-export interface Showtime {
-  id: string;
-  movieId: string;
-  movieTitle: string;
-  theaterId: string;
-  theaterName: string;
-  startTime: Date;
-  endTime: Date;
-  price: number;
-  availableSeats: number;
-}
-
 export interface ReservationData {
-  showtime: Showtime;
-  selectedSeats: Seat[];
+  cinema: CinemaDto;
+  movie: MovieDto;
+  showtime: ShowtimeDto;
+  selectedSeats: SeatDto[];
   customerInfo: {
     firstName: string;
     lastName: string;
@@ -69,9 +67,10 @@ export interface ReservationData {
     SelectComponent,
     BadgeComponent,
     ProgressIndicatorComponent,
-    SeatGridComponent,
-    SeatLegendComponent,
-    SeatCounterComponent,
+    CinemaCardComponent,
+    FilmCardComponent,
+    ShowtimeSelectorComponent,
+    SeatSelectionGridComponent,
     ReservationSummaryComponent,
     QRCodeDisplayComponent
   ],
@@ -79,44 +78,54 @@ export interface ReservationData {
   styleUrls: ['./reservation-flow.component.scss']
 })
 export class ReservationFlowComponent implements OnInit, OnDestroy {
-  @Input() showtime!: Showtime;
-  @Input() initialSeats: Seat[] = [];
+  @Input() cinemas: CinemaDto[] = [];
+  @Input() movies: MovieDto[] = [];
+  @Input() initialSeats: SeatDto[] = [];
   @Output() reservationComplete = new EventEmitter<ReservationData>();
   @Output() reservationCanceled = new EventEmitter<void>();
 
   currentStep = 0;
   steps: ReservationStep[] = [
     {
-      id: 'seat-selection',
-      title: 'Sélection des sièges',
-      description: 'Choisissez vos places dans la salle',
+      id: 'cinema-selection',
+      title: 'Sélection du cinéma',
+      description: 'Choisissez votre cinéma',
       completed: false,
       active: true
     },
     {
-      id: 'customer-info',
-      title: 'Informations client',
-      description: 'Renseignez vos coordonnées',
+      id: 'movie-selection',
+      title: 'Film et séances',
+      description: 'Choisissez votre film et horaire',
       completed: false,
       active: false
     },
     {
-      id: 'payment',
-      title: 'Paiement',
-      description: 'Choisissez votre moyen de paiement',
+      id: 'seat-selection',
+      title: 'Sélection des sièges',
+      description: 'Choisissez vos places dans la salle',
       completed: false,
       active: false
     },
     {
       id: 'confirmation',
       title: 'Confirmation',
-      description: 'Récapitulatif et QR Code',
+      description: 'Récapitulatif et paiement',
       completed: false,
       active: false
     }
   ];
 
-  selectedSeats: Seat[] = [];
+  // Données de réservation
+  selectedCinema: CinemaDto | null = null;
+  selectedMovie: MovieDto | null = null;
+  selectedShowtime: ShowtimeDto | null = null;
+  selectedSeats: SeatDto[] = [];
+  
+  // Données pour l'affichage
+  showtimeGroups: ShowtimeGroup[] = [];
+  seatRows: GridSeatRow[] = [];
+  
   reservationForm!: FormGroup;
   paymentMethods = [
     { value: 'credit_card', label: 'Carte de crédit' },
@@ -128,15 +137,22 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   reservationData: ReservationData | null = null;
   isLoading = false;
   reservationConfirmed = false;
+  
+  // Propriété publique pour l'accès au template
+  get isUserAuthenticated(): boolean {
+    return this.userStateService.isAuthenticated;
+  }
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private userStateService: UserStateService
   ) {}
 
   ngOnInit(): void {
     this.initializeForm();
-    this.initializeSeats();
+    this.initializeData();
+    this.loadUserData();
   }
 
   ngOnDestroy(): void {
@@ -156,51 +172,91 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
     });
   }
 
-  private initializeSeats(): void {
-    if (this.initialSeats.length === 0) {
-      // Générer des sièges par défaut si aucun n'est fourni
-      this.initialSeats = this.generateDefaultSeats();
+  // Charger les données de l'utilisateur connecté
+  private loadUserData(): void {
+    const currentUser = this.userStateService.currentUser;
+    if (currentUser) {
+      this.prefillUserData(currentUser);
     }
   }
 
-  private generateDefaultSeats(): Seat[] {
-    const seats: Seat[] = [];
-    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    const seatsPerRow = 10;
-
-    for (let i = 0; i < rows.length; i++) {
-      for (let j = 1; j <= seatsPerRow; j++) {
-        const type = i < 2 ? 'premium' : (j === 1 || j === seatsPerRow ? 'handicap' : 'standard');
-        const price = type === 'premium' ? 12 : (type === 'handicap' ? 8 : 10);
-        
-        seats.push({
-          id: `${rows[i]}${j}`,
-          row: rows[i],
-          number: j,
-          type,
-          status: Math.random() > 0.8 ? 'occupied' : 'available',
-          price
-        });
-      }
+  // Pré-remplir les données utilisateur dans le formulaire
+  private prefillUserData(user: AppUserDto): void {
+    const customerInfo = this.reservationForm.get('customerInfo');
+    if (customerInfo) {
+      customerInfo.patchValue({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phoneNumber || ''
+      });
     }
-
-    return seats;
   }
 
-  onSeatSelected(seat: Seat): void {
-    const index = this.selectedSeats.findIndex(s => s.id === seat.id);
+  private initializeData(): void {
+    // Initialiser les données si fournies
+    if (this.initialSeats.length > 0) {
+      this.seatRows = organizeSeatsByRow(this.initialSeats);
+    }
     
-    if (index > -1) {
-      // Si le siège est déjà sélectionné, le retirer
-      this.selectedSeats.splice(index, 1);
-    } else {
-      // Si le siège n'est pas sélectionné, l'ajouter
-      this.selectedSeats.push({ ...seat, status: 'selected' });
+    // Grouper les séances par date si des films sont fournis
+    if (this.movies.length > 0 && this.selectedCinema) {
+      this.updateShowtimeGroups();
     }
   }
 
-  onSeatsChange(seats: Seat[]): void {
-    this.selectedSeats = seats.filter(seat => seat.status === 'selected');
+  // Mettre à jour les groupes de séances basé sur le cinéma sélectionné
+  private updateShowtimeGroups(): void {
+    if (!this.selectedCinema) return;
+
+    // Récupérer toutes les séances des films pour ce cinéma
+    const allShowtimes: ShowtimeDto[] = [];
+    this.movies.forEach(movie => {
+      if (movie.showtimes) {
+        const cinemaShowtimes = movie.showtimes.filter(
+          showtime => showtime.cinemaId === this.selectedCinema!.cinemaId
+        );
+        allShowtimes.push(...cinemaShowtimes);
+      }
+    });
+
+    this.showtimeGroups = groupShowtimesByDate(allShowtimes);
+  }
+
+  // Gestion de la sélection du cinéma
+  onCinemaSelect(cinema: CinemaDto): void {
+    this.selectedCinema = cinema;
+    this.updateShowtimeGroups();
+  }
+
+  // Gestion de la sélection du film
+  onMovieSelect(movie: MovieDto): void {
+    this.selectedMovie = movie;
+  }
+
+  // Gestion de la sélection de la séance
+  onShowtimeSelect(showtime: ShowtimeDto): void {
+    this.selectedShowtime = showtime;
+    // Charger les sièges pour cette séance
+    this.loadSeatsForShowtime(showtime);
+  }
+
+  // Gestion de la sélection des sièges
+  onSeatsChange(selection: any): void {
+    this.selectedSeats = selection.seats;
+  }
+
+  // Charger les sièges pour une séance
+  private loadSeatsForShowtime(showtime: ShowtimeDto): void {
+    // Utiliser les sièges initiaux fournis par le composant parent
+    // Le composant parent utilisera reservationService.getAvailableSeats(showtimeId)
+    if (this.initialSeats.length > 0) {
+      this.seatRows = organizeSeatsByRow(this.initialSeats);
+    } else {
+      // Si aucun siège n'est fourni, afficher un message d'erreur
+      console.warn('Aucun siège disponible pour cette séance');
+      this.seatRows = [];
+    }
   }
 
   nextStep(): void {
@@ -234,13 +290,16 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
 
   canProceedToNextStep(): boolean {
     switch (this.currentStep) {
-      case 0: // Sélection des sièges
+      case 0: // Sélection du cinéma
+        return this.selectedCinema !== null;
+      
+      case 1: // Film et séances
+        return this.selectedMovie !== null && this.selectedShowtime !== null;
+      
+      case 2: // Sélection des sièges
         return this.selectedSeats.length > 0;
       
-      case 1: // Informations client
-        return this.reservationForm.get('customerInfo')?.valid || false;
-      
-      case 2: // Paiement
+      case 3: // Confirmation
         return this.reservationForm.valid;
       
       default:
@@ -249,14 +308,16 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   }
 
   private prepareReservationData(): void {
-    if (!this.showtime) return;
+    if (!this.selectedCinema || !this.selectedMovie || !this.selectedShowtime) return;
 
     const customerInfo = this.reservationForm.get('customerInfo')?.value;
     const paymentMethod = this.reservationForm.get('paymentMethod')?.value;
-    const totalAmount = this.selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+    const totalAmount = this.selectedSeats.length * (this.selectedShowtime.price || 9.90);
 
     this.reservationData = {
-      showtime: this.showtime,
+      cinema: this.selectedCinema,
+      movie: this.selectedMovie,
+      showtime: this.selectedShowtime,
       selectedSeats: this.selectedSeats,
       customerInfo,
       paymentMethod,
@@ -295,16 +356,17 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
 
   getStepButtonText(): string {
     switch (this.currentStep) {
-      case 0: return 'Continuer vers les informations';
-      case 1: return 'Continuer vers le paiement';
-      case 2: return 'Confirmer la réservation';
-      case 3: return 'Imprimer les billets';
+      case 0: return 'Continuer vers les films';
+      case 1: return 'Continuer vers les sièges';
+      case 2: return 'Continuer vers la confirmation';
+      case 3: return 'Confirmer la réservation';
       default: return 'Continuer';
     }
   }
 
   getTotalAmount(): number {
-    return this.selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+    if (!this.selectedShowtime) return 0;
+    return this.selectedSeats.length * (this.selectedShowtime.price || 9.90);
   }
 
   getProgressPercentage(): number {
@@ -339,26 +401,26 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
     return {
       id: reservationData.reservationId || 'temp-id',
       movie: {
-        id: reservationData.showtime.movieId,
-        title: reservationData.showtime.movieTitle,
-        duration: 120, // Valeur par défaut
-        rating: 'PG-13',
-        genre: ['Action', 'Aventure']
+        id: reservationData.movie.movieId.toString(),
+        title: reservationData.movie.title,
+        duration: this.parseDuration(reservationData.movie.duration),
+        rating: 'PG-13', // À adapter selon les données réelles
+        genre: [reservationData.movie.genre.toString()]
       },
       showtime: {
-        id: reservationData.showtime.id,
+        id: reservationData.showtime.showtimeId.toString(),
         date: reservationData.showtime.startTime.toISOString().split('T')[0],
         time: reservationData.showtime.startTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        format: '2D',
-        language: 'VF',
-        theater: reservationData.showtime.theaterName
+        format: reservationData.showtime.quality.toString(),
+        language: 'VF', // À adapter selon les données réelles
+        theater: `Salle ${reservationData.showtime.theaterId}`
       },
       seats: reservationData.selectedSeats.map(seat => ({
-        id: seat.id,
-        row: seat.row,
-        number: seat.number,
-        type: seat.type,
-        price: seat.price
+        id: seat.seatId.toString(),
+        row: seat.seatNumber.match(/^([A-Z]+)/)?.[0] || '',
+        number: parseInt(seat.seatNumber.match(/\d+$/)?.[0] || '0', 10),
+        type: seat.isAccessible ? 'handicap' : 'standard',
+        price: reservationData.showtime.price || 9.90
       })),
       totalPrice: reservationData.totalAmount,
       bookingFee: 1.50,
@@ -368,5 +430,16 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
       status: 'confirmed',
       qrCodeData: reservationData.reservationId || ''
     };
+  }
+
+  // Convertir la durée du film (ex: "2h 15min" en minutes)
+  private parseDuration(duration: string): number {
+    const hoursMatch = duration.match(/(\d+)h/);
+    const minutesMatch = duration.match(/(\d+)min/);
+    
+    const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
+    
+    return hours * 60 + minutes;
   }
 }

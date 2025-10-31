@@ -1,1 +1,23 @@
-<p>reservations works!</p>
+<div class="reservations-page">
+  <header class="page-header">
+    <h1>Réservation de places</h1>
+    <p>Réservez vos places de cinéma en quelques étapes simples</p>
+  </header>
+
+  <main class="reservations-content">
+    <app-reservation-flow
+      [cinemas]="cinemas"
+      [movies]="movies"
+      [initialSeats]="initialSeats"
+      (reservationComplete)="onReservationComplete($event)"
+      (reservationCanceled)="onReservationCanceled()"
+    ></app-reservation-flow>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-info">
+      <p><strong>Besoin d'aide ?</strong> Contactez notre service client au +33 1 23 45 67 89</p>
+      <p>Ou envoyez-nous un email à <a href="mailto:support&#64;cinephoria.com">support&#64;cinephoria.com</a></p>
+    </div>
+  </footer>
+</div>

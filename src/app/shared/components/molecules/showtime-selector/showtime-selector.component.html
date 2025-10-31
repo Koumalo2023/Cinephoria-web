@@ -58,13 +58,13 @@
           [class]="getShowtimeClasses(showtime)"
           class="showtime-selector__showtime"
           type="button"
-          [disabled]="showtime.isFull || disabled"
+          [disabled]="getAvailableSeats(showtime) <= 0 || disabled"
           (click)="onShowtimeSelect(showtime)"
         >
           <!-- Heure et informations principales -->
           <div class="showtime-selector__showtime-main">
             <div class="showtime-selector__time">
-              {{ formatTime(showtime.time) }}
+              {{ formatTime(showtime.startTime) }}
             </div>
 
             <!-- Informations supplémentaires -->
@@ -74,7 +74,7 @@
                 *ngIf="showFormat"
                 class="showtime-selector__format"
               >
-                {{ showtime.format }}
+                {{ getProjectionFormat(showtime) }}
               </span>
 
               <!-- Langue -->
@@ -82,7 +82,7 @@
                 *ngIf="showLanguage"
                 class="showtime-selector__language"
               >
-                {{ showtime.language }}
+                {{ getLanguage(showtime) }}
               </span>
 
               <!-- Accessibilité -->
@@ -98,7 +98,7 @@
                 *ngIf="showTheater"
                 class="showtime-selector__theater"
               >
-                Salle {{ showtime.theater }}
+                Salle {{ showtime.theaterId }}
               </span>
             </div>
           </div>
@@ -110,7 +110,7 @@
               *ngIf="showPrice"
               class="showtime-selector__price"
             >
-              {{ formatPrice(showtime.price) }}
+              {{ formatPrice(getPrice(showtime)) }}
             </div>
 
             <!-- Disponibilité -->
@@ -137,7 +137,7 @@
 
           <!-- Indicateur de bientôt -->
           <div
-            *ngIf="showtime.isSoon"
+            *ngIf="isSoon(showtime)"
             class="showtime-selector__soon-indicator"
           >
             Bientôt

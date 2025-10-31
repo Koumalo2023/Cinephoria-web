@@ -1,23 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MovieDto } from 'src/app/core/interfaces/core.interfaces';
 
 export type FilmCardSize = 'small' | 'medium' | 'large';
 export type FilmCardVariant = 'default' | 'featured' | 'compact';
-
-export interface Film {
-  id: string | number;
-  title: string;
-  posterUrl: string;
-  year: number;
-  duration: string;
-  rating: number;
-  genres: string[];
-  director?: string;
-  description?: string;
-  isFavorite?: boolean;
-  isWatched?: boolean;
-  isInWatchlist?: boolean;
-}
 
 @Component({
   selector: 'app-film-card',
@@ -27,7 +13,7 @@ export interface Film {
   styleUrls: ['./film-card.component.scss']
 })
 export class FilmCardComponent {
-  @Input() film!: Film;
+  @Input() film!: MovieDto;
   @Input() size: FilmCardSize = 'medium';
   @Input() variant: FilmCardVariant = 'default';
   @Input() showActions: boolean = true;
@@ -37,10 +23,10 @@ export class FilmCardComponent {
   @Input() showDuration: boolean = true;
   @Input() showDescription: boolean = false;
 
-  @Output() favoriteToggle = new EventEmitter<Film>();
-  @Output() watchlistToggle = new EventEmitter<Film>();
-  @Output() watchedToggle = new EventEmitter<Film>();
-  @Output() filmClick = new EventEmitter<Film>();
+  @Output() favoriteToggle = new EventEmitter<MovieDto>();
+  @Output() watchlistToggle = new EventEmitter<MovieDto>();
+  @Output() watchedToggle = new EventEmitter<MovieDto>();
+  @Output() filmClick = new EventEmitter<MovieDto>();
 
   // Classes CSS
   get cardClasses(): string {
@@ -48,9 +34,7 @@ export class FilmCardComponent {
       'film-card',
       `film-card--${this.size}`,
       `film-card--${this.variant}`,
-      this.film.isFavorite ? 'film-card--favorite' : '',
-      this.film.isWatched ? 'film-card--watched' : '',
-      this.film.isInWatchlist ? 'film-card--watchlist' : ''
+      this.film.isFavorite ? 'film-card--favorite' : ''
     ].join(' ').trim();
   }
 
@@ -80,15 +64,30 @@ export class FilmCardComponent {
   // Formater la durée
   get formattedDuration(): string {
     if (!this.film.duration) return '';
-    return this.film.duration.replace('PT', '').replace('H', 'h').replace('M', 'min');
+    return this.film.duration;
   }
 
   // Obtenir la couleur du rating
   get ratingColor(): string {
-    const rating = this.film.rating;
+    const rating = this.film.averageRating || 0;
     if (rating >= 8) return 'rating--excellent';
     if (rating >= 7) return 'rating--good';
     if (rating >= 6) return 'rating--average';
     return 'rating--poor';
+  }
+
+  // Obtenir l'année de sortie
+  get releaseYear(): number {
+    return this.film.releaseDate ? new Date(this.film.releaseDate).getFullYear() : 0;
+  }
+
+  // Obtenir le genre comme tableau de strings
+  get genres(): string[] {
+    return [this.film.genre?.toString() || ''];
+  }
+
+  // Obtenir l'URL de l'affiche
+  get posterUrl(): string {
+    return this.film.posterUrls || '';
   }
 }

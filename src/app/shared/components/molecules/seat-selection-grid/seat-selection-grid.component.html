@@ -55,16 +55,16 @@
             *ngFor="let seat of row.seats"
             class="seat-selection-grid__seat"
             type="button"
-            [disabled]="seat.status !== 'available' || disabled"
+            [disabled]="!seat.isAvailable || disabled"
             (click)="onSeatSelect(seat)"
           >
             <app-seat
-              [type]="seat.type"
+              [type]="seat.isAccessible ? 'handicap' : 'standard'"
               [state]="getSeatState(seat)"
-              [seatNumber]="seat.number.toString()"
-              [row]="seat.row"
-              [price]="seat.price || 0"
-              [disabled]="seat.status !== 'available'"
+              [seatNumber]="getSeatNumberInRow(seat.seatNumber).toString()"
+              [row]="getRowFromSeatNumber(seat.seatNumber)"
+              [price]="getSeatPrice(seat)"
+              [disabled]="!seat.isAvailable"
             ></app-seat>
           </button>
         </div>
@@ -160,16 +160,16 @@
           class="seat-selection-grid__selected-seat"
         >
           <app-badge
-            [variant]="getSeatTypeBadgeVariant(seat.type)"
+            [variant]="getSeatTypeBadgeVariant(seat)"
             [size]="'small'"
           >
-            {{ seat.row }}{{ seat.number }}
+            {{ seat.seatNumber }}
           </app-badge>
           <span
-            *ngIf="showPrice && seat.price"
+            *ngIf="showPrice"
             class="seat-selection-grid__seat-price"
           >
-            {{ formatPrice(seat.price) }}
+            {{ formatPrice(getSeatPrice(seat)) }}
           </span>
           <button
             type="button"

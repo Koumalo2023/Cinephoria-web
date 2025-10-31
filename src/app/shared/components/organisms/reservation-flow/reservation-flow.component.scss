@@ -175,6 +175,108 @@
       }
     }
 
+    // Styles pour les grilles de cinémas et films
+    .cinema-selection-step,
+    .movie-selection-step {
+      .cinema-selection-container,
+      .movie-selection-container {
+        padding: 2rem;
+
+        .cinemas-grid,
+        .movies-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+
+          // Styles pour les cartes sélectionnables
+          .cinema-card-selectable,
+          .movie-card-selectable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            &.selected {
+              border-color: #007bff;
+              box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+            }
+          }
+        }
+
+        .selection-hint {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 1rem;
+          background: #e7f3ff;
+          border: 1px solid #b3d9ff;
+          border-radius: 6px;
+          color: #0066cc;
+          font-size: 0.9rem;
+
+          app-icon {
+            color: #0066cc;
+          }
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 3rem 2rem;
+          color: #6c757d;
+
+          app-icon {
+            margin-bottom: 1rem;
+            color: #adb5bd;
+          }
+
+          h3 {
+            margin: 0 0 0.5rem 0;
+            color: #495057;
+            font-size: 1.25rem;
+          }
+
+          p {
+            margin: 0;
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+
+    .movie-selection-step {
+      .movie-selection-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+
+        .movie-selection-section {
+          h3 {
+            margin: 0 0 1rem 0;
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+          }
+        }
+
+        .showtime-selection-section {
+          h3 {
+            margin: 0 0 1rem 0;
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+
     .seat-selection-step {
       .seat-selection-container {
         padding: 2rem;
@@ -211,6 +313,25 @@
       .customer-form,
       .payment-form {
         padding: 2rem;
+
+        // Indicateur d'informations utilisateur pré-remplies
+        .user-info-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1rem;
+          background-color: #e8f5e8;
+          border: 1px solid #4caf50;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          color: #2e7d32;
+          font-size: 0.875rem;
+          font-weight: 500;
+
+          .user-info-note {
+            flex: 1;
+          }
+        }
 
         .form-grid {
           display: grid;
@@ -443,6 +564,25 @@
 @media (max-width: 1024px) {
   .reservation-flow {
     .reservation-content {
+      .cinema-selection-step,
+      .movie-selection-step {
+        .cinema-selection-container,
+        .movie-selection-container {
+          .cinemas-grid,
+          .movies-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+          }
+        }
+      }
+
+      .movie-selection-step {
+        .movie-selection-container {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+      }
+
       .seat-selection-step {
         .seat-selection-container {
           grid-template-columns: 1fr;
@@ -494,6 +634,18 @@
 
         &.customer-info-step .customer-form .form-grid,
         &.payment-step .payment-form .form-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+      }
+    }
+
+    .cinema-selection-step,
+    .movie-selection-step {
+      .cinema-selection-container,
+      .movie-selection-container {
+        .cinemas-grid,
+        .movies-grid {
           grid-template-columns: 1fr;
           gap: 1rem;
         }
@@ -617,6 +769,12 @@
         .customer-form,
         .payment-form,
         .confirmation-content {
+          .user-info-header {
+            background-color: #2d4a2d;
+            border-color: #4caf50;
+            color: #a5d6a7;
+          }
+
           .seat-legend-section,
           .seat-grid-section,
           .seat-summary-section,
