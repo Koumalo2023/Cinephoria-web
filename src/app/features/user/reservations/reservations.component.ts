@@ -10,8 +10,6 @@ import { CinemaDto, MovieDto, SeatDto, ShowtimeDto } from 'src/app/core/interfac
 import { CinemaService } from 'src/app/core/services/api/cinema.service';
 import { MovieService } from 'src/app/core/services/api/movie.service';
 import { ReservationService } from 'src/app/core/services/api/reservation.service';
-import { SeatsService } from 'src/app/core/services/api/seats.service';
-import { ShowtimeService } from 'src/app/core/services/api/showtime.service';
 import { UserStateService } from 'src/app/core/services/auth/user-state.service';
 
 // Services utilitaires
@@ -35,6 +33,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   cinemas: CinemaDto[] = [];
   movies: MovieDto[] = [];
   initialSeats: SeatDto[] = [];
+  showtimes: ShowtimeDto[] = [];
   
   isLoading = false;
   private destroy$ = new Subject<void>();
@@ -42,8 +41,6 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   constructor(
     private cinemaService: CinemaService,
     private movieService: MovieService,
-    private seatsService: SeatsService,
-    private showtimeService: ShowtimeService,
     private reservationService: ReservationService,
     private userStateService: UserStateService,
     private loadingService: LoadingService,
@@ -70,7 +67,9 @@ export class ReservationsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (cinemas) => {
           this.cinemas = cinemas;
-          this.loadMoviesWithShowtimes();
+          // Ne pas charger les films immédiatement, attendre la sélection du cinéma
+          this.isLoading = false;
+          this.loadingService.stop('reservations');
         },
         error: (error) => {
           console.error('Erreur lors du chargement des cinémas:', error);
@@ -81,21 +80,52 @@ export class ReservationsComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadMoviesWithShowtimes(): void {
-    // Utiliser la méthode spécifique pour charger les films avec leurs séances
-    this.movieService.getMoviesWithShowtimes()
+  // Méthode pour charger les films d'un cinéma spécifique
+  loadMoviesByCinema(cinemaId: number): void {
+    this.isLoading = true;
+    this.loadingService.start('movies-by-cinema', 'Chargement des films...');
+
+    this.movieService.getMoviesByCinema(cinemaId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (movies) => {
           this.movies = movies;
           this.isLoading = false;
-          this.loadingService.stop('reservations');
+          this.loadingService.stop('movies-by-cinema');
         },
         error: (error) => {
-          console.error('Erreur lors du chargement des films avec séances:', error);
-          this.notificationService.error('Erreur', 'Erreur lors du chargement des films disponibles');
+          console.error('Erreur lors du chargement des films du cinéma:', error);
+          this.notificationService.error('Erreur', 'Erreur lors du chargement des films du cinéma');
           this.isLoading = false;
-          this.loadingService.stop('reservations');
+          this.loadingService.stop('movies-by-cinema');
+        }
+      });
+  }
+
+  // Méthode pour charger les séances d'un film spécifique
+  loadMovieSessions(movieId: number): void {
+    this.isLoading = true;
+    this.loadingService.start('movie-sessions', 'Chargement des séances...');
+
+    this.reservationService.getMovieSessions(movieId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (showtimes) => {
+          // Mettre à jour les séances du film sélectionné
+          const selectedMovie = this.movies.find(m => m.movieId === movieId);
+          if (selectedMovie) {
+            selectedMovie.showtimes = showtimes;
+          }
+          // Transmettre les séances au composant enfant
+          this.showtimes = showtimes;
+          this.isLoading = false;
+          this.loadingService.stop('movie-sessions');
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des séances du film:', error);
+          this.notificationService.error('Erreur', 'Erreur lors du chargement des séances disponibles');
+          this.isLoading = false;
+          this.loadingService.stop('movie-sessions');
         }
       });
   }
@@ -165,32 +195,6 @@ export class ReservationsComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Méthode pour charger les films d'un cinéma spécifique
-  loadMoviesByCinema(cinemaId: number): void {
-    this.isLoading = true;
-    this.loadingService.start('movies-by-cinema', 'Chargement des films...');
-
-    this.movieService.getMoviesByCinema(cinemaId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (movies) => {
-          this.movies = movies;
-          this.isLoading = false;
-          this.loadingService.stop('movies-by-cinema');
-        },
-        error: (error) => {
-          console.error('Erreur lors du chargement des films du cinéma:', error);
-          this.notificationService.error('Erreur', 'Erreur lors du chargement des films du cinéma');
-          this.isLoading = false;
-          this.loadingService.stop('movies-by-cinema');
-        }
-      });
-  }
-
-  // Méthode pour charger les séances d'un film spécifique
-  loadMovieSessions(movieId: number): Observable<ShowtimeDto[]> {
-    return this.reservationService.getMovieSessions(movieId);
-  }
 
   // Méthode pour charger les réservations d'une séance
   loadShowtimeReservations(showtimeId: number): Observable<any[]> {

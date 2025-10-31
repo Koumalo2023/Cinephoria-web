@@ -11,7 +11,6 @@ import { UserStateService } from 'src/app/core/services/auth/user-state.service'
 
 // Utilitaires de conversion
 import {
-  groupShowtimesByDate,
   organizeSeatsByRow
 } from 'src/app/core/utils/data-converters.util';
 
@@ -81,8 +80,15 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   @Input() cinemas: CinemaDto[] = [];
   @Input() movies: MovieDto[] = [];
   @Input() initialSeats: SeatDto[] = [];
+  @Input() set showtimes(showtimes: ShowtimeDto[]) {
+    if (showtimes && showtimes.length > 0) {
+      this.updateShowtimeGroups(showtimes);
+    }
+  }
   @Output() reservationComplete = new EventEmitter<ReservationData>();
   @Output() reservationCanceled = new EventEmitter<void>();
+  @Output() cinemaSelected = new EventEmitter<number>();
+  @Output() movieSelected = new EventEmitter<number>();
 
   currentStep = 0;
   steps: ReservationStep[] = [
@@ -199,39 +205,56 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
       this.seatRows = organizeSeatsByRow(this.initialSeats);
     }
     
-    // Grouper les séances par date si des films sont fournis
-    if (this.movies.length > 0 && this.selectedCinema) {
-      this.updateShowtimeGroups();
-    }
+    // Réinitialiser les données de sélection
+    this.selectedCinema = null;
+    this.selectedMovie = null;
+    this.selectedShowtime = null;
+    this.selectedSeats = [];
+    this.showtimeGroups = [];
   }
 
-  // Mettre à jour les groupes de séances basé sur le cinéma sélectionné
-  private updateShowtimeGroups(): void {
-    if (!this.selectedCinema) return;
+  // Charger les films d'un cinéma spécifique
+  private loadMoviesByCinema(cinemaId: number): void {
+    // Émettre l'événement pour que le composant parent charge les films
+    this.cinemaSelected.emit(cinemaId);
+  }
 
-    // Récupérer toutes les séances des films pour ce cinéma
-    const allShowtimes: ShowtimeDto[] = [];
-    this.movies.forEach(movie => {
-      if (movie.showtimes) {
-        const cinemaShowtimes = movie.showtimes.filter(
-          showtime => showtime.cinemaId === this.selectedCinema!.cinemaId
-        );
-        allShowtimes.push(...cinemaShowtimes);
-      }
+  // Charger les séances d'un film spécifique
+  private loadMovieSessions(movieId: number): void {
+    // Émettre l'événement pour que le composant parent charge les séances
+    this.movieSelected.emit(movieId);
+  }
+
+  // Mettre à jour les groupes de séances
+  private updateShowtimeGroups(showtimes: ShowtimeDto[]): void {
+    // Importer la fonction groupShowtimesByDate
+    import('src/app/core/utils/data-converters.util').then(utils => {
+      this.showtimeGroups = utils.groupShowtimesByDate(showtimes);
     });
-
-    this.showtimeGroups = groupShowtimesByDate(allShowtimes);
   }
 
   // Gestion de la sélection du cinéma
   onCinemaSelect(cinema: CinemaDto): void {
     this.selectedCinema = cinema;
-    this.updateShowtimeGroups();
+    // Réinitialiser les sélections suivantes
+    this.selectedMovie = null;
+    this.selectedShowtime = null;
+    this.selectedSeats = [];
+    this.showtimeGroups = [];
+    
+    // Charger les films spécifiques à ce cinéma
+    this.loadMoviesByCinema(cinema.cinemaId);
   }
 
   // Gestion de la sélection du film
   onMovieSelect(movie: MovieDto): void {
     this.selectedMovie = movie;
+    // Réinitialiser les sélections suivantes
+    this.selectedShowtime = null;
+    this.selectedSeats = [];
+    
+    // Charger les séances spécifiques à ce film
+    this.loadMovieSessions(movie.movieId);
   }
 
   // Gestion de la sélection de la séance
