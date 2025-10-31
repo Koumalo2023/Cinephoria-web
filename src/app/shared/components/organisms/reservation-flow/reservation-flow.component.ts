@@ -85,10 +85,19 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
       this.updateShowtimeGroups(showtimes);
     }
   }
+
+  @Input() set seats(seats: SeatDto[]) {
+    if (seats && seats.length > 0) {
+      this.seatRows = organizeSeatsByRow(seats);
+    } else {
+      this.seatRows = [];
+    }
+  }
   @Output() reservationComplete = new EventEmitter<ReservationData>();
   @Output() reservationCanceled = new EventEmitter<void>();
   @Output() cinemaSelected = new EventEmitter<number>();
   @Output() movieSelected = new EventEmitter<number>();
+  @Output() showtimeSelected = new EventEmitter<number>();
 
   currentStep = 0;
   steps: ReservationStep[] = [
@@ -271,15 +280,8 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
 
   // Charger les sièges pour une séance
   private loadSeatsForShowtime(showtime: ShowtimeDto): void {
-    // Utiliser les sièges initiaux fournis par le composant parent
-    // Le composant parent utilisera reservationService.getAvailableSeats(showtimeId)
-    if (this.initialSeats.length > 0) {
-      this.seatRows = organizeSeatsByRow(this.initialSeats);
-    } else {
-      // Si aucun siège n'est fourni, afficher un message d'erreur
-      console.warn('Aucun siège disponible pour cette séance');
-      this.seatRows = [];
-    }
+    // Émettre l'événement pour que le composant parent charge les sièges
+    this.showtimeSelected.emit(showtime.showtimeId);
   }
 
   nextStep(): void {

@@ -10,10 +10,12 @@
       [movies]="movies"
       [initialSeats]="initialSeats"
       [showtimes]="showtimes"
+      [seats]="availableSeats"
       (reservationComplete)="onReservationComplete($event)"
       (reservationCanceled)="onReservationCanceled()"
       (cinemaSelected)="loadMoviesByCinema($event)"
       (movieSelected)="loadMovieSessions($event)"
+      (showtimeSelected)="loadAvailableSeatsForShowtime($event)"
     ></app-reservation-flow>
   </main>
 

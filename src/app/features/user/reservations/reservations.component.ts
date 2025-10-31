@@ -34,6 +34,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   movies: MovieDto[] = [];
   initialSeats: SeatDto[] = [];
   showtimes: ShowtimeDto[] = [];
+  availableSeats: SeatDto[] = [];
   
   isLoading = false;
   private destroy$ = new Subject<void>();
@@ -186,7 +187,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (seats: SeatDto[]) => {
-          this.initialSeats = seats;
+          this.availableSeats = seats;
         },
         error: (error) => {
           console.error('Erreur lors du chargement des sièges disponibles:', error);
