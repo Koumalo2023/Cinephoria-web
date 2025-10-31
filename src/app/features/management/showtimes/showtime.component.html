@@ -1,13 +1,19 @@
 <!-- Header et Statistiques -->
 <div class="showtime-management">
+  <!-- Notifications Toast -->
+  <app-toast-notification
+    [autoClose]="true"
+    [duration]="5000">
+  </app-toast-notification>
+
   <header class="showtime-header">
     <div class="header-content">
       <h1 class="page-title">Gestion des Séances</h1>
       <p class="page-subtitle">Gérez les séances de films dans vos cinémas</p>
     </div>
     <div class="header-actions">
-      <app-button 
-        variant="primary" 
+      <app-button
+        variant="primary"
         size="medium"
         (click)="openCreateForm()">
         <i class="icon-plus"></i>
