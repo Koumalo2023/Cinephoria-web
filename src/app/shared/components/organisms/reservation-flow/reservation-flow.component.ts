@@ -26,7 +26,7 @@ import { SelectComponent } from '../../atoms/select/select.component';
 import { CinemaCardComponent } from '../../molecules/cinema-card/cinema-card.component';
 import { FilmCardComponent } from '../../molecules/film-card/film-card.component';
 import { QRCodeDisplayComponent } from '../../molecules/qr-code-display/qr-code-display.component';
-import { ReservationDetails, ReservationSummaryComponent } from '../../molecules/reservation-summary/reservation-summary.component';
+import { ReservationDetails } from '../../molecules/reservation-summary/reservation-summary.component';
 import { SeatRow as GridSeatRow, SeatSelectionGridComponent } from '../../molecules/seat-selection-grid/seat-selection-grid.component';
 import { ShowtimeGroup, ShowtimeSelectorComponent } from '../../molecules/showtime-selector/showtime-selector.component';
 
@@ -70,7 +70,6 @@ export interface ReservationData {
     FilmCardComponent,
     ShowtimeSelectorComponent,
     SeatSelectionGridComponent,
-    ReservationSummaryComponent,
     QRCodeDisplayComponent
   ],
   templateUrl: './reservation-flow.component.html',
@@ -392,6 +391,10 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   getTotalAmount(): number {
     if (!this.selectedShowtime) return 0;
     return this.selectedSeats.length * (this.selectedShowtime.price || 9.90);
+  }
+
+  calculateTotalPrice(): number {
+    return this.getTotalAmount();
   }
 
   getProgressPercentage(): number {

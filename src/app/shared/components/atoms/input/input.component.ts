@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export type InputType = 'text' | 'email' | 'number' | 'tel' | 'url' | 'search';
 export type InputSize = 'small' | 'medium' | 'large';
@@ -33,6 +33,8 @@ export class InputComponent implements ControlValueAccessor {
   @Input() helperText: string = '';
   @Input() prefixIcon: string = '';
   @Input() suffixIcon: string = '';
+  @Input() id: string = '';
+  @Input() name: string = '';
   
   @Output() valueChange = new EventEmitter<string>();
   @Output() blur = new EventEmitter<FocusEvent>();

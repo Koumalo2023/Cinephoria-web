@@ -141,12 +141,24 @@ export class ReservationsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Vérifier que nous avons toutes les données nécessaires
+    if (!reservationData.showtime || !reservationData.selectedSeats || reservationData.selectedSeats.length === 0) {
+      this.notificationService.error('Erreur', 'Données de réservation incomplètes');
+      this.loadingService.stop('reservation-create');
+      return;
+    }
+
     // Préparer les données pour l'API
     const createReservationDto = {
       showtimeId: reservationData.showtime.showtimeId,
       seatNumbers: reservationData.selectedSeats.map((seat: SeatDto) => seat.seatNumber),
       appUserId: currentUser.appUserId
     };
+
+    console.log('Données envoyées à l\'API:', JSON.stringify(createReservationDto, null, 2));
+    console.log('Showtime ID:', reservationData.showtime.showtimeId, 'Type:', typeof reservationData.showtime.showtimeId);
+    console.log('Sièges sélectionnés:', reservationData.selectedSeats);
+    console.log('User ID:', currentUser.appUserId, 'Type:', typeof currentUser.appUserId);
 
     this.reservationService.createReservation(createReservationDto)
       .pipe(takeUntil(this.destroy$))
@@ -164,9 +176,12 @@ export class ReservationsComponent implements OnInit, OnDestroy {
           }, 2000);
         },
         error: (error) => {
-          console.error('Erreur lors de la création de la réservation:', error);
+          console.error('Erreur détaillée lors de la création de la réservation:', error);
+          console.error('Status:', error.status);
+          console.error('Message:', error.message);
+          console.error('Response body:', error.error);
           this.loadingService.stop('reservation-create');
-          this.notificationService.error('Erreur', 'Erreur lors de la création de la réservation');
+          this.notificationService.error('Erreur', 'Erreur lors de la création de la réservation. Veuillez vérifier que les sièges sont disponibles.');
         }
       });
   }

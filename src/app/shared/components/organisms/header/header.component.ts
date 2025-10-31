@@ -1,11 +1,11 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 // Interfaces core
-import { AppUserDto } from '../../../../core/interfaces/core.interfaces';
 import { UserRole } from '../../../../core/enums/user-role.enum';
+import { AppUserDto } from '../../../../core/interfaces/core.interfaces';
 import { UserStateService } from '../../../../core/services/auth/user-state.service';
 
 export type HeaderVariant = 'default' | 'transparent' | 'sticky';
@@ -86,8 +86,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       case UserRole.User:
         return [
           ...baseItems,
-          { label: 'Mon espace', routerLink: ['/profile'], icon: 'user' },
-          { label: 'Notifications', routerLink: ['/notifications'], icon: 'bell', badge: this.unreadNotifications }
+          { label: 'Mon espace', routerLink: ['/user/profile'], icon: 'user' },
+          { label: 'Notifications', routerLink: ['/user/notifications'], icon: 'bell', badge: this.unreadNotifications }
         ];
 
       case UserRole.Employee:
@@ -136,12 +136,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/user/profile']);
     this.closeMobileMenu();
   }
 
   onNotifications(): void {
-    this.router.navigate(['/notifications']);
+    this.router.navigate(['/user/notifications']);
     this.closeMobileMenu();
   }
 
