@@ -19,6 +19,11 @@ export const routes: Routes = [
         title: 'Cinephoria - Films'
       },
       {
+        path: 'movies/:id',
+        loadComponent: () => import('./features/public/movie-detail/movie-detail.component').then(m => m.MovieDetailComponent),
+        title: 'Cinephoria - Détail Film'
+      },
+      {
         path: 'contact',
         loadComponent: () => import('./features/public/contact/contact.component').then(m => m.ContactComponent),
         title: 'Cinephoria - Contact'
@@ -112,7 +117,7 @@ export const routes: Routes = [
       },
       {
         path: 'showtimes',
-        loadComponent: () => import('./features/management/showtimes/showtime-management.component').then(m => m.ShowtimeManagementComponent),
+        loadComponent: () => import('./features/management/showtimes/showtime.component').then(m => m.ShowtimeComponent),
         title: 'Cinephoria - Gestion Séances'
       },
       {
@@ -157,7 +162,7 @@ export const routes: Routes = [
       },
       {
         path: 'showtimes',
-        loadComponent: () => import('./features/management/showtimes/showtime-management.component').then(m => m.ShowtimeManagementComponent),
+        loadComponent: () => import('./features/management/showtimes/showtime.component').then(m => m.ShowtimeComponent),
         title: 'Cinephoria - Gestion Séances'
       },
       {
@@ -212,7 +217,7 @@ export const routes: Routes = [
       },
       {
         path: 'showtimes',
-        loadComponent: () => import('./features/management/showtimes/showtime-management.component').then(m => m.ShowtimeManagementComponent),
+        loadComponent: () => import('./features/management/showtimes/showtime.component').then(m => m.ShowtimeComponent),
         title: 'Cinephoria - Gestion Séances'
       },
       {

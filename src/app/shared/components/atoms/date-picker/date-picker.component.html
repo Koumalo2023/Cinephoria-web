@@ -6,7 +6,7 @@
   
   <div [class]="datePickerClasses" class="date-picker__input-wrapper">
     <input
-      type="date"
+      [type]="mode === 'datetime' ? 'datetime-local' : 'date'"
       [value]="value"
       [placeholder]="placeholder"
       [disabled]="disabled"

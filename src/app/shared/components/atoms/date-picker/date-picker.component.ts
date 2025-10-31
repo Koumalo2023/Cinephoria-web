@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export type DatePickerSize = 'small' | 'medium' | 'large';
 export type DatePickerVariant = 'primary' | 'secondary' | 'outline';
+export type DateTimeMode = 'date' | 'datetime';
 
 @Component({
   selector: 'app-date-picker',
@@ -30,6 +31,7 @@ export class DatePickerComponent implements ControlValueAccessor {
   @Input() maxDate: string = '';
   @Input() showClear: boolean = true;
   @Input() format: string = 'YYYY-MM-DD';
+  @Input() mode: DateTimeMode = 'date';
   
   @Output() dateChange = new EventEmitter<string>();
 

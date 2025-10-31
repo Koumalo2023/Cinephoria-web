@@ -9,6 +9,92 @@ import { UserRole } from '../enums/user-role.enum';
  */
 
 // =============================================
+// Enums supplémentaires
+// =============================================
+
+export enum MinimumAge {
+  All = -1,        // pour "Tous âges"
+  Public = 0,      // "Tous publics" Champs par défaut
+  Ten = 10,        // "+10 ans"
+  Twelve = 12,     // "+12 ans"
+  Sixteen = 16,    // "+16 ans"
+  Eighteen = 18    // "+18 ans"
+}
+
+export enum NotificationType {
+  EmailNewReservation = 0,
+  EmailCanceledReservation = 1,
+  EmailNewUser = 2,
+  EmailSystemAlerts = 3,
+  AppNewReservation = 4,
+  AppCanceledReservation = 5,
+  AppNewUser = 6,
+  AppSystemAlerts = 7
+}
+
+export enum NotificationSeverity {
+  Info = 0,
+  Warning = 1,
+  Error = 2,
+  Success = 3,
+  Critical = 4
+}
+
+export enum IncidentStatus {
+  Pending = 0,
+  InProgress = 1,
+  Resolved = 2
+}
+
+/**
+ * Fonction utilitaire pour obtenir le libellé d'un âge minimum
+ * @param age Valeur de l'enum MinimumAge
+ * @returns Le libellé correspondant
+ */
+export function getMinimumAgeLabel(age: MinimumAge): string {
+  switch (age) {
+    case MinimumAge.All:
+      return "Tous âges";
+    case MinimumAge.Public:
+      return "Tous publics";
+    case MinimumAge.Ten:
+      return "+10 ans";
+    case MinimumAge.Twelve:
+      return "+12 ans";
+    case MinimumAge.Sixteen:
+      return "+16 ans";
+    case MinimumAge.Eighteen:
+      return "+18 ans";
+    default:
+      return "Âge inconnu";
+  }
+}
+
+/**
+ * Fonction utilitaire pour obtenir la valeur MinimumAge à partir d'un nombre
+ * @param value Valeur numérique
+ * @returns La valeur MinimumAge correspondante
+ */
+export function getMinimumAgeFromValue(value: number): MinimumAge {
+  switch (value) {
+    case -1:
+      return MinimumAge.All;
+    case 0:
+      return MinimumAge.Public;
+    case 10:
+      return MinimumAge.Ten;
+    case 12:
+      return MinimumAge.Twelve;
+    case 16:
+      return MinimumAge.Sixteen;
+    case 18:
+      return MinimumAge.Eighteen;
+    default:
+      return MinimumAge.Public; // Valeur par défaut
+  }
+}
+
+// =============================================
 // Interfaces Principales
 // =============================================
 
@@ -50,12 +136,15 @@ export interface MovieDto {
   description: string;
   genre: MovieGenre;
   duration: string;
-  director: string;
+  director: string[];
   releaseDate: Date;
-  minimumAge: number;
+  minimumAge: MinimumAge;
   isFavorite: boolean;
   averageRating: number;
   posterUrls?: string;
+  bandeAnnonce?: string;
+  actors: string[];
+  filmsSimilaires: MovieDto[];
   showtimes: ShowtimeDto[];
   movieRatings: MovieRatingDto[];
 }
@@ -82,16 +171,14 @@ export interface ReservationDto {
  */
 export interface IncidentDto {
   incidentId: number;
-  title: string;
+  theaterId: number;
   description: string;
-  status: number;
-  priority: number;
   reportedById: string;
   resolvedById?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  status: IncidentStatus;
+  reportedAt: Date;
   resolvedAt?: Date;
-  imageUrl?: string;
+  imageUrls: string[];
 }
 
 /**
@@ -105,7 +192,7 @@ export interface ShowtimeDto {
   cinemaId: number;
   startTime: Date;
   endTime: Date;
-  quality: number;
+  quality: ProjectionQuality;
   price: number;
   priceAdjustment: number;
   isPromotion: boolean;
@@ -243,10 +330,12 @@ export interface LoginResponseDto {
   token: string;
   expiresIn: number;
   user: AppUserDto;
+  profile?: object; // UserProfileDto ou EmployeeProfileDto (pour compatibilité)
 }
 
 /**
  * Réponse de connexion réelle de l'API backend
+ * (Maintenue pour compatibilité avec les services existants)
  */
 export interface ApiLoginResponseDto {
   token: string;
@@ -268,6 +357,7 @@ export interface ApiLoginResponseDto {
   };
 }
 
+
 /**
  * Profil utilisateur simplifié
  * @see api-documentation.md#userprofiledto
@@ -279,6 +369,14 @@ export interface UserProfileDto {
   email: string;
   phoneNumber: string;
   profilePictureUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+  role: string;
+  reservations: ReservationDto[];
+  movieRatings: MovieRatingDto[];
+  favoriteMovies: MovieDto[];
+  userMovieHistories: UserMovieHistoryDto[];
+  employeeFavorites: EmployeeFavoriteDto[];
 }
 
 /**
@@ -392,7 +490,7 @@ export interface MovieDetailsDto {
   director: string[];
   actors: string[];
   releaseDate: Date;
-  minimumAge: number;
+  minimumAge: MinimumAge;
   averageRating: number;
   posterUrls: string;
   bandeAnnonce?: string;
@@ -410,11 +508,12 @@ export interface CreateMovieDto {
   description: string;
   genre: MovieGenre;
   duration: string;
-  director: string;
+  director: string[];
   releaseDate: Date;
-  minimumAge: number;
-  isFavorite: boolean;
-  posterUrls?: string;
+  minimumAge: MinimumAge;
+  posterUrls: string;
+  bandeAnnonce: string;
+  actors: string[];
 }
 
 /**
@@ -422,15 +521,18 @@ export interface CreateMovieDto {
  * @see api-documentation.md#updatemoviedto
  */
 export interface UpdateMovieDto {
-  title?: string;
-  description?: string;
-  genre?: MovieGenre;
-  duration?: string;
-  director?: string;
-  releaseDate?: Date;
-  minimumAge?: number;
-  isFavorite?: boolean;
-  posterUrls?: string;
+  movieId: number;
+  title: string;
+  description: string;
+  genre: MovieGenre;
+  duration: string;
+  director: string[];
+  releaseDate: Date;
+  minimumAge: MinimumAge;
+  isFavorite: boolean;
+  posterUrls: string;
+  bandeAnnonce: string;
+  actors: string[];
 }
 
 /**
@@ -442,6 +544,39 @@ export interface MovieReviewDto {
   appUserId: string;
   rating: number;
   description: string;
+}
+
+/**
+ * Interface simplifiée pour les résultats de recherche TMDb
+ * @see api-documentation.md#tmdbsearchresult
+ */
+export interface TMDbSearchResult {
+  id: number;
+  title: string;
+  overview: string;
+  releaseDate: string;
+  posterPath: string;
+  backdropPath: string;
+  voteAverage: number;
+  voteCount: number;
+  popularity: number;
+}
+
+/**
+ * Interface IncidentDto pour MongoDB
+ * @see api-documentation.md#incidentdto-mongodb
+ */
+export interface IncidentMongoDto {
+  incidentId: number;
+  description: string;
+  status: string;
+  reportedAt: string;
+  resolvedAt?: string;
+  theaterId: number;
+  theaterName: string;
+  reportedBy?: string;
+  resolvedBy?: string;
+  imageUrls: string[];
 }
 
 /**
@@ -475,7 +610,7 @@ export interface FilterMoviesRequestDto {
   year?: number;
   director?: string;
   actor?: string;
-  minimumAge?: number;
+  minimumAge?: MinimumAge;
 }
 
 /**
@@ -522,20 +657,13 @@ export interface EmployeeFavoriteResponseDto {
  */
 export interface UserReservationDto {
   reservationId: number;
-  appUserId: string;
-  showtimeId: number;
+  showtime: ShowtimeDto;
+  seats: SeatDto[];
   totalPrice: number;
   qrCode: string;
   isValidated: boolean;
-  movieName: string;
-  cinemaName: string;
-  startTime: Date;
-  movieId: number;
-  endTime: Date;
   status: ReservationStatus;
-  numberOfSeats: number;
-  posterUrls: string;
-  seats: SeatDto[];
+  createdAt: Date;
 }
 
 /**
@@ -574,11 +702,11 @@ export interface CreateShowtimeDto {
   movieId: number;
   theaterId: number;
   cinemaId: number;
-  startTime: Date;
-  quality: number;
-  price: number;
-  priceAdjustment?: number;
-  isPromotion?: boolean;
+  startTime: string; // Format ISO 8601
+  quality: ProjectionQuality;
+  endTime: string; // Format ISO 8601
+  priceAdjustment: number;
+  isPromotion: boolean;
 }
 
 /**
@@ -587,14 +715,14 @@ export interface CreateShowtimeDto {
  */
 export interface UpdateShowtimeDto {
   showtimeId: number;
-  movieId?: number;
-  theaterId?: number;
-  cinemaId?: number;
-  startTime?: Date;
-  quality?: number;
-  price?: number;
-  priceAdjustment?: number;
-  isPromotion?: boolean;
+  movieId: number;
+  theaterId: number;
+  cinemaId: number;
+  startTime: string; // Format ISO 8601
+  quality: ProjectionQuality;
+  endTime: string; // Format ISO 8601
+  priceAdjustment: number;
+  isPromotion: boolean;
 }
 
 /**
@@ -665,85 +793,11 @@ export interface CreateSeatDto {
  * @see api-documentation.md#updateseatdto
  */
 export interface UpdateSeatDto {
-  theaterId: number;
-  seatNumber: string;
-  isAccessible: boolean;
-  isAvailable: boolean;
-}
-
-/**
- * Interface pour la recherche de cinémas
- */
-export interface SearchCinemasDto {
-  city?: string;
-  name?: string;
-  projectionQuality?: ProjectionQuality;
-  isOperational?: boolean;
-}
-
-/**
- * Interface pour la recherche de salles
- */
-export interface SearchTheatersDto {
-  cinemaId?: number;
-  name?: string;
-  projectionQuality?: ProjectionQuality;
-  isOperational?: boolean;
-  minSeatCount?: number;
-  maxSeatCount?: number;
-}
-
-/**
- * Interface pour la recherche de sièges
- */
-export interface SearchSeatsDto {
-  theaterId?: number;
-  row?: string;
+  seatNumber?: string;
+  isAccessible?: boolean;
   isAvailable?: boolean;
-  isHandicapAccessible?: boolean;
 }
 
-/**
- * Interface pour les statistiques de cinéma
- */
-export interface CinemaStatsDto {
-  cinemaId: number;
-  name: string;
-  totalTheaters: number;
-  totalSeats: number;
-  operationalTheaters: number;
-  averageRating: number;
-  totalRevenue: number;
-  totalReservations: number;
-}
-
-/**
- * Interface pour les statistiques de salle
- */
-export interface TheaterStatsDto {
-  theaterId: number;
-  name: string;
-  seatCount: number;
-  projectionQuality: ProjectionQuality;
-  isOperational: boolean;
-  totalReservations: number;
-  occupancyRate: number;
-  revenue: number;
-  averageRating: number;
-}
-
-/**
- * Interface pour les statistiques de sièges
- */
-export interface SeatStatsDto {
-  theaterId: number;
-  totalSeats: number;
-  availableSeats: number;
-  handicapSeats: number;
-  occupancyRate: number;
-  premiumSeats: number;
-  standardSeats: number;
-}
 
 /**
  * Ajout d'un siège PMR
@@ -783,11 +837,10 @@ export interface CreateIncidentDto {
  * @see api-documentation.md#updateincidentdto
  */
 export interface UpdateIncidentDto {
-  incidentId: number;
-  title?: string;
   description?: string;
-  priority?: number;
-  imageUrl?: string;
+  status?: IncidentStatus;
+  resolvedAt?: Date;
+  imageUrls?: string[];
 }
 
 /**
@@ -796,7 +849,7 @@ export interface UpdateIncidentDto {
  */
 export interface IncidentStatusUpdateDto {
   incidentId: number;
-  status: number;
+  status: IncidentStatus;
   resolvedAt?: Date;
 }
 
@@ -805,139 +858,342 @@ export interface IncidentStatusUpdateDto {
 // =============================================
 
 /**
- * Statistiques du dashboard
+ * Statistiques du dashboard (conforme à la documentation)
+ * @see api-documentation.md#dashboardstats
  */
 export interface DashboardStats {
-  totalRevenue: number;
-  totalReservations: number;
-  totalMovies: number;
-  totalUsers: number;
-  revenueChange: number;
-  reservationsChange: number;
-  moviesChange: number;
-  usersChange: number;
+  reservationsToday: number;
+  reservationsTrend: number;
+  revenueToday: number;
+  revenueTrend: number;
+  visitorsToday: number;
+  visitorsTrend: number;
+  occupancyRate: number;
+  occupancyTrend: number;
+  timestamp: Date;
 }
 
 /**
- * Données du graphique des réservations
+ * Données du graphique des réservations (conforme à la documentation)
+ * @see api-documentation.md#reservationchartdata
  */
 export interface ReservationChartData {
-  labels: string[];
-  data: number[];
-  total: number;
-  average: number;
+  period: string;
+  data: ReservationChartItem[];
 }
 
 /**
- * Film populaire
+ * Élément du graphique des réservations
+ * @see api-documentation.md#reservationchartitem
+ */
+export interface ReservationChartItem {
+  date: Date;
+  reservations: number;
+  revenue: number;
+}
+
+/**
+ * Film populaire (conforme à la documentation)
+ * @see api-documentation.md#topfilm
  */
 export interface TopFilm {
-  movieId: number;
+  id: string;
   title: string;
-  genre: string;
-  rating: number;
-  posterUrl: string;
   reservations: number;
+  occupancyRate: number;
+  revenue: number;
+  imageUrl: string;
 }
 
 /**
- * Réservation récente
+ * Réservation récente (conforme à la documentation)
+ * @see api-documentation.md#recentreservation
  */
 export interface RecentReservation {
-  reservationId: number;
-  movieTitle: string;
-  cinemaName: string;
-  userName: string;
-  totalPrice: number;
-  numberOfSeats: number;
+  id: string;
+  customer: CustomerInfo;
+  film: FilmInfo;
+  cinema: CinemaInfo;
   showtime: Date;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  tickets: number;
+  totalAmount: number;
+  status: string;
+  createdAt: Date;
 }
 
 /**
- * Log d'activité
+ * Informations client
+ * @see api-documentation.md#customerinfo
+ */
+export interface CustomerInfo {
+  id: string;
+  name: string;
+  email: string;
+}
+
+/**
+ * Informations film
+ * @see api-documentation.md#filminfo
+ */
+export interface FilmInfo {
+  id: string;
+  title: string;
+  duration: string;
+}
+
+/**
+ * Informations cinéma
+ * @see api-documentation.md#cinemainfo
+ */
+export interface CinemaInfo {
+  id: string;
+  name: string;
+  city: string;
+}
+
+/**
+ * Log d'activité (conforme à la documentation)
+ * @see api-documentation.md#activitylog
  */
 export interface ActivityLog {
   id: string;
-  type: 'reservation' | 'user_registration' | 'movie_added' | 'incident' | 'system';
-  title: string;
-  description: string;
+  type: string;
+  action: string;
+  message: string;
+  userId: string;
+  userName: string;
   timestamp: Date;
+  relativeTime: string;
+  metadata: Record<string, string>;
 }
 
 /**
- * Période pour le dashboard
- */
-export interface DashboardPeriod {
-  label: string;
-  value: string;
-  startDate: Date;
-  endDate: Date;
-}
-
-// =============================================
-// Interfaces pour les Incidents du Dashboard
-// =============================================
-
-/**
- * Statistiques des incidents
+ * Statistiques des incidents (conforme à la documentation)
+ * @see api-documentation.md#incidentstats
  */
 export interface IncidentStats {
-  totalIncidents: number;
   openIncidents: number;
-  resolvedIncidents: number;
-  highPriorityIncidents: number;
-  averageResolutionTime: number;
-  incidentsChange: number;
-  resolutionRate: number;
+  openTrend: number;
+  resolvedToday: number;
+  resolvedTrend: number;
+  avgResolutionTime: number;
+  resolutionTrend: number;
+  criticalIncidents: number;
+  criticalTrend: number;
+  customerImpactScore: number;
+  impactTrend: number;
 }
 
 /**
- * Données du graphique d'évolution des incidents
+ * Données du graphique d'incidents (conforme à la documentation)
+ * @see api-documentation.md#incidentchartdata
  */
 export interface IncidentChartData {
-  labels: string[];
-  data: number[];
-  total: number;
-  average: number;
-  trend: 'up' | 'down' | 'stable';
+  data: IncidentChartItem[];
 }
 
 /**
- * Type d'incident fréquent
+ * Élément du graphique d'incidents
+ * @see api-documentation.md#incidentchartitem
  */
-export interface IncidentType {
-  type: string;
+export interface IncidentChartItem {
+  date: string;
   count: number;
-  percentage: number;
-  trend: 'up' | 'down' | 'stable';
+  resolved: number;
 }
 
 /**
- * Incident récent
+ * Type d'incident fréquent (conforme à la documentation)
+ * @see api-documentation.md#topincidenttype
  */
-export interface RecentIncident {
+export interface TopIncidentType {
+  category: string;
+  count: number;
+  resolutionRate: number;
+  avgResponseTime: number;
+}
+
+/**
+ * Activité d'incident (conforme à la documentation)
+ * @see api-documentation.md#incidentactivity
+ */
+export interface IncidentActivity {
+  type: string;
+  message: string;
   incidentId: number;
+  user: string;
+  time: string;
+}
+
+// =============================================
+// Interfaces Settings
+// =============================================
+
+export interface GeneralSettingsDto {
+  cinemaName: string;
+  address: string;
+  phoneNumber: string;
+  email: string;
+  openingHours: string;
+  currency: string;
+  timeZone: string;
+}
+
+export interface NotificationSettingsDto {
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+  reservationReminders: boolean;
+  promotionNotifications: boolean;
+  newsletter: boolean;
+}
+
+export interface SecuritySettingsDto {
+  passwordExpirationDays: number;
+  maxLoginAttempts: number;
+  sessionTimeoutMinutes: number;
+  twoFactorAuthentication: boolean;
+  ipWhitelist: string[];
+}
+
+// =============================================
+// Interfaces TMDb
+// =============================================
+
+export interface TMDbMovieDetails {
+  id: number;
   title: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  reportedBy: string;
+  overview: string;
+  releaseDate: string;
+  runtime?: number;
+  posterPath: string;
+  backdropPath: string;
+  genres: TMDbGenre[];
+  credits: TMDbCredits;
+  voteAverage: number;
+  voteCount: number;
+  popularity: number;
+  originalLanguage: string;
+  originalTitle: string;
+}
+
+export interface TMDbGenre {
+  id: number;
+  name: string;
+}
+
+export interface TMDbCredits {
+  cast: TMDbCastMember[];
+  crew: TMDbCrewMember[];
+}
+
+export interface TMDbCastMember {
+  name: string;
+  character: string;
+  order: number;
+}
+
+export interface TMDbCrewMember {
+  name: string;
+  job: string;
+  department: string;
+}
+
+export interface TMDbSearchResult {
+  id: number;
+  title: string;
+  overview: string;
+  release_date: string;
+  poster_path: string;
+  backdrop_path: string;
+  vote_average: number;
+  vote_count: number;
+  popularity: number;
+  genre_ids: number[];
+  original_language: string;
+  original_title: string;
+  adult: boolean;
+  video: boolean;
+}
+
+export interface TMDbVideo {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  size: number;
+  type: string;
+  official: boolean;
+  publishedAt: string;
+}
+
+export interface TMDbImportRequestDto {
+  tmdbId: number;
+}
+
+export interface TMDbSearchRequestDto {
+  query: string;
+  page?: number;
+}
+
+export interface TMDbSearchResponse {
+  page: number;
+  results: TMDbSearchResult[];
+  total_pages: number;
+  total_results: number;
+}
+
+// =============================================
+// Interfaces de Réponse API
+// =============================================
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  errors?: string[];
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface QueryParams {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+}
+
+// =============================================
+// Interfaces de Notification API
+// =============================================
+
+export interface NotificationModel {
+  id?: string;
+  type: NotificationType;
+  recipientId: string;
+  recipientEmail?: string;
+  title: string;
+  message: string;
+  data?: Record<string, any>;
+  isRead: boolean;
+  sentAt: Date;
+  createdAt: Date;
+}
+
+export interface NotificationPreference {
+  id?: string;
+  userId: string;
+  emailEnabled: boolean;
+  appEnabled: boolean;
+  preferences: Record<NotificationType, boolean>;
   createdAt: Date;
   updatedAt: Date;
-  resolutionTime?: number;
-}
-
-/**
- * Log d'activité lié aux incidents
- */
-export interface IncidentActivityLog {
-  id: string;
-  type: 'incident_created' | 'incident_updated' | 'incident_resolved' | 'incident_assigned';
-  title: string;
-  description: string;
-  timestamp: Date;
-  incidentId: number;
-  userName: string;
 }
 
 // =============================================

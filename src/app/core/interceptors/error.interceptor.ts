@@ -1,15 +1,15 @@
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Router } from '@angular/router';
-import { AuthStateService } from '../services/auth/auth.service';
+import { AuthManagerService } from '../services/auth/auth-manager.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
   constructor(
-    private authService: AuthStateService,
+    private authService: AuthManagerService,
     private router: Router
   ) {}
 
@@ -84,6 +84,12 @@ export class ErrorInterceptor implements HttpInterceptor {
    * Gérer les erreurs spécifiques du serveur
    */
   private handleServerError(error: HttpErrorResponse): void {
+    // Ne pas rediriger pour les erreurs d'API (requêtes vers /api/)
+    if (error.url && error.url.includes('/api/')) {
+      // Pour les erreurs d'API, on laisse le composant gérer l'erreur
+      return;
+    }
+
     switch (error.status) {
       case 401:
         // Token expiré ou invalide - déconnecter l'utilisateur

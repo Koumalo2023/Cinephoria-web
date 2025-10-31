@@ -1,1 +1,501 @@
-<p>movie-management works!</p>
+<div class="movie-management">
+  <!-- En-tête avec actions -->
+  <div class="movie-management__header">
+    <div class="movie-management__title">
+      <h1>Gestion des Films</h1>
+      <p class="movie-management__subtitle">Gérez votre catalogue de films</p>
+    </div>
+    
+    <div class="movie-management__actions">
+      <div class="movie-management__creation-methods">
+        <button class="btn btn-primary" (click)="openCreateModal()">
+          <i class="icon-plus"></i>
+          Nouveau Film
+        </button>
+        
+        <button class="btn btn-secondary" (click)="openTMDbModal()">
+          <i class="icon-download"></i>
+          Importer TMDb
+        </button>
+      </div>
+
+      <div class="movie-management__view-toggle">
+        <button 
+          class="btn" 
+          [class.btn-primary]="viewMode === 'table'"
+          [class.btn-secondary]="viewMode !== 'table'"
+          (click)="viewMode = 'table'"
+        >
+          <i class="icon-table"></i>
+          Tableau
+        </button>
+        <button 
+          class="btn" 
+          [class.btn-primary]="viewMode === 'grid'"
+          [class.btn-secondary]="viewMode !== 'grid'"
+          (click)="viewMode = 'grid'"
+        >
+          <i class="icon-grid"></i>
+          Grille
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de recherche -->
+  <div class="movie-management__filters">
+    <div class="movie-management__search">
+      <input 
+        type="text" 
+        class="search-input"
+        placeholder="Rechercher un film..."
+        (input)="onSearchChange($any($event.target).value)"
+      />
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="movie-management__content">
+    <!-- Indicateur de chargement -->
+    <div *ngIf="isLoading" class="movie-management__loading">
+      <div class="loading-spinner">
+        <i class="icon-spinner"></i>
+        <span>Chargement des films...</span>
+      </div>
+    </div>
+
+    <!-- Vue Tableau -->
+    <div *ngIf="viewMode === 'table' && !isLoading" class="movie-management__table-view">
+      <table class="movie-table">
+        <thead>
+          <tr>
+            <th style="width: 60px">Poster</th>
+            <th>Titre</th>
+            <th>Genre</th>
+            <th>Date sortie</th>
+            <th>Âge min</th>
+            <th>Note</th>
+            <th style="width: 80px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let movie of movies">
+            <td>
+              <div class="table-poster">
+                <img *ngIf="movie.posterUrls" [src]="movie.posterUrls" [alt]="movie.title" />
+                <div *ngIf="!movie.posterUrls" class="table-poster-placeholder">
+                  <i class="icon-film"></i>
+                </div>
+              </div>
+            </td>
+            <td>
+              <strong>{{ movie.title }}</strong>
+              <div class="movie-director" *ngIf="movie.director && movie.director.length > 0">
+                <small>Par {{ movie.director.join(', ') }}</small>
+              </div>
+            </td>
+            <td>
+              <span class="badge">{{ getGenreLabel(movie.genre) }}</span>
+            </td>
+            <td>{{ movie.releaseDate | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="badge">{{ getAgeLabel(movie.minimumAge) }}</span>
+            </td>
+            <td>
+              <span class="rating-badge">{{ movie.averageRating || 'N/A' }}</span>
+            </td>
+            <td class="actions">
+              <button class="btn btn-sm btn-secondary" (click)="viewMovieDetails(movie)">
+                <i class="icon-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" (click)="openEditModal(movie)">
+                <i class="icon-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="openDeleteModal(movie)">
+                <i class="icon-bin"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Vue Grille -->
+    <div *ngIf="viewMode === 'grid' && !isLoading" class="movie-management__grid-view">
+      <div class="movie-grid">
+        <div *ngFor="let movie of movies" class="movie-card">
+          <div class="movie-card__poster">
+            <img *ngIf="movie.posterUrls" [src]="movie.posterUrls" [alt]="movie.title" />
+            <div *ngIf="!movie.posterUrls" class="movie-card__poster-placeholder">
+              <i class="icon-film"></i>
+            </div>
+          </div>
+          <div class="movie-card__content">
+            <h3 class="movie-card__title">{{ movie.title }}</h3>
+            <p class="movie-card__genre">{{ getGenreLabel(movie.genre) }}</p>
+            <p class="movie-card__year">{{ movie.releaseDate | date:'yyyy' }}</p>
+            <p class="movie-card__director" *ngIf="movie.director && movie.director.length > 0">
+              <small>Réalisé par {{ movie.director.join(', ') }}</small>
+            </p>
+            <div class="movie-card__actions">
+              <button class="btn btn-sm btn-secondary" (click)="viewMovieDetails(movie)">
+                <i class="icon-eye"></i>
+                Voir
+              </button>
+              <button class="btn btn-sm btn-primary" (click)="openEditModal(movie)">
+                <i class="icon-pencil"></i>
+                Éditer
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="openDeleteModal(movie)">
+                <i class="icon-bin"></i>
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- État vide -->
+    <div *ngIf="!isLoading && movies.length === 0" class="movie-management__empty-state">
+      <div class="empty-state">
+        <i class="icon-film"></i>
+        <h3>Aucun film trouvé</h3>
+        <p>Commencez par créer votre premier film ou importez depuis TMDb</p>
+        <div class="empty-state__actions">
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            Créer un film
+          </button>
+          <button class="btn btn-secondary" (click)="openTMDbModal()">
+            Importer TMDb
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale de création -->
+  <div *ngIf="isCreateModalOpen" class="modal-overlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h2>Créer un nouveau film</h2>
+        <button class="modal__close" (click)="isCreateModalOpen = false">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="movie-form">
+          <div class="form-group">
+            <label>Titre</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="createMovieForm.title"
+              placeholder="Titre du film"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              class="form-control"
+              [(ngModel)]="createMovieForm.description"
+              placeholder="Description du film..."
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Genre</label>
+              <select class="form-control" [(ngModel)]="createMovieForm.genre">
+                <option *ngFor="let option of genreOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Âge minimum</label>
+              <select class="form-control" [(ngModel)]="createMovieForm.minimumAge">
+                <option *ngFor="let option of ageOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Durée</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="createMovieForm.duration"
+                placeholder="Ex: 2h15"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label>Date de sortie</label>
+              <input
+                type="date"
+                class="form-control"
+                [value]="createMovieForm.releaseDate | date:'yyyy-MM-dd'"
+                (input)="createMovieForm.releaseDate = $any($event.target).value"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-secondary" (click)="isCreateModalOpen = false">
+          Annuler
+        </button>
+        <button class="btn btn-primary" (click)="onCreateMovie()" [disabled]="isLoading">
+          {{ isLoading ? 'Création...' : 'Créer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale d'édition -->
+  <div *ngIf="isEditModalOpen" class="modal-overlay">
+    <div class="modal">
+      <div class="modal__header">
+        <h2>Éditer le film</h2>
+        <button class="modal__close" (click)="isEditModalOpen = false">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="movie-form">
+          <div class="form-group">
+            <label>Titre</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="editMovieForm.title"
+              placeholder="Titre du film"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              class="form-control"
+              [(ngModel)]="editMovieForm.description"
+              placeholder="Description du film..."
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Genre</label>
+              <select class="form-control" [(ngModel)]="editMovieForm.genre">
+                <option *ngFor="let option of genreOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Âge minimum</label>
+              <select class="form-control" [(ngModel)]="editMovieForm.minimumAge">
+                <option *ngFor="let option of ageOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Durée</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="editMovieForm.duration"
+                placeholder="Ex: 2h15"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label>Date de sortie</label>
+              <input
+                type="date"
+                class="form-control"
+                [value]="editMovieForm.releaseDate | date:'yyyy-MM-dd'"
+                (input)="editMovieForm.releaseDate = $any($event.target).value"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-secondary" (click)="isEditModalOpen = false">
+          Annuler
+        </button>
+        <button class="btn btn-primary" (click)="onEditMovie()" [disabled]="isLoading">
+          {{ isLoading ? 'Mise à jour...' : 'Mettre à jour' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale TMDb -->
+  <div *ngIf="isTMDbModalOpen" class="modal-overlay">
+    <div class="modal modal-lg">
+      <div class="modal__header">
+        <h2>Importer depuis TMDb</h2>
+        <button class="modal__close" (click)="closeTMDbModal()">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="tmdb-import">
+          <!-- Recherche TMDb -->
+          <div class="tmdb-import__search">
+            <div class="search-bar">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Rechercher un film sur TMDb..."
+                [(ngModel)]="tmdbSearchTerm"
+                (keyup.enter)="onTMDbSearch()"
+              />
+              <button
+                class="btn btn-primary"
+                (click)="onTMDbSearch()"
+                [disabled]="isTMDbSearching || !tmdbSearchTerm.trim()"
+              >
+                <i class="icon-search"></i>
+                {{ isTMDbSearching ? 'Recherche...' : 'Rechercher' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Résultats de recherche -->
+          <div *ngIf="tmdbSearchResults.length > 0" class="tmdb-import__results">
+            <h4>Résultats de recherche ({{ tmdbSearchResults.length }})</h4>
+            <div class="tmdb-results">
+              <div
+                *ngFor="let movie of tmdbSearchResults"
+                class="tmdb-result"
+                [class.tmdb-result--selected]="selectedTMDbMovie?.id === movie.id"
+                (click)="onTMDbMovieSelect(movie)"
+              >
+                <div class="tmdb-result__poster">
+                  <img
+                    *ngIf="movie.poster_path"
+                    [src]="'https://image.tmdb.org/t/p/w200' + movie.poster_path"
+                    [alt]="movie.title"
+                  />
+                  <div *ngIf="!movie.poster_path" class="tmdb-result__poster-placeholder">
+                    <i class="icon-film"></i>
+                  </div>
+                </div>
+                <div class="tmdb-result__info">
+                  <h5 class="tmdb-result__title">{{ movie.title }}</h5>
+                  <div class="tmdb-result__details">
+                    <span class="tmdb-result__year">{{ getTMDbMovieYear(movie) }}</span>
+                    <span class="tmdb-result__rating">
+                      <i class="icon-star"></i>
+                      {{ getTMDbMovieRating(movie) }}
+                    </span>
+                  </div>
+                  <p class="tmdb-result__overview">{{ movie.overview }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aucun résultat -->
+          <div *ngIf="tmdbSearchTerm && !isTMDbSearching && tmdbSearchResults.length === 0" class="tmdb-import__no-results">
+            <div class="no-results">
+              <i class="icon-search"></i>
+              <p>Aucun film trouvé pour "{{ tmdbSearchTerm }}"</p>
+            </div>
+          </div>
+
+          <!-- Film sélectionné -->
+          <div *ngIf="selectedTMDbMovie" class="tmdb-import__selected">
+            <h4>Film sélectionné</h4>
+            <div class="selected-movie">
+              <div class="selected-movie__poster">
+                <img
+                  *ngIf="selectedTMDbMovie.poster_path"
+                  [src]="'https://image.tmdb.org/t/p/w300' + selectedTMDbMovie.poster_path"
+                  [alt]="selectedTMDbMovie.title"
+                />
+                <div *ngIf="!selectedTMDbMovie.poster_path" class="selected-movie__poster-placeholder">
+                  <i class="icon-film"></i>
+                </div>
+              </div>
+              <div class="selected-movie__details">
+                <h5>{{ selectedTMDbMovie.title }}</h5>
+                <div class="selected-movie__meta">
+                  <span>{{ getTMDbMovieYear(selectedTMDbMovie) }}</span>
+                  <span>•</span>
+                  <span>
+                    <i class="icon-star"></i>
+                    {{ getTMDbMovieRating(selectedTMDbMovie) }}
+                  </span>
+                </div>
+                <p>{{ selectedTMDbMovie.overview }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-secondary" (click)="closeTMDbModal()">
+          Annuler
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="onTMDbImport()"
+          [disabled]="!selectedTMDbMovie || isLoading"
+        >
+          {{ isLoading ? 'Import...' : 'Importer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale de suppression -->
+  <div *ngIf="isDeleteModalOpen" class="modal-overlay">
+    <div class="modal modal-sm">
+      <div class="modal__header">
+        <h2>Confirmer la suppression</h2>
+        <button class="modal__close" (click)="isDeleteModalOpen = false">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="delete-confirmation">
+          <div class="delete-confirmation__icon">
+            <i class="icon-warning"></i>
+          </div>
+          <h3>Êtes-vous sûr ?</h3>
+          <p>
+            Voulez-vous vraiment supprimer le film 
+            <strong>"{{ selectedMovie?.title }}"</strong> ?
+          </p>
+          <p class="delete-confirmation__warning">
+            Cette action est irréversible.
+          </p>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn-secondary" (click)="isDeleteModalOpen = false">
+          Annuler
+        </button>
+        <button class="btn btn-danger" (click)="onDeleteMovie()" [disabled]="isLoading">
+          {{ isLoading ? 'Suppression...' : 'Supprimer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
