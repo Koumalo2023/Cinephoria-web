@@ -340,7 +340,7 @@ export interface LoginResponseDto {
 export interface ApiLoginResponseDto {
   token: string;
   profile: {
-    employeeId: string;
+    appUserId: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -414,7 +414,7 @@ export interface UpdateAppUserDto {
  * @see api-documentation.md#updateemployeedto
  */
 export interface UpdateEmployeeDto {
-  employeeId: string;
+  appUserId: string;
   email: string;
   firstName: string;
   lastName: string;

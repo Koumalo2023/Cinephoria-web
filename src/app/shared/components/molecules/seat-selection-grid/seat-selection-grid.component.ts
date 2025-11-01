@@ -1,29 +1,20 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SeatComponent } from '../../atoms/seat/seat.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { SeatDto } from 'src/app/core/interfaces/core.interfaces';
 import { BadgeComponent } from '../../atoms/badge/badge.component';
+import { IconComponent } from '../../atoms/icon/icon.component';
+import { SeatComponent } from '../../atoms/seat/seat.component';
 
 export type SeatSelectionGridSize = 'small' | 'medium' | 'large';
 export type SeatSelectionGridVariant = 'default' | 'compact' | 'detailed';
 
-export interface Seat {
-  id: string;
-  row: string;
-  number: number;
-  type: 'standard' | 'vip' | 'handicap' | 'couple';
-  status: 'available' | 'selected' | 'occupied' | 'reserved' | 'blocked';
-  price?: number;
-  features?: string[];
-}
-
 export interface SeatRow {
   row: string;
-  seats: Seat[];
+  seats: SeatDto[];
 }
 
 export interface SeatSelection {
-  seats: Seat[];
+  seats: SeatDto[];
   totalPrice: number;
   totalSeats: number;
 }
@@ -44,7 +35,7 @@ export class SeatSelectionGridComponent {
   @Input() size: SeatSelectionGridSize = 'medium';
   @Input() variant: SeatSelectionGridVariant = 'default';
   @Input() rows: SeatRow[] = [];
-  @Input() selectedSeats: Seat[] = [];
+  @Input() selectedSeats: SeatDto[] = [];
   @Input() maxSeats: number = 8;
   @Input() loading: boolean = false;
   @Input() disabled: boolean = false;
@@ -57,8 +48,8 @@ export class SeatSelectionGridComponent {
   @Input() loadingMessage: string = 'Chargement des sièges...';
   @Input() maxSeatsMessage: string = 'Maximum {{max}} sièges sélectionnés';
 
-  @Output() seatSelected = new EventEmitter<Seat>();
-  @Output() seatDeselected = new EventEmitter<Seat>();
+  @Output() seatSelected = new EventEmitter<SeatDto>();
+  @Output() seatDeselected = new EventEmitter<SeatDto>();
   @Output() selectionChanged = new EventEmitter<SeatSelection>();
 
   // Classes CSS pour le conteneur
@@ -101,8 +92,8 @@ export class SeatSelectionGridComponent {
   }
 
   // Vérifier si un siège est sélectionné
-  isSelected(seat: Seat): boolean {
-    return this.selectedSeats.some(selectedSeat => selectedSeat.id === seat.id);
+  isSelected(seat: SeatDto): boolean {
+    return this.selectedSeats.some(selectedSeat => selectedSeat.seatId === seat.seatId);
   }
 
   // Vérifier si une rangée a des sièges sélectionnés
@@ -122,7 +113,7 @@ export class SeatSelectionGridComponent {
 
   // Obtenir la sélection actuelle
   get currentSelection(): SeatSelection {
-    const totalPrice = this.selectedSeats.reduce((sum, seat) => sum + (seat.price || 0), 0);
+    const totalPrice = this.selectedSeats.reduce((sum, seat) => sum + this.getSeatPrice(seat), 0);
     
     return {
       seats: this.selectedSeats,
@@ -132,38 +123,30 @@ export class SeatSelectionGridComponent {
   }
 
   // Obtenir le texte du type de siège
-  getSeatTypeText(type: string): string {
-    const types: { [key: string]: string } = {
-      'standard': 'Standard',
-      'vip': 'VIP',
-      'handicap': 'Handicap',
-      'couple': 'Couple'
-    };
-    
-    return types[type] || type;
+  getSeatTypeText(seat: SeatDto): string {
+    if (seat.isAccessible) {
+      return 'PMR';
+    }
+    return 'Standard';
   }
 
   // Obtenir la variante de badge pour le type de siège
-  getSeatTypeBadgeVariant(type: string): 'primary' | 'secondary' | 'success' | 'warning' | 'error' {
-    const variants: { [key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' } = {
-      'standard': 'secondary',
-      'vip': 'warning',
-      'handicap': 'success',
-      'couple': 'primary'
-    };
-    
-    return variants[type] || 'secondary';
+  getSeatTypeBadgeVariant(seat: SeatDto): 'primary' | 'secondary' | 'success' | 'warning' | 'error' {
+    if (seat.isAccessible) {
+      return 'success';
+    }
+    return 'secondary';
   }
 
   // Gérer la sélection d'un siège
-  onSeatSelect(seat: Seat): void {
-    if (this.disabled || this.loading || seat.status !== 'available') {
+  onSeatSelect(seat: SeatDto): void {
+    if (this.disabled || this.loading || !seat.isAvailable) {
       return;
     }
 
     if (this.isSelected(seat)) {
       // Désélectionner le siège
-      this.selectedSeats = this.selectedSeats.filter(s => s.id !== seat.id);
+      this.selectedSeats = this.selectedSeats.filter(s => s.seatId !== seat.seatId);
       this.seatDeselected.emit(seat);
     } else {
       // Vérifier la limite de sièges
@@ -196,12 +179,19 @@ export class SeatSelectionGridComponent {
 
   // Obtenir le nombre de sièges disponibles par type
   getAvailableSeatsByType(): { [key: string]: number } {
-    const counts: { [key: string]: number } = {};
+    const counts: { [key: string]: number } = {
+      'standard': 0,
+      'pmr': 0
+    };
     
     this.rows.forEach(row => {
       row.seats.forEach(seat => {
-        if (seat.status === 'available') {
-          counts[seat.type] = (counts[seat.type] || 0) + 1;
+        if (seat.isAvailable) {
+          if (seat.isAccessible) {
+            counts['pmr']++;
+          } else {
+            counts['standard']++;
+          }
         }
       });
     });
@@ -211,30 +201,48 @@ export class SeatSelectionGridComponent {
 
   // Obtenir le prix total par type de siège
   getPriceByType(type: string): number {
-    const seat = this.rows.flatMap(row => row.seats).find(s => s.type === type && s.price);
-    return seat?.price || 0;
+    // Prix par défaut - à adapter selon les données réelles
+    const prices: { [key: string]: number } = {
+      'standard': 9.90,
+      'pmr': 9.90
+    };
+    return prices[type] || 9.90;
   }
 
   // Obtenir l'état du siège pour le composant Seat
-  getSeatState(seat: Seat): 'available' | 'selected' | 'occupied' | 'disabled' {
+  getSeatState(seat: SeatDto): 'available' | 'selected' | 'occupied' | 'disabled' {
     if (this.isSelected(seat)) {
       return 'selected';
     }
     
-    switch (seat.status) {
-      case 'available':
-        return 'available';
-      case 'occupied':
-      case 'reserved':
-      case 'blocked':
-        return 'occupied';
-      default:
-        return 'disabled';
+    if (seat.isAvailable) {
+      return 'available';
+    } else {
+      return 'occupied';
     }
   }
 
   // Formater le prix
   formatPrice(price: number): string {
     return `${price.toFixed(2)}€`;
+  }
+  // Obtenir le numéro de rangée à partir du numéro de siège
+  getRowFromSeatNumber(seatNumber: string): string {
+    // Extraction de la lettre de rangée (ex: "A12" -> "A")
+    const match = seatNumber.match(/^([A-Z]+)/);
+    return match ? match[1] : '';
+  }
+
+  // Obtenir le numéro de siège dans la rangée
+  getSeatNumberInRow(seatNumber: string): number {
+    // Extraction du numéro (ex: "A12" -> 12)
+    const match = seatNumber.match(/\d+$/);
+    return match ? parseInt(match[0], 10) : 0;
+  }
+
+  // Obtenir le prix du siège
+  getSeatPrice(seat: SeatDto): number {
+    // Prix par défaut - à adapter selon les données réelles
+    return seat.isAccessible ? 9.90 : 9.90;
   }
 }

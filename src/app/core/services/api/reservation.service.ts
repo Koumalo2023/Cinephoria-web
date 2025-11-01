@@ -13,7 +13,7 @@ import {
   providedIn: 'root'
 })
 export class ReservationService {
-  private readonly baseUrl = `${environment.apiUrl}/reservation`;
+  private readonly baseUrl = `${environment.apiUrl}/Reservation`;
 
   constructor(private http: HttpClient) {}
 

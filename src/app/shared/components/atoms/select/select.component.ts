@@ -35,6 +35,8 @@ export class SelectComponent implements ControlValueAccessor {
   @Input() errorMessage: string = '';
   @Input() helperText: string = '';
   @Input() prefixIcon: string = '';
+  @Input() id: string = '';
+  @Input() name: string = '';
   
   @Output() valueChange = new EventEmitter<any>();
   @Output() blur = new EventEmitter<FocusEvent>();

@@ -2,7 +2,7 @@
   <!-- Image du film -->
   <div class="film-card__image">
     <img
-      [src]="film.posterUrl"
+      [src]="posterUrl"
       [alt]="film.title"
       class="film-card__poster"
       loading="lazy"
@@ -27,7 +27,7 @@
         <button
           *ngIf="showActions"
           class="film-card__action film-card__action--watchlist"
-          [class.film-card__action--active]="film.isInWatchlist"
+          [class.film-card__action--active]="false"
           (click)="onWatchlistToggle($event)"
           aria-label="Ajouter à la watchlist"
         >
@@ -39,7 +39,7 @@
         <button
           *ngIf="showActions"
           class="film-card__action film-card__action--watched"
-          [class.film-card__action--active]="film.isWatched"
+          [class.film-card__action--active]="false"
           (click)="onWatchedToggle($event)"
           aria-label="Marquer comme vu"
         >
@@ -50,8 +50,8 @@
       </div>
 
       <!-- Rating -->
-      <div *ngIf="showRating && film.rating" class="film-card__rating" [class]="ratingColor">
-        <span class="film-card__rating-value">{{ film.rating.toFixed(1) }}</span>
+      <div *ngIf="showRating && film.averageRating" class="film-card__rating" [class]="ratingColor">
+        <span class="film-card__rating-value">{{ film.averageRating.toFixed(1) }}</span>
       </div>
     </div>
   </div>
@@ -63,7 +63,7 @@
 
     <!-- Métadonnées -->
     <div class="film-card__metadata">
-      <span *ngIf="showYear" class="film-card__year">{{ film.year }}</span>
+      <span *ngIf="showYear" class="film-card__year">{{ releaseYear }}</span>
       
       <span *ngIf="showDuration && film.duration" class="film-card__duration">
         {{ formattedDuration }}
@@ -71,12 +71,12 @@
     </div>
 
     <!-- Genres -->
-    <div *ngIf="showGenres && film.genres?.length" class="film-card__genres">
-      <span *ngFor="let genre of film.genres.slice(0, 2)" class="film-card__genre">
+    <div *ngIf="showGenres && genres?.length" class="film-card__genres">
+      <span *ngFor="let genre of genres.slice(0, 2)" class="film-card__genre">
         {{ genre }}
       </span>
-      <span *ngIf="film.genres.length > 2" class="film-card__genre-more">
-        +{{ film.genres.length - 2 }}
+      <span *ngIf="genres.length > 2" class="film-card__genre-more">
+        +{{ genres.length - 2 }}
       </span>
     </div>
 
@@ -94,13 +94,13 @@
 
   <!-- Badges d'état -->
   <div class="film-card__badges">
-    <span *ngIf="film.isWatched" class="film-card__badge film-card__badge--watched">
+    <span *ngIf="false" class="film-card__badge film-card__badge--watched">
       Vu
     </span>
-    <span *ngIf="film.isFavorite" class="film-card__badge film-card__badge--favorite">
+    <span *ngIf="false" class="film-card__badge film-card__badge--favorite">
       Favori
     </span>
-    <span *ngIf="film.isInWatchlist" class="film-card__badge film-card__badge--watchlist">
+    <span *ngIf="false" class="film-card__badge film-card__badge--watchlist">
       Watchlist
     </span>
   </div>

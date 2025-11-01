@@ -1,32 +1,17 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ShowtimeDto } from 'src/app/core/interfaces/core.interfaces';
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
 
 export type ShowtimeSelectorSize = 'small' | 'medium' | 'large';
 export type ShowtimeSelectorVariant = 'default' | 'compact' | 'grid';
 
-export interface Showtime {
-  id: string;
-  time: string;
-  date: string;
-  format: '2D' | '3D' | 'IMAX' | '4DX';
-  language: string;
-  subtitles?: boolean;
-  audioDescription?: boolean;
-  availableSeats: number;
-  totalSeats: number;
-  price: number;
-  theater: string;
-  isFull?: boolean;
-  isSoon?: boolean;
-}
-
 export interface ShowtimeGroup {
   date: string;
   dayOfWeek: string;
-  showtimes: Showtime[];
+  showtimes: ShowtimeDto[];
 }
 
 @Component({
@@ -45,7 +30,7 @@ export class ShowtimeSelectorComponent {
   @Input() size: ShowtimeSelectorSize = 'medium';
   @Input() variant: ShowtimeSelectorVariant = 'default';
   @Input() showtimes: ShowtimeGroup[] = [];
-  @Input() selectedShowtime?: Showtime;
+  @Input() selectedShowtime?: ShowtimeDto;
   @Input() loading: boolean = false;
   @Input() disabled: boolean = false;
   @Input() showFormat: boolean = true;
@@ -59,7 +44,7 @@ export class ShowtimeSelectorComponent {
   @Input() emptyMessage: string = 'Aucune séance disponible';
   @Input() loadingMessage: string = 'Chargement des séances...';
 
-  @Output() showtimeSelected = new EventEmitter<Showtime>();
+  @Output() showtimeSelected = new EventEmitter<ShowtimeDto>();
   @Output() showtimeDeselected = new EventEmitter<void>();
 
   // Classes CSS pour le conteneur
@@ -93,22 +78,29 @@ export class ShowtimeSelectorComponent {
   }
 
   // Classes CSS pour une séance
-  getShowtimeClasses(showtime: Showtime): string {
+  getShowtimeClasses(showtime: ShowtimeDto): string {
     const classes = ['showtime-selector__showtime'];
     
     if (this.isSelected(showtime)) {
       classes.push('showtime-selector__showtime--selected');
     }
 
-    if (showtime.isFull) {
+    // Calculer si la séance est complète basé sur les réservations
+    const isFull = showtime.reservations && showtime.reservations.length > 0 &&
+                   this.getAvailableSeats(showtime) <= 0;
+    
+    if (isFull) {
       classes.push('showtime-selector__showtime--full');
     }
 
-    if (showtime.isSoon) {
+    // Calculer si c'est bientôt (dans les 30 minutes)
+    const isSoon = this.isSoon(showtime);
+    if (isSoon) {
       classes.push('showtime-selector__showtime--soon');
     }
 
-    if (showtime.availableSeats <= 5 && !showtime.isFull) {
+    const availableSeats = this.getAvailableSeats(showtime);
+    if (availableSeats <= 5 && !isFull) {
       classes.push('showtime-selector__showtime--few-seats');
     }
 
@@ -116,8 +108,8 @@ export class ShowtimeSelectorComponent {
   }
 
   // Vérifier si une séance est sélectionnée
-  isSelected(showtime: Showtime): boolean {
-    return this.selectedShowtime?.id === showtime.id;
+  isSelected(showtime: ShowtimeDto): boolean {
+    return this.selectedShowtime?.showtimeId === showtime.showtimeId;
   }
 
   // Vérifier si un groupe a une séance sélectionnée
@@ -126,45 +118,48 @@ export class ShowtimeSelectorComponent {
   }
 
   // Obtenir le pourcentage de sièges disponibles
-  getAvailabilityPercentage(showtime: Showtime): number {
-    return (showtime.availableSeats / showtime.totalSeats) * 100;
+  getAvailabilityPercentage(showtime: ShowtimeDto): number {
+    const availableSeats = this.getAvailableSeats(showtime);
+    // Estimation du nombre total de sièges (à adapter selon les données réelles)
+    const totalSeats = 100; // Valeur par défaut
+    return (availableSeats / totalSeats) * 100;
   }
 
   // Obtenir le texte d'accessibilité
-  getAccessibilityText(showtime: Showtime): string {
+  getAccessibilityText(showtime: ShowtimeDto): string {
     const parts = [];
     
-    if (showtime.subtitles) {
-      parts.push('ST');
-    }
+    // À adapter selon les données réelles d'accessibilité
+    // Pour l'instant, on retourne des valeurs par défaut
+    parts.push('VF'); // Version française
     
-    if (showtime.audioDescription) {
-      parts.push('AD');
-    }
-
     return parts.join(' • ');
   }
 
   // Obtenir le texte de disponibilité
-  getAvailabilityText(showtime: Showtime): string {
-    if (showtime.isFull) {
+  getAvailabilityText(showtime: ShowtimeDto): string {
+    const availableSeats = this.getAvailableSeats(showtime);
+    
+    if (availableSeats <= 0) {
       return 'Complet';
     }
     
-    if (showtime.availableSeats <= 5) {
-      return `${showtime.availableSeats} places`;
+    if (availableSeats <= 5) {
+      return `${availableSeats} places`;
     }
     
     return 'Places disponibles';
   }
 
   // Obtenir la variante de badge pour la disponibilité
-  getAvailabilityBadgeVariant(showtime: Showtime): 'primary' | 'secondary' | 'success' | 'warning' | 'error' {
-    if (showtime.isFull) {
+  getAvailabilityBadgeVariant(showtime: ShowtimeDto): 'primary' | 'secondary' | 'success' | 'warning' | 'error' {
+    const availableSeats = this.getAvailableSeats(showtime);
+    
+    if (availableSeats <= 0) {
       return 'error';
     }
     
-    if (showtime.availableSeats <= 5) {
+    if (availableSeats <= 5) {
       return 'warning';
     }
     
@@ -172,8 +167,8 @@ export class ShowtimeSelectorComponent {
   }
 
   // Gérer la sélection d'une séance
-  onShowtimeSelect(showtime: Showtime): void {
-    if (this.disabled || this.loading || showtime.isFull) {
+  onShowtimeSelect(showtime: ShowtimeDto): void {
+    if (this.disabled || this.loading || this.getAvailableSeats(showtime) <= 0) {
       return;
     }
 
@@ -203,10 +198,13 @@ export class ShowtimeSelectorComponent {
   }
 
   // Formater l'heure
-  formatTime(time: string): string {
+  formatTime(time: Date): string {
     // Implémentation basique - pourrait être améliorée avec une librairie de dates
-    const [hours, minutes] = time.split(':');
-    return `${hours}:${minutes}`;
+    const dateObj = new Date(time);
+    return dateObj.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   // Obtenir le jour de la semaine
@@ -228,5 +226,37 @@ export class ShowtimeSelectorComponent {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const showtimeDate = new Date(date);
     return tomorrow.toDateString() === showtimeDate.toDateString();
+  }
+
+  // Obtenir le nombre de sièges disponibles
+  getAvailableSeats(showtime: ShowtimeDto): number {
+    // Estimation basée sur les réservations existantes
+    // À adapter selon les données réelles de la salle
+    const totalSeats = 100; // Valeur par défaut
+    const reservedSeats = showtime.reservations?.length || 0;
+    return Math.max(0, totalSeats - reservedSeats);
+  }
+
+  // Vérifier si la séance est bientôt
+  isSoon(showtime: ShowtimeDto): boolean {
+    const now = new Date();
+    const showtimeDate = new Date(showtime.startTime);
+    const timeDiff = showtimeDate.getTime() - now.getTime();
+    return timeDiff > 0 && timeDiff <= 30 * 60 * 1000; // Dans les 30 minutes
+  }
+
+  // Obtenir le format de projection
+  getProjectionFormat(showtime: ShowtimeDto): string {
+    return showtime.quality?.toString() || '2D';
+  }
+
+  // Obtenir le prix
+  getPrice(showtime: ShowtimeDto): number {
+    return showtime.price || 0;
+  }
+
+  // Obtenir la langue
+  getLanguage(showtime: ShowtimeDto): string {
+    return 'VF'; // Valeur par défaut pour l'instant
   }
 }

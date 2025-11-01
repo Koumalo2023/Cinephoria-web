@@ -3,8 +3,11 @@
   <header class="reservation-header">
     <div class="header-content">
       <h1 class="reservation-title">Réservation de places</h1>
-      <p class="reservation-subtitle" *ngIf="showtime">
-        {{ showtime.movieTitle }} - {{ showtime.theaterName }}
+      <p class="reservation-subtitle" *ngIf="selectedCinema">
+        {{ selectedCinema.name }} - {{ selectedCinema.city }}
+      </p>
+      <p class="reservation-subtitle" *ngIf="selectedMovie">
+        {{ selectedMovie.title }}
       </p>
     </div>
     
@@ -18,219 +21,363 @@
     </div>
   </header>
 
-  <!-- Étapes de navigation -->
-  <nav class="steps-navigation">
-    <div class="steps-container">
-      <div
-        *ngFor="let step of steps; let i = index"
-        class="step-item"
-        [class.active]="step.active"
-        [class.completed]="step.completed"
-        [class.pending]="!step.active && !step.completed"
-      >
-        <div class="step-indicator">
-          <span class="step-number" *ngIf="!step.completed">{{ i + 1 }}</span>
-          <app-icon *ngIf="step.completed" name="check" size="small"></app-icon>
-        </div>
-        <div class="step-info">
-          <h3 class="step-title">{{ step.title }}</h3>
-          <p class="step-description">{{ step.description }}</p>
-        </div>
-      </div>
-    </div>
-  </nav>
-
   <!-- Contenu principal des étapes -->
   <main class="reservation-content">
-    <!-- Étape 1: Sélection des sièges -->
-    <section *ngIf="currentStep === 0" class="step-content seat-selection-step">
+    <!-- Étape 1: Sélection du cinéma -->
+    <section *ngIf="currentStep === 0" class="step-content cinema-selection-step">
+      <div class="step-header">
+        <h2>Choisissez votre cinéma</h2>
+        <p>Sélectionnez le cinéma où vous souhaitez voir le film</p>
+      </div>
+
+      <div class="cinema-selection-container">
+        <div class="cinemas-grid" *ngIf="cinemas && cinemas.length > 0">
+          <app-cinema-card
+            *ngFor="let cinema of cinemas"
+            [cinema]="cinema"
+            [showDetails]="true"
+            [class.selected]="selectedCinema?.cinemaId === cinema.cinemaId"
+            (cinemaSelected)="onCinemaSelect(cinema)"
+            class="cinema-card-selectable"
+          ></app-cinema-card>
+        </div>
+
+        <div *ngIf="!cinemas || cinemas.length === 0" class="empty-state">
+          <app-icon name="map-pin" size="large"></app-icon>
+          <h3>Aucun cinéma disponible</h3>
+          <p>Veuillez réessayer plus tard</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Étape 2: Film et séances -->
+    <section *ngIf="currentStep === 1" class="step-content movie-selection-step">
+      <div class="step-header">
+        <h2>Choisissez votre film et horaire</h2>
+        <p>Sélectionnez le film que vous souhaitez voir et l'horaire de projection</p>
+      </div>
+
+      <div class="movie-selection-container">
+        <!-- Sélection du film -->
+        <div class="movie-selection-section">
+          <h3>Films disponibles</h3>
+          <div class="movies-grid" *ngIf="movies && movies.length > 0">
+            <app-film-card
+              *ngFor="let movie of movies"
+              [film]="movie"
+              (click)="onMovieSelect(movie)"
+              class="movie-card-selectable"
+            ></app-film-card>
+          </div>
+
+          <div *ngIf="!movies || movies.length === 0" class="empty-state">
+            <app-icon name="film" size="large"></app-icon>
+            <h3>Aucun film disponible</h3>
+            <p>Veuillez réessayer plus tard</p>
+          </div>
+        </div>
+
+        <!-- Sélection de la séance -->
+        <div class="showtime-selection-section" *ngIf="selectedMovie">
+          <h3>Séances disponibles</h3>
+          <app-showtime-selector
+            [showtimes]="showtimeGroups"
+            [selectedShowtime]="selectedShowtime || undefined"
+            (showtimeSelected)="onShowtimeSelect($event)"
+            [showTheater]="false"
+            [showPrice]="true"
+            [showAvailability]="true"
+          ></app-showtime-selector>
+        </div>
+
+        <div *ngIf="!selectedMovie" class="selection-hint">
+          <app-icon name="info" size="medium"></app-icon>
+          <p>Veuillez sélectionner un film pour voir les séances disponibles</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Étape 3: Sélection des sièges -->
+    <section *ngIf="currentStep === 2" class="step-content seat-selection-step">
       <div class="step-header">
         <h2>Sélectionnez vos sièges</h2>
         <p>Choisissez vos places dans la salle de cinéma</p>
       </div>
 
-      <div class="seat-selection-container">
-        <!-- Légende des sièges -->
-        <div class="seat-legend-section">
-          <app-seat-legend></app-seat-legend>
+      <div class="seat-selection-container" *ngIf="selectedShowtime">
+        <!-- Informations de la séance -->
+        <div class="showtime-info">
+          <h3>{{ selectedMovie?.title }}</h3>
+          <p>
+            {{ selectedShowtime.startTime | date:'EEEE d MMMM' }} à 
+            {{ selectedShowtime.startTime | date:'HH:mm' }} - 
+            {{ selectedShowtime.quality }} - 
+            Salle {{ selectedShowtime.theaterId }}
+          </p>
         </div>
 
         <!-- Grille des sièges -->
         <div class="seat-grid-section">
-          <app-seat-grid
-            [seats]="initialSeats"
+          <app-seat-selection-grid
+            [rows]="seatRows"
             [selectedSeats]="selectedSeats"
-            (seatSelected)="onSeatSelected($event)"
             (selectionChanged)="onSeatsChange($event)"
-          ></app-seat-grid>
+            [maxSeats]="8"
+            [showScreen]="true"
+            [showLegend]="true"
+            [showPrice]="true"
+          ></app-seat-selection-grid>
         </div>
+      </div>
 
-        <!-- Compteur et résumé -->
-        <div class="seat-summary-section">
-          <app-seat-counter
-            [selectedSeats]="selectedSeats"
-          ></app-seat-counter>
-        </div>
+      <div *ngIf="!selectedShowtime" class="selection-hint">
+        <app-icon name="info" size="medium"></app-icon>
+        <p>Veuillez sélectionner une séance pour choisir vos sièges</p>
       </div>
     </section>
 
-    <!-- Étape 2: Informations client -->
-    <section *ngIf="currentStep === 1" class="step-content customer-info-step">
-      <div class="step-header">
-        <h2>Vos informations</h2>
-        <p>Renseignez vos coordonnées pour finaliser la réservation</p>
-      </div>
-
-      <form [formGroup]="reservationForm" class="customer-form">
-        <div formGroupName="customerInfo" class="form-grid">
-          <div class="form-group">
-            <label for="firstName">Prénom *</label>
-            <app-input
-              id="firstName"
-              formControlName="firstName"
-              type="text"
-              placeholder="Votre prénom"
-              [required]="true"
-            ></app-input>
-            <div *ngIf="reservationForm.get('customerInfo.firstName')?.invalid && reservationForm.get('customerInfo.firstName')?.touched" class="error-message">
-              Le prénom est requis (minimum 2 caractères)
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="lastName">Nom *</label>
-            <app-input
-              id="lastName"
-              formControlName="lastName"
-              type="text"
-              placeholder="Votre nom"
-              [required]="true"
-            ></app-input>
-            <div *ngIf="reservationForm.get('customerInfo.lastName')?.invalid && reservationForm.get('customerInfo.lastName')?.touched" class="error-message">
-              Le nom est requis (minimum 2 caractères)
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="email">Email *</label>
-            <app-input
-              id="email"
-              formControlName="email"
-              type="email"
-              placeholder="votre@email.com"
-              [required]="true"
-            ></app-input>
-            <div *ngIf="reservationForm.get('customerInfo.email')?.invalid && reservationForm.get('customerInfo.email')?.touched" class="error-message">
-              Veuillez entrer une adresse email valide
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Téléphone</label>
-            <app-input
-              id="phone"
-              formControlName="phone"
-              type="tel"
-              placeholder="+33 1 23 45 67 89"
-            ></app-input>
-            <div *ngIf="reservationForm.get('customerInfo.phone')?.invalid && reservationForm.get('customerInfo.phone')?.touched" class="error-message">
-              Format de téléphone invalide
-            </div>
-          </div>
-        </div>
-      </form>
-    </section>
-
-    <!-- Étape 3: Paiement -->
-    <section *ngIf="currentStep === 2" class="step-content payment-step">
-      <div class="step-header">
-        <h2>Moyen de paiement</h2>
-        <p>Choisissez comment vous souhaitez payer</p>
-      </div>
-
-      <form [formGroup]="reservationForm" class="payment-form">
-        <div class="payment-methods">
-          <label for="paymentMethod">Méthode de paiement *</label>
-          <app-select
-            id="paymentMethod"
-            formControlName="paymentMethod"
-            [options]="paymentMethods"
-            placeholder="Choisissez un moyen de paiement"
-          ></app-select>
-        </div>
-
-        <div class="terms-section">
-          <div class="checkbox-group">
-            <input
-              type="checkbox"
-              id="termsAccepted"
-              formControlName="termsAccepted"
-              class="terms-checkbox"
-            />
-            <label for="termsAccepted" class="terms-label">
-              J'accepte les 
-              <a href="/terms" target="_blank" class="terms-link">conditions générales</a>
-              et la 
-              <a href="/privacy" target="_blank" class="terms-link">politique de confidentialité</a>
-            </label>
-          </div>
-          <div *ngIf="reservationForm.get('termsAccepted')?.invalid && reservationForm.get('termsAccepted')?.touched" class="error-message">
-            Vous devez accepter les conditions générales
-          </div>
-        </div>
-
-        <!-- Récapitulatif du paiement -->
-        <div class="payment-summary">
-          <h3>Récapitulatif</h3>
-          <div class="summary-details">
-            <div class="summary-item">
-              <span>Places sélectionnées:</span>
-              <span>{{ selectedSeats.length }} place(s)</span>
-            </div>
-            <div class="summary-item">
-              <span>Total:</span>
-              <span class="total-amount">{{ getTotalAmount() | currency:'EUR' }}</span>
-            </div>
-          </div>
-        </div>
-      </form>
-    </section>
-
-    <!-- Étape 4: Confirmation -->
+    <!-- Étape 4: Confirmation et paiement -->
     <section *ngIf="currentStep === 3" class="step-content confirmation-step">
-      <div class="step-header">
-        <h2>Confirmation de réservation</h2>
-        <p>Votre réservation a été enregistrée avec succès</p>
-      </div>
-
-      <div class="confirmation-content" *ngIf="reservationData">
-        <!-- QR Code -->
-        <div class="qr-code-section">
-          <app-qr-code-display
-            [data]="reservationData.reservationId || ''"
-            [size]="'medium'"
-            [title]="'Code de réservation'"
-          ></app-qr-code-display>
-          <p class="reservation-id">N°: {{ reservationData.reservationId }}</p>
+      <div class="confirmation-container">
+        <!-- En-tête de l'étape -->
+        <div class="confirmation-header">
+          <h2>Finalisez votre réservation</h2>
+          <p>Vérifiez vos informations et procédez au paiement</p>
         </div>
 
-        <!-- Récapitulatif complet -->
-        <div class="full-summary-section">
-          <app-reservation-summary
-            [reservation]="convertToReservationDetails(reservationData)"
-          ></app-reservation-summary>
-        </div>
+        <!-- Contenu principal -->
+        <div class="confirmation-content" *ngIf="!reservationConfirmed">
+          <div class="confirmation-grid">
+            <!-- Récapitulatif -->
+            <div class="summary-section">
+              <div class="summary-card">
+                <div class="summary-header">
+                  <h3>Votre réservation</h3>
+                  <div class="reservation-reference">
+                    Réf. #{{ (reservationData?.reservationId) || 'En attente' }}
+                  </div>
+                </div>
 
-        <!-- Actions de confirmation -->
-        <div class="confirmation-actions">
-          <div class="success-message" *ngIf="reservationConfirmed">
-            <app-icon name="check-circle" size="large" class="success-icon"></app-icon>
-            <h3>Réservation confirmée !</h3>
-            <p>Vos billets ont été envoyés par email</p>
+                <div class="summary-details">
+                  <!-- Film -->
+                  <div class="detail-group">
+                    <div class="detail-label">Film</div>
+                    <div class="detail-content">
+                      <div class="movie-title">{{ reservationData?.movie?.title }}</div>
+                      <div class="movie-meta">
+                        {{ reservationData?.movie?.duration }} • {{ reservationData?.movie?.genre }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Séance -->
+                  <div class="detail-group">
+                    <div class="detail-label">Séance</div>
+                    <div class="detail-content">
+                      <div class="showtime-details">
+                        <div class="showtime-item">
+                          <app-icon name="calendar" size="small"></app-icon>
+                          {{ reservationData?.showtime?.startTime | date:'EEEE d MMMM yyyy' }}
+                        </div>
+                        <div class="showtime-item">
+                          <app-icon name="clock" size="small"></app-icon>
+                          {{ reservationData?.showtime?.startTime | date:'HH:mm' }}
+                        </div>
+                        <div class="showtime-item">
+                          <app-icon name="map-pin" size="small"></app-icon>
+                          Salle {{ reservationData?.showtime?.theaterId }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Sièges -->
+                  <div class="detail-group">
+                    <div class="detail-label">Sièges ({{ (reservationData?.selectedSeats?.length) || 0 }})</div>
+                    <div class="detail-content">
+                      <div class="seats-container">
+                        <div
+                          *ngFor="let seat of reservationData?.selectedSeats || []"
+                          class="seat-detail"
+                        >
+                          <app-badge variant="secondary" size="small">
+                            {{ seat.seatNumber }}
+                          </app-badge>
+                          <span class="seat-category">{{ seat.isAccessible ? 'handicap' : 'standard' }}</span>
+                          <span class="seat-price">{{ reservationData?.showtime?.price || 9.90 }}€</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Total -->
+                  <div class="total-section">
+                    <div class="total-label">Total à payer</div>
+                    <div class="total-amount">{{ calculateTotalPrice() }}€</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulaire -->
+            <div class="form-section">
+              <div class="form-card">
+                <div class="form-header">
+                  <h3>Informations personnelles</h3>
+                  <div class="user-status" *ngIf="isUserAuthenticated">
+                    <app-icon name="user-check" size="small"></app-icon>
+                    <span>Connecté(e)</span>
+                  </div>
+                </div>
+
+                <form [formGroup]="reservationForm" class="customer-form">
+                  <div class="form-fields" formGroupName="customerInfo">
+                    <div class="form-row">
+                      <div class="form-field">
+                        <label for="firstName">Prénom *</label>
+                        <input
+                          id="firstName"
+                          name="firstName"
+                          formControlName="firstName"
+                          type="text"
+                          placeholder="Votre prénom"
+                          required
+                          class="form-input"
+                        />
+                        <div *ngIf="reservationForm.get('customerInfo.firstName')?.invalid && reservationForm.get('customerInfo.firstName')?.touched" class="field-error">
+                          Le prénom est requis (minimum 2 caractères)
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label for="lastName">Nom *</label>
+                        <input
+                          id="lastName"
+                          name="lastName"
+                          formControlName="lastName"
+                          type="text"
+                          placeholder="Votre nom"
+                          required
+                          class="form-input"
+                        />
+                        <div *ngIf="reservationForm.get('customerInfo.lastName')?.invalid && reservationForm.get('customerInfo.lastName')?.touched" class="field-error">
+                          Le nom est requis (minimum 2 caractères)
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <div class="form-field">
+                        <label for="email">Email *</label>
+                        <input
+                          id="email"
+                          name="email"
+                          formControlName="email"
+                          type="email"
+                          placeholder="votre@email.com"
+                          required
+                          class="form-input"
+                        />
+                        <div *ngIf="reservationForm.get('customerInfo.email')?.invalid && reservationForm.get('customerInfo.email')?.touched" class="field-error">
+                          Veuillez entrer une adresse email valide
+                        </div>
+                      </div>
+
+                      <div class="form-field">
+                        <label for="phone">Téléphone</label>
+                        <input
+                          id="phone"
+                          name="phone"
+                          formControlName="phone"
+                          type="tel"
+                          placeholder="+33 1 23 45 67 89"
+                          class="form-input"
+                        />
+                        <div *ngIf="reservationForm.get('customerInfo.phone')?.invalid && reservationForm.get('customerInfo.phone')?.touched" class="field-error">
+                          Format de téléphone invalide
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="payment-section">
+                    <h4>Paiement</h4>
+                    <div class="payment-field">
+                      <label for="paymentMethod">Méthode de paiement *</label>
+                      <select
+                        id="paymentMethod"
+                        name="paymentMethod"
+                        formControlName="paymentMethod"
+                        required
+                        class="form-select"
+                      >
+                        <option value="">Choisissez un moyen de paiement</option>
+                        <option *ngFor="let method of paymentMethods" [value]="method.value">
+                          {{ method.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="terms-agreement">
+                      <div class="checkbox-container">
+                        <input
+                          type="checkbox"
+                          id="termsAccepted"
+                          formControlName="termsAccepted"
+                          class="terms-checkbox"
+                        />
+                        <label for="termsAccepted" class="terms-text">
+                          J'accepte les
+                          <a href="/terms" target="_blank" class="terms-link">conditions générales</a>
+                          et la
+                          <a href="/privacy" target="_blank" class="terms-link">politique de confidentialité</a>
+                        </label>
+                      </div>
+                      <div *ngIf="reservationForm.get('termsAccepted')?.invalid && reservationForm.get('termsAccepted')?.touched" class="field-error">
+                        Vous devez accepter les conditions générales
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="loading-message" *ngIf="isLoading">
-            <app-icon name="spinner" size="large" class="loading-icon"></app-icon>
+        <!-- Confirmation réussie -->
+        <div class="success-section" *ngIf="reservationConfirmed && reservationData">
+          <div class="success-container">
+            <div class="success-icon">
+              <app-icon name="check-circle" size="large"></app-icon>
+            </div>
+            <div class="success-message">
+              <h3>Réservation confirmée !</h3>
+              <p class="success-description">Vos billets ont été envoyés par email</p>
+            </div>
+            <div class="reservation-ticket">
+              <div class="ticket-qr">
+                <app-qr-code-display
+                  [data]="reservationData.reservationId || ''"
+                  [size]="'medium'"
+                  [title]="'Code de réservation'"
+                ></app-qr-code-display>
+              </div>
+              <div class="ticket-info">
+                <div class="ticket-number">N°: {{ reservationData.reservationId }}</div>
+                <div class="ticket-movie">{{ reservationData?.movie?.title }}</div>
+                <div class="ticket-showtime">
+                  {{ reservationData?.showtime?.startTime | date:'EEEE d MMMM' }} à
+                  {{ reservationData?.showtime?.startTime | date:'HH:mm' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chargement -->
+        <div class="loading-section" *ngIf="isLoading">
+          <div class="loading-container">
+            <app-icon name="spinner" size="large" class="loading-spinner"></app-icon>
             <p>Confirmation en cours...</p>
           </div>
         </div>
@@ -275,7 +422,7 @@
           *ngIf="isLastStep() && !reservationConfirmed"
           variant="primary"
           (click)="confirmReservation()"
-          [disabled]="isLoading"
+          [disabled]="isLoading || !reservationForm.valid"
           class="confirm-button"
         >
           <app-icon name="check" size="small"></app-icon>
