@@ -1,1 +1,125 @@
-<p>movies works!</p>
+<div class="movies-page">
+  <!-- En-tête de la page -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Catalogue des Films</h1>
+      <p class="page-subtitle">Découvrez notre sélection de films et réservez vos séances</p>
+    </div>
+    
+    <!-- Actions rapides -->
+    <div class="header-actions">
+      <button 
+        class="refresh-button" 
+        (click)="refreshData()"
+        [disabled]="isLoading"
+        title="Actualiser les données">
+        🔄 Actualiser
+      </button>
+    </div>
+  </header>
+
+  <!-- Barre de recherche et filtres -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <!-- Barre de recherche -->
+      <div class="search-container">
+        <app-search-bar
+          placeholder="Rechercher un film, un réalisateur..."
+          (search)="onSearch($event)">
+        </app-search-bar>
+      </div>
+
+      <!-- Filtres avancés -->
+      <div class="advanced-filters">
+        <app-movie-filter-panel
+          (filtersChange)="onFiltersChange($event)">
+        </app-movie-filter-panel>
+      </div>
+
+      <!-- Options de tri -->
+      <div class="sort-options">
+        <app-movie-sort-options
+          (sortChange)="onSortChange($event)">
+        </app-movie-sort-options>
+      </div>
+    </div>
+  </section>
+
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Chargement des films...</p>
+  </div>
+
+  <!-- État d'erreur -->
+  <div *ngIf="hasError && !isLoading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h3>Erreur de chargement</h3>
+    <p>{{ state?.error }}</p>
+    <button class="retry-button" (click)="loadMovies()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Contenu principal -->
+  <main *ngIf="!isLoading && !hasError" class="main-content">
+    <!-- En-tête des résultats -->
+    <div class="results-header">
+      <div class="results-info">
+        <h2 *ngIf="hasData" class="results-title">
+          {{ totalCount }} film{{ totalCount > 1 ? 's' : '' }} trouvé{{ totalCount > 1 ? 's' : '' }}
+        </h2>
+        <p *ngIf="hasData" class="results-subtitle">
+          Affichage de {{ showingFrom }} à {{ showingTo }} sur {{ totalCount }} résultat{{ totalCount > 1 ? 's' : '' }}
+        </p>
+        <p *ngIf="!hasData" class="no-results">
+          Aucun film ne correspond à vos critères de recherche.
+        </p>
+      </div>
+
+      <!-- Actions des résultats -->
+      <div *ngIf="hasData" class="results-actions">
+        <button 
+          class="reset-filters-button"
+          (click)="resetFilters()"
+          title="Réinitialiser tous les filtres">
+          🔄 Réinitialiser
+        </button>
+      </div>
+    </div>
+
+    <!-- Liste des films -->
+    <section *ngIf="hasData" class="movies-section">
+      <app-movie-list
+        [movies]="currentPageMovies"
+        [showFilters]="false"
+        [showSort]="false"
+        [showPagination]="false"
+        (movieSelected)="onMovieClick($event)"
+        (filterChange)="onFiltersChange($event)">
+      </app-movie-list>
+    </section>
+
+    <!-- Pagination -->
+    <div *ngIf="hasData && totalPages > 1" class="pagination-section">
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [pageSize]="pageSize"
+        [totalItems]="totalCount"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+
+    <!-- État sans résultats -->
+    <div *ngIf="!hasData && !isLoading && !hasError" class="empty-state">
+      <div class="empty-icon">🎬</div>
+      <h3>Aucun film trouvé</h3>
+      <p>Essayez de modifier vos critères de recherche ou de réinitialiser les filtres.</p>
+      <button class="reset-button" (click)="resetFilters()">
+        Réinitialiser les filtres
+      </button>
+    </div>
+  </main>
+</div>

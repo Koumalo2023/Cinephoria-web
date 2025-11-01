@@ -81,7 +81,7 @@ export class MovieService {
   }
 
   /**
-   * Récupérer les films avec séances
+   * Récupérer les films avec séances programmées
    */
   getMoviesWithShowtimes(): Observable<MovieDto[]> {
     return this.http.get<MovieDto[]>(`${this.baseUrl}/with-showtimes`);

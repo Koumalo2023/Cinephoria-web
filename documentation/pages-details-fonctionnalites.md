@@ -62,14 +62,14 @@
 #### Actions
 - Filtrage des films
 - Recherche texte
+- Ajout Film dans ses favories 
 - Tri des résultats
 - Navigation vers détails film
 - Lancement processus réservation
 
 #### Endpoints API
-- `GET /api/movie/all` - Tous les films
+- `GET /api/movie/with-showtimes` - Tous les films avec séances programmées
 - `POST /api/movie/filter` - Filtrage avancé
-- `GET /api/movie/recent` - Films récents
 
 #### Services Nécessaires
 - [`MovieService`](cinephoria-web/src/app/shared/services/api/movie.service.ts) - Gestion films
