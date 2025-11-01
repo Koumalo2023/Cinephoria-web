@@ -235,14 +235,15 @@
                     <div class="form-row">
                       <div class="form-field">
                         <label for="firstName">Prénom *</label>
-                        <app-input
+                        <input
                           id="firstName"
                           name="firstName"
                           formControlName="firstName"
                           type="text"
                           placeholder="Votre prénom"
-                          [required]="true"
-                        ></app-input>
+                          required
+                          class="form-input"
+                        />
                         <div *ngIf="reservationForm.get('customerInfo.firstName')?.invalid && reservationForm.get('customerInfo.firstName')?.touched" class="field-error">
                           Le prénom est requis (minimum 2 caractères)
                         </div>
@@ -250,14 +251,15 @@
 
                       <div class="form-field">
                         <label for="lastName">Nom *</label>
-                        <app-input
+                        <input
                           id="lastName"
                           name="lastName"
                           formControlName="lastName"
                           type="text"
                           placeholder="Votre nom"
-                          [required]="true"
-                        ></app-input>
+                          required
+                          class="form-input"
+                        />
                         <div *ngIf="reservationForm.get('customerInfo.lastName')?.invalid && reservationForm.get('customerInfo.lastName')?.touched" class="field-error">
                           Le nom est requis (minimum 2 caractères)
                         </div>
@@ -267,14 +269,15 @@
                     <div class="form-row">
                       <div class="form-field">
                         <label for="email">Email *</label>
-                        <app-input
+                        <input
                           id="email"
                           name="email"
                           formControlName="email"
                           type="email"
                           placeholder="votre@email.com"
-                          [required]="true"
-                        ></app-input>
+                          required
+                          class="form-input"
+                        />
                         <div *ngIf="reservationForm.get('customerInfo.email')?.invalid && reservationForm.get('customerInfo.email')?.touched" class="field-error">
                           Veuillez entrer une adresse email valide
                         </div>
@@ -282,13 +285,14 @@
 
                       <div class="form-field">
                         <label for="phone">Téléphone</label>
-                        <app-input
+                        <input
                           id="phone"
                           name="phone"
                           formControlName="phone"
                           type="tel"
                           placeholder="+33 1 23 45 67 89"
-                        ></app-input>
+                          class="form-input"
+                        />
                         <div *ngIf="reservationForm.get('customerInfo.phone')?.invalid && reservationForm.get('customerInfo.phone')?.touched" class="field-error">
                           Format de téléphone invalide
                         </div>
@@ -300,13 +304,18 @@
                     <h4>Paiement</h4>
                     <div class="payment-field">
                       <label for="paymentMethod">Méthode de paiement *</label>
-                      <app-select
+                      <select
                         id="paymentMethod"
                         name="paymentMethod"
                         formControlName="paymentMethod"
-                        [options]="paymentMethods"
-                        placeholder="Choisissez un moyen de paiement"
-                      ></app-select>
+                        required
+                        class="form-select"
+                      >
+                        <option value="">Choisissez un moyen de paiement</option>
+                        <option *ngFor="let method of paymentMethods" [value]="method.value">
+                          {{ method.label }}
+                        </option>
+                      </select>
                     </div>
 
                     <div class="terms-agreement">
@@ -318,9 +327,9 @@
                           class="terms-checkbox"
                         />
                         <label for="termsAccepted" class="terms-text">
-                          J'accepte les 
+                          J'accepte les
                           <a href="/terms" target="_blank" class="terms-link">conditions générales</a>
-                          et la 
+                          et la
                           <a href="/privacy" target="_blank" class="terms-link">politique de confidentialité</a>
                         </label>
                       </div>

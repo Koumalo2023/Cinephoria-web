@@ -4,29 +4,25 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 
 // Interfaces API
-import { AppUserDto, CinemaDto, MovieDto, SeatDto, ShowtimeDto } from 'src/app/core/interfaces/core.interfaces';
+import { AppUserDto, CinemaDto, CreateReservationDto, MovieDto, SeatDto, ShowtimeDto } from 'src/app/core/interfaces/core.interfaces';
 
 // Services
+import { ReservationService } from 'src/app/core/services/api/reservation.service';
 import { UserStateService } from 'src/app/core/services/auth/user-state.service';
 
 // Utilitaires de conversion
-import {
-  organizeSeatsByRow
-} from 'src/app/core/utils/data-converters.util';
+import { organizeSeatsByRow } from 'src/app/core/utils/data-converters.util';
 
 // Composants atomiques
 import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
-import { InputComponent } from '../../atoms/input/input.component';
 import { ProgressIndicatorComponent, ProgressStep } from '../../atoms/progress-indicator/progress-indicator.component';
-import { SelectComponent } from '../../atoms/select/select.component';
 
 // Composants molécules
 import { CinemaCardComponent } from '../../molecules/cinema-card/cinema-card.component';
 import { FilmCardComponent } from '../../molecules/film-card/film-card.component';
 import { QRCodeDisplayComponent } from '../../molecules/qr-code-display/qr-code-display.component';
-import { ReservationDetails } from '../../molecules/reservation-summary/reservation-summary.component';
 import { SeatRow as GridSeatRow, SeatSelectionGridComponent } from '../../molecules/seat-selection-grid/seat-selection-grid.component';
 import { ShowtimeGroup, ShowtimeSelectorComponent } from '../../molecules/showtime-selector/showtime-selector.component';
 
@@ -62,8 +58,6 @@ export interface ReservationData {
     ReactiveFormsModule,
     ButtonComponent,
     IconComponent,
-    InputComponent,
-    SelectComponent,
     BadgeComponent,
     ProgressIndicatorComponent,
     CinemaCardComponent,
@@ -160,7 +154,8 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private userStateService: UserStateService
+    private userStateService: UserStateService,
+    private reservationService: ReservationService
   ) {}
 
   ngOnInit(): void {
@@ -285,6 +280,13 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
 
   nextStep(): void {
     if (this.canProceedToNextStep()) {
+      // Vérifier l'authentification avant de passer à l'étape de confirmation
+      if (this.currentStep === 2 && !this.userStateService.isAuthenticated) {
+        alert('Vous devez être connecté pour finaliser votre réservation.');
+        this.router.navigate(['/auth/login']);
+        return;
+      }
+
       this.steps[this.currentStep].completed = true;
       this.steps[this.currentStep].active = false;
       
@@ -357,16 +359,88 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   }
 
   confirmReservation(): void {
-    if (!this.reservationData) return;
+    if (!this.reservationData || !this.selectedShowtime) return;
+
+    // Vérifier que l'utilisateur est connecté
+    if (!this.userStateService.isAuthenticated) {
+      alert('Vous devez être connecté pour effectuer une réservation.');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    // Récupérer l'identifiant utilisateur depuis le token JWT
+    let userId = this.extractUserIdFromToken();
+    
+    console.log('ID utilisateur extrait du token:', userId);
+
+    if (!userId) {
+      alert('Erreur: Impossible de récupérer l\'identifiant utilisateur. Veuillez vous reconnecter.');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
 
     this.isLoading = true;
 
-    // Simuler un appel API
-    setTimeout(() => {
-      this.isLoading = false;
-      this.reservationConfirmed = true;
-      this.reservationComplete.emit(this.reservationData!);
-    }, 2000);
+    // Préparer les données pour l'API
+    const reservationData: CreateReservationDto = {
+      appUserId: userId,
+      showtimeId: this.selectedShowtime.showtimeId,
+      seatNumbers: this.selectedSeats.map(seat => seat.seatNumber)
+    };
+
+    console.log('Envoi de la réservation à l\'API:', reservationData);
+
+    // Utiliser le vrai service API
+    this.reservationService.createReservation(reservationData).subscribe({
+      next: (response) => {
+        console.log('Réservation créée avec succès:', response);
+        this.isLoading = false;
+        this.reservationConfirmed = true;
+        this.reservationComplete.emit(this.reservationData!);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la création de la réservation:', error);
+        this.isLoading = false;
+        // Gérer l'erreur (afficher un message à l'utilisateur)
+        alert('Erreur lors de la création de la réservation. Veuillez réessayer.');
+      }
+    });
+  }
+
+  // Extraire l'identifiant utilisateur depuis le token JWT
+  private extractUserIdFromToken(): string {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      console.error('Token JWT non trouvé dans le localStorage');
+      return '';
+    }
+
+    try {
+      // Décoder le token JWT (partie payload)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('Payload du token JWT:', payload);
+      
+      // L'identifiant utilisateur peut être dans différentes propriétés selon le token
+      // Inclure les claims XMLSOAP spécifiques pour les utilisateurs User
+      const userId = payload.sub ||
+                    payload.nameid ||
+                    payload.userId ||
+                    payload.appUserId ||
+                    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+                    payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/userdata'] ||
+                    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid'];
+      
+      if (userId) {
+        console.log('ID utilisateur trouvé dans le token:', userId);
+        return userId;
+      } else {
+        console.error('Aucun identifiant utilisateur trouvé dans le token JWT');
+        return '';
+      }
+    } catch (error) {
+      console.error('Erreur lors du décodage du token JWT:', error);
+      return '';
+    }
   }
 
   cancelReservation(): void {
@@ -421,53 +495,5 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
       active: step.active,
       disabled: index > this.currentStep
     }));
-  }
-
-  // Convertir les données de réservation pour le composant de résumé
-  convertToReservationDetails(reservationData: ReservationData): ReservationDetails {
-    const now = new Date();
-    return {
-      id: reservationData.reservationId || 'temp-id',
-      movie: {
-        id: reservationData.movie.movieId.toString(),
-        title: reservationData.movie.title,
-        duration: this.parseDuration(reservationData.movie.duration),
-        rating: 'PG-13', // À adapter selon les données réelles
-        genre: [reservationData.movie.genre.toString()]
-      },
-      showtime: {
-        id: reservationData.showtime.showtimeId.toString(),
-        date: reservationData.showtime.startTime.toISOString().split('T')[0],
-        time: reservationData.showtime.startTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        format: reservationData.showtime.quality.toString(),
-        language: 'VF', // À adapter selon les données réelles
-        theater: `Salle ${reservationData.showtime.theaterId}`
-      },
-      seats: reservationData.selectedSeats.map(seat => ({
-        id: seat.seatId.toString(),
-        row: seat.seatNumber.match(/^([A-Z]+)/)?.[0] || '',
-        number: parseInt(seat.seatNumber.match(/\d+$/)?.[0] || '0', 10),
-        type: seat.isAccessible ? 'handicap' : 'standard',
-        price: reservationData.showtime.price || 9.90
-      })),
-      totalPrice: reservationData.totalAmount,
-      bookingFee: 1.50,
-      taxes: reservationData.totalAmount * 0.20,
-      finalPrice: reservationData.totalAmount + 1.50 + (reservationData.totalAmount * 0.20),
-      reservationDate: now.toISOString(),
-      status: 'confirmed',
-      qrCodeData: reservationData.reservationId || ''
-    };
-  }
-
-  // Convertir la durée du film (ex: "2h 15min" en minutes)
-  private parseDuration(duration: string): number {
-    const hoursMatch = duration.match(/(\d+)h/);
-    const minutesMatch = duration.match(/(\d+)min/);
-    
-    const hours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
-    const minutes = minutesMatch ? parseInt(minutesMatch[1], 10) : 0;
-    
-    return hours * 60 + minutes;
   }
 }

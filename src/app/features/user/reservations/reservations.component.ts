@@ -132,58 +132,19 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   }
 
   onReservationComplete(reservationData: any): void {
-    this.loadingService.start('reservation-create', 'Création de la réservation...');
-
-    const currentUser = this.userStateService.currentUser;
-    if (!currentUser) {
-      this.notificationService.error('Erreur', 'Utilisateur non connecté');
-      this.loadingService.stop('reservation-create');
-      return;
-    }
-
-    // Vérifier que nous avons toutes les données nécessaires
-    if (!reservationData.showtime || !reservationData.selectedSeats || reservationData.selectedSeats.length === 0) {
-      this.notificationService.error('Erreur', 'Données de réservation incomplètes');
-      this.loadingService.stop('reservation-create');
-      return;
-    }
-
-    // Préparer les données pour l'API
-    const createReservationDto = {
-      showtimeId: reservationData.showtime.showtimeId,
-      seatNumbers: reservationData.selectedSeats.map((seat: SeatDto) => seat.seatNumber),
-      appUserId: currentUser.appUserId
-    };
-
-    console.log('Données envoyées à l\'API:', JSON.stringify(createReservationDto, null, 2));
-    console.log('Showtime ID:', reservationData.showtime.showtimeId, 'Type:', typeof reservationData.showtime.showtimeId);
-    console.log('Sièges sélectionnés:', reservationData.selectedSeats);
-    console.log('User ID:', currentUser.appUserId, 'Type:', typeof currentUser.appUserId);
-
-    this.reservationService.createReservation(createReservationDto)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (createdReservation) => {
-          this.loadingService.stop('reservation-create');
-          this.notificationService.success(
-            'Réservation confirmée !',
-            `Votre réservation pour "${reservationData.movie.title}" a été confirmée. Numéro: ${createdReservation.reservationId}`
-          );
-          
-          // Rediriger vers la page des réservations de l'utilisateur
-          setTimeout(() => {
-            this.router.navigate(['/user/reservations']);
-          }, 2000);
-        },
-        error: (error) => {
-          console.error('Erreur détaillée lors de la création de la réservation:', error);
-          console.error('Status:', error.status);
-          console.error('Message:', error.message);
-          console.error('Response body:', error.error);
-          this.loadingService.stop('reservation-create');
-          this.notificationService.error('Erreur', 'Erreur lors de la création de la réservation. Veuillez vérifier que les sièges sont disponibles.');
-        }
-      });
+    console.log('Réservation complétée avec succès:', reservationData);
+    
+    // La réservation a déjà été créée dans le ReservationFlowComponent
+    // Ici, nous gérons simplement la confirmation et la redirection
+    this.notificationService.success(
+      'Réservation confirmée !',
+      `Votre réservation pour "${reservationData.movie.title}" a été confirmée.`
+    );
+    
+    // Rediriger vers la page des réservations de l'utilisateur
+    setTimeout(() => {
+      this.router.navigate(['/user/reservations']);
+    }, 2000);
   }
 
   onReservationCanceled(): void {
