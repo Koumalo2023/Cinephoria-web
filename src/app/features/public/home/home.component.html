@@ -1,1 +1,116 @@
-<p>home works!</p>
+<div class="home-page">
+  <!-- Section Hero -->
+  <app-hero-section
+    (searchQuery)="onSearch($event)"
+    (quickReservation)="onQuickReservation()"
+  ></app-hero-section>
+
+  <!-- État de chargement -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Chargement des films et séances...</p>
+  </div>
+
+  <!-- État d'erreur -->
+  <div class="error-state" *ngIf="hasError && !isLoading">
+    <div class="error-icon">⚠️</div>
+    <h2 class="error-title">Erreur de chargement</h2>
+    <p class="error-description">{{ error }}</p>
+    <button (click)="loadHomeData()" class="retry-button">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="home-content" *ngIf="hasData && !isLoading">
+    
+    <!-- Section Films Récents -->
+    <app-movie-section
+      *ngIf="hasRecentMovies"
+      [movies]="homeData!.recentMovies"
+      title="Films Récents"
+      subtitle="Découvrez les derniers films ajoutés à notre catalogue"
+      [showViewAll]="true"
+      variant="default"
+      [maxItems]="6"
+      (movieClick)="onMovieClick($event)"
+      (favoriteToggle)="onFavoriteToggle($event)"
+    ></app-movie-section>
+
+    <!-- Section Coups de Cœur Employés -->
+    <app-movie-section
+      *ngIf="hasEmployeeFavorites"
+      [movies]="getEmployeeFavoriteMovies()"
+      title="Coups de Cœur des Employés"
+      subtitle="Les recommandations de notre équipe passionnée"
+      [showViewAll]="false"
+      variant="featured"
+      [maxItems]="4"
+      (movieClick)="onMovieClick($event)"
+      (favoriteToggle)="onFavoriteToggle($event)"
+    ></app-movie-section>
+
+    <!-- Section Promotion du Mois -->
+    <app-movie-section
+      *ngIf="hasPromotion"
+      [movies]="[homeData!.promotionMovie!]"
+      title="Promotion du Mois"
+      subtitle="Profitez de notre offre spéciale"
+      [showViewAll]="false"
+      variant="compact"
+      (movieClick)="onMovieClick($event)"
+      (favoriteToggle)="onFavoriteToggle($event)"
+    ></app-movie-section>
+
+    <!-- Section Séances du Jour -->
+    <div class="showtimes-section" *ngIf="hasTodaysShowtimes">
+      <div class="section-header">
+        <h2 class="section-title">Séances du Jour</h2>
+        <p class="section-subtitle">Réservez votre place pour aujourd'hui</p>
+      </div>
+      
+      <div class="showtimes-grid">
+        <div 
+          *ngFor="let showtime of homeData!.todaysShowtimes.slice(0, 4)" 
+          class="showtime-card"
+          (click)="navigateToShowtime(showtime)"
+        >
+          <div class="showtime-time">
+            {{ showtime.startTime | date:'HH:mm' }}
+          </div>
+          <div class="showtime-movie">
+            {{ getMovieTitle(showtime.movieId) }}
+          </div>
+          <div class="showtime-cinema">
+            Salle {{ showtime.theaterId }}
+          </div>
+          <div class="showtime-price">
+            {{ showtime.price | currency:'EUR' }}
+          </div>
+        </div>
+      </div>
+      
+      <div class="section-footer">
+        <button (click)="navigateToShowtimes()" class="view-all-button">
+          Voir toutes les séances
+        </button>
+      </div>
+    </div>
+
+    <!-- Section Vide -->
+    <div class="empty-sections" *ngIf="!hasRecentMovies && !hasEmployeeFavorites && !hasPromotion && !hasTodaysShowtimes">
+      <div class="empty-icon">🎬</div>
+      <h2 class="empty-title">Aucun contenu disponible</h2>
+      <p class="empty-description">
+        Les films et séances seront bientôt disponibles. Revenez plus tard !
+      </p>
+    </div>
+  </div>
+
+  <!-- Actions globales -->
+  <div class="global-actions" *ngIf="hasData && !isLoading">
+    <button (click)="refreshData()" class="refresh-button">
+      🔄 Actualiser
+    </button>
+  </div>
+</div>

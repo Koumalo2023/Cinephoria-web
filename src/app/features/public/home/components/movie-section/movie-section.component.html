@@ -1,0 +1,70 @@
+<section [class]="sectionClasses">
+  <div class="section-header">
+    <div class="header-content">
+      <h2 class="section-title">{{ title }}</h2>
+      
+      <div class="header-info">
+        <p class="section-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+        
+        <div class="section-meta" *ngIf="hasMovies">
+          <span class="meta-count">
+            {{ displayedCount }} film{{ displayedCount > 1 ? 's' : '' }}
+            <span class="meta-total" *ngIf="hasHiddenItems">
+              sur {{ totalCount }}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-actions" *ngIf="showViewAll && hasMovies">
+      <button 
+        (click)="onViewAll()" 
+        class="view-all-button"
+      >
+        Voir tout
+        <span class="view-all-icon">→</span>
+      </button>
+    </div>
+  </div>
+
+  <div [class]="containerClasses">
+    <!-- État de chargement/vide -->
+    <div class="empty-state" *ngIf="!hasMovies">
+      <div class="empty-icon">🎬</div>
+      <h3 class="empty-title">Aucun film disponible</h3>
+      <p class="empty-description">
+        Les films seront bientôt disponibles. Revenez plus tard !
+      </p>
+    </div>
+
+    <!-- Grille de films -->
+    <div class="movies-grid" *ngIf="hasMovies">
+      <app-film-card
+        *ngFor="let movie of displayMovies"
+        [film]="movie"
+        [size]="getFilmCardSize()"
+        [variant]="getFilmCardVariant()"
+        [showActions]="true"
+        [showRating]="true"
+        [showGenres]="true"
+        [showYear]="true"
+        [showDuration]="true"
+        (filmClick)="onMovieClick(movie)"
+        (favoriteToggle)="onFavoriteToggle(movie)"
+        class="movie-card"
+      ></app-film-card>
+    </div>
+
+    <!-- Bouton "Voir plus" pour les sections limitées -->
+    <div class="section-footer" *ngIf="hasHiddenItems && showViewAll">
+      <button 
+        (click)="onViewAll()" 
+        class="view-more-button"
+      >
+        Voir {{ totalCount - displayedCount }} film{{ totalCount - displayedCount > 1 ? 's' : '' }} supplémentaires
+        <span class="view-more-icon">↓</span>
+      </button>
+    </div>
+  </div>
+</section>

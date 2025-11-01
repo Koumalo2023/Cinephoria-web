@@ -16,20 +16,22 @@
 #### Fonctionnalités
 - Présentation de l'application Cinephoria
 - Films récemment ajoutés
-- Séances à venir
+- Films coup de coeur des employés
+- Séances à venir (du jour de consultation)
 - Promotion du mois
 - Navigation vers autres sections
 
 #### Actions
 - Navigation vers catalogue films
-- Navigation vers cinémas
+- Ajout Film dans ses favories
+- Navigation vers la page détail d'un film
 - Accès rapide réservation
 - Recherche globale
 
 #### Endpoints API
 - `GET /api/movie/recent` - Films récents
-- `GET /api/movie/all` - Tous les films (limitée)
 - `GET /api/showtime` - Séances à venir
+- Autre end-point
 
 #### Services Nécessaires
 - [`MovieService`](cinephoria-web/src/app/shared/services/api/movie.service.ts) - Récupération films
@@ -37,12 +39,13 @@
 - [`CacheService`](cinephoria-web/src/app/shared/services/cache.service.ts) - Cache données
 - [`LoadingService`](cinephoria-web/src/app/shared/services/loading.service.ts) - Indicateurs chargement
 - [`NotificationService`](cinephoria-web/src/app/shared/services/notification.service.ts) - Retours utilisateur
-
+- Autre Services necessaire
 #### Composants Réutilisables
 - [`Header`](cinephoria-web/src/app/shared/components/organisms/header/) - Navigation
 - [`FilmCard`](cinephoria-web/src/app/shared/components/molecules/film-card/) - Cartes films
 - [`SearchBar`](cinephoria-web/src/app/shared/components/molecules/search-bar/) - Recherche
 - [`Footer`](cinephoria-web/src/app/shared/components/organisms/footer/) - Pied de page
+- Autre composants réutilisables necessaire ou à créer
 
 ---
 
