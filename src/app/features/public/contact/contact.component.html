@@ -1,1 +1,171 @@
-<app-contact-page></app-contact-page>
+<div class="contact-page">
+  <!-- En-tête de la page -->
+  <section class="contact-header">
+    <div class="container">
+      <h1 class="page-title">Contactez-nous</h1>
+      <p class="page-subtitle">
+        Nous sommes là pour vous aider. N'hésitez pas à nous contacter pour toute question, suggestion ou problème.
+      </p>
+    </div>
+  </section>
+
+  <!-- Formulaire de contact -->
+  <section class="contact-form-section">
+    <div class="container">
+      <div class="form-container">
+        <h2>Envoyez-nous un message</h2>
+        
+        <!-- Message de succès -->
+        <div *ngIf="isSubmitted" class="success-message">
+          <div class="success-icon">✓</div>
+          <div>
+            <h3>Message envoyé !</h3>
+            <p>Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.</p>
+          </div>
+        </div>
+
+        <!-- Formulaire -->
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" *ngIf="!isSubmitted">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="username">Nom d'utilisateur (optionnel)</label>
+              <input
+                id="username"
+                type="text"
+                formControlName="username"
+                placeholder="Votre nom d'utilisateur"
+                class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Adresse email</label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="votre@email.com"
+                class="form-input">
+              <div *ngIf="email?.invalid && email?.touched" class="error-message">
+                Veuillez saisir une adresse email valide
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="title">Titre</label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Titre de votre message"
+              class="form-input">
+            <div *ngIf="title?.invalid && title?.touched" class="error-message">
+              Le titre doit contenir au moins 5 caractères
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              placeholder="Décrivez votre demande en détail..."
+              rows="6"
+              class="form-textarea"
+              [class.error]="description?.invalid && description?.touched">
+            </textarea>
+            <div *ngIf="description?.invalid && description?.touched" class="error-message">
+              La description doit contenir au moins 10 caractères
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              class="btn btn-primary btn-large"
+              [disabled]="contactForm.invalid || isSubmitting">
+              {{ isSubmitting ? 'Envoi en cours...' : 'Envoyer le message' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Informations de contact -->
+  <section class="contact-info-section">
+    <div class="container">
+      <h2>Nos coordonnées</h2>
+      <div class="contact-grid">
+        <div *ngFor="let info of contactInfos" class="contact-card">
+          <div class="contact-icon">
+            {{ info.icon === 'mail' ? '✉️' : info.icon === 'phone' ? '📞' : info.icon === 'map-pin' ? '📍' : '🔗' }}
+          </div>
+          <div class="contact-details">
+            <h3>{{ info.label }}</h3>
+            <p class="contact-value">{{ info.value }}</p>
+            <p class="contact-description">{{ info.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container">
+      <h2>Questions fréquentes</h2>
+      <div class="faq-categories">
+        <span *ngFor="let category of faqCategories" class="faq-category-tag">
+          {{ category }}
+        </span>
+      </div>
+      
+      <div class="faq-list">
+        <div *ngFor="let category of faqCategories" class="faq-category">
+          <h3>{{ category }}</h3>
+          <div class="faq-items">
+            <div *ngFor="let item of getFaqItemsByCategory(category)" class="faq-item">
+              <details class="faq-details">
+                <summary class="faq-question">
+                  {{ item.question }}
+                  <span class="chevron">▼</span>
+                </summary>
+                <div class="faq-answer">
+                  <p>{{ item.answer }}</p>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Équipe de support -->
+  <section class="support-team-section">
+    <div class="container">
+      <h2>Notre équipe de support</h2>
+      <div class="team-grid">
+        <div *ngFor="let member of supportTeam" class="team-member">
+          <div class="member-avatar">
+            <div class="avatar-placeholder">{{ member.name.charAt(0) }}</div>
+          </div>
+          <div class="member-info">
+            <h3>{{ member.name }}</h3>
+            <p class="member-role">{{ member.role }}</p>
+            <div class="member-contact">
+              <p>✉️ {{ member.email }}</p>
+              <p>📞 {{ member.phone }}</p>
+            </div>
+            <div class="member-specialties">
+              <span *ngFor="let specialty of member.specialties" class="specialty-tag">
+                {{ specialty }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
