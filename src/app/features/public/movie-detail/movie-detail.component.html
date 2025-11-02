@@ -1,1 +1,247 @@
-<p>movie-detail works!</p>
+<div class="movie-detail-container">
+  <!-- En-tête avec navigation -->
+  <div class="movie-header">
+    <button class="back-button" (click)="goBack()">
+      <i class="icon-arrow-left"></i>
+      Retour
+    </button>
+    <h1 class="movie-title">{{ movieDetails?.title }}</h1>
+    <button class="share-button" (click)="shareMovie()">
+      <i class="icon-share"></i>
+      Partager
+    </button>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="movie-content" *ngIf="hasData">
+    <!-- Section supérieure : Poster et informations principales -->
+    <div class="movie-hero">
+      <div class="poster-section">
+        <img 
+          [src]="movieDetails?.posterUrls || 'assets/images/movie-placeholder.jpg'" 
+          [alt]="movieDetails?.title"
+          class="movie-poster"
+        />
+        <div class="movie-rating">
+          <div class="rating-display">
+            <div class="stars">
+              <span *ngFor="let star of [1,2,3,4,5]" 
+                    [class.filled]="star <= averageRating"
+                    class="star">★</span>
+            </div>
+            <div class="rating-info">
+              <span class="average">{{ averageRating | number:'1.1-1' }}/5</span>
+              <span class="count">({{ totalReviews }} avis)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="movie-details-card">
+          <div class="details-grid">
+            <div class="detail-item">
+              <strong>Durée:</strong>
+              <span>{{ movieDetails?.duration || 'Non spécifiée' }}</span>
+            </div>
+            <div class="detail-item">
+              <strong>Genre:</strong>
+              <span>{{ getGenreName(movieDetails?.genre) }}</span>
+            </div>
+            <div class="detail-item">
+              <strong>Âge minimum:</strong>
+              <span>{{ movieDetails?.minimumAge || 0 }}+</span>
+            </div>
+            <div class="detail-item">
+              <strong>Date de sortie:</strong>
+              <span>{{ movieDetails?.releaseDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+          
+          <!-- Séances disponibles -->
+          <div class="showtimes-section" *ngIf="hasShowtimes">
+            <h3>Séances disponibles</h3>
+            <div class="showtimes-list">
+              <div *ngFor="let showtime of showtimes" 
+                   class="showtime-item"
+                   (click)="onShowtimeSelected(showtime)">
+                <div class="showtime-time">
+                  {{ showtime.startTime | date:'dd/MM HH:mm' }}
+                </div>
+                <div class="showtime-price">
+                  {{ showtime.price | currency:'EUR' }}
+                </div>
+                <div class="showtime-quality">
+                  {{ getQualityName(showtime.quality) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation par onglets -->
+    <div class="tabs-navigation">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'info'"
+        (click)="setActiveTab('info')">
+        Informations
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'showtimes'"
+        (click)="setActiveTab('showtimes')">
+        Séances ({{ showtimes.length }})
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'reviews'"
+        (click)="setActiveTab('reviews')">
+        Avis ({{ totalReviews }})
+      </button>
+    </div>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content">
+      <!-- Onglet Informations -->
+      <div *ngIf="activeTab === 'info'" class="tab-panel">
+        <div class="movie-description">
+          <h3>Synopsis</h3>
+          <p>{{ movieDetails?.description || 'Aucune description disponible.' }}</p>
+        </div>
+
+        <div class="movie-details-grid">
+          <div class="detail-item">
+            <strong>Réalisateur:</strong>
+            <span>{{ movieDetails?.director?.join(', ') || 'Non spécifié' }}</span>
+          </div>
+          <div class="detail-item">
+            <strong>Acteurs:</strong>
+            <span>{{ movieDetails?.actors?.join(', ') || 'Non spécifié' }}</span>
+          </div>
+        </div>
+
+        <!-- Bande-annonce -->
+        <div *ngIf="movieDetails?.bandeAnnonce" class="trailer-section">
+          <h3>Bande-annonce</h3>
+          <div class="trailer-container">
+            <iframe
+              [src]="movieDetails!.bandeAnnonce"
+              frameborder="0"
+              allowfullscreen
+              class="trailer-video">
+            </iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglet Séances -->
+      <div *ngIf="activeTab === 'showtimes'" class="tab-panel">
+        <div *ngIf="hasShowtimes; else noShowtimes">
+          <div class="showtimes-grid">
+            <div *ngFor="let showtime of showtimes" 
+                 class="showtime-card"
+                 (click)="onShowtimeSelected(showtime)">
+              <div class="showtime-header">
+                <div class="showtime-date">
+                  {{ showtime.startTime | date:'EEEE d MMMM' }}
+                </div>
+                <div class="showtime-time">
+                  {{ showtime.startTime | date:'HH:mm' }}
+                </div>
+              </div>
+              <div class="showtime-details">
+                <div class="showtime-quality">
+                  {{ getQualityName(showtime.quality) }}
+                </div>
+                <div class="showtime-price">
+                  {{ showtime.price | currency:'EUR' }}
+                </div>
+              </div>
+              <button class="reserve-btn">Réserver</button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noShowtimes>
+          <div class="no-data-message">
+            <i class="icon-calendar"></i>
+            <h3>Aucune séance disponible</h3>
+            <p>Il n'y a pas de séances programmées pour ce film pour le moment.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Onglet Avis -->
+      <div *ngIf="activeTab === 'reviews'" class="tab-panel">
+        <!-- Formulaire d'avis -->
+        <div class="review-form">
+          <h3>Donnez votre avis</h3>
+          <div class="rating-input">
+            <div class="stars-input">
+              <span *ngFor="let star of [1,2,3,4,5]" 
+                    [class.filled]="star <= userRating"
+                    (click)="onRatingChange(star)"
+                    class="star">★</span>
+            </div>
+          </div>
+          <div class="review-textarea">
+            <textarea
+              [(ngModel)]="userReview"
+              placeholder="Partagez votre expérience avec ce film..."
+              rows="4">
+            </textarea>
+          </div>
+          <button 
+            class="submit-review-btn"
+            (click)="onSubmitReview()"
+            [disabled]="!userRating">
+            Soumettre l'avis
+          </button>
+        </div>
+
+        <!-- Liste des avis -->
+        <div *ngIf="hasReviews; else noReviews" class="reviews-list">
+          <h3>Avis des spectateurs</h3>
+          <div *ngFor="let rating of movieDetails?.ratings" class="review-item">
+            <div class="review-header">
+              <div class="review-rating">
+                <span class="stars">
+                  <span *ngFor="let star of [1,2,3,4,5]" 
+                        [class.filled]="star <= rating.rating"
+                        class="star">★</span>
+                </span>
+                <span class="rating-value">{{ rating.rating }}/5</span>
+              </div>
+              <span class="review-date">
+                {{ rating.createdAt | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+            <p class="review-comment">{{ rating.comment }}</p>
+          </div>
+        </div>
+        <ng-template #noReviews>
+          <div class="no-data-message">
+            <i class="icon-message"></i>
+            <h3>Aucun avis pour le moment</h3>
+            <p>Soyez le premier à donner votre avis sur ce film !</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- États de chargement et d'erreur -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des détails du film...</p>
+  </div>
+
+  <div *ngIf="hasError" class="error-state">
+    <i class="icon-error"></i>
+    <h3>Erreur de chargement</h3>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="loadMovieData()">Réessayer</button>
+  </div>
+</div>

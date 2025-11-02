@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
-  LoginUserDto,
-  LoginResponseDto,
-  RegisterUserDto,
-  UserProfileDto,
-  UpdateAppUserDto,
+  ApiLoginResponseDto,
   ChangeUserPasswordDto,
+  ContactRequest,
+  LoginResponseDto,
+  LoginUserDto,
+  RegisterUserDto,
   RequestPasswordResetDto,
   ResetPasswordDto,
-  ContactRequest,
-  ApiLoginResponseDto
+  UpdateAppUserDto,
+  UserProfileDto
 } from '../../interfaces/core.interfaces';
 
 @Injectable({
@@ -90,6 +90,6 @@ export class AuthService {
    * Envoi d'un message de contact
    */
   sendContactMessage(contactData: ContactRequest): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/contact`, contactData);
+    return this.http.post<void>(`${this.baseUrl}/send-contact`, contactData);
   }
 }

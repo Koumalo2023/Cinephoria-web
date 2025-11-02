@@ -1,10 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 // Composants atomiques
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { SpinnerComponent } from '../../atoms/spinner/spinner.component';
 
 // Composants molécules
@@ -141,14 +141,21 @@ export class MovieListComponent {
 
   convertToFilm(movie: Movie): any {
     return {
-      id: movie.id,
+      movieId: parseInt(movie.id),
       title: movie.title,
-      posterUrl: movie.posterUrl,
-      year: new Date(movie.releaseDate).getFullYear(),
+      posterUrls: movie.posterUrl,
+      releaseDate: new Date(movie.releaseDate),
+      averageRating: movie.rating,
       duration: movie.duration + ' min',
-      rating: movie.rating,
-      genres: movie.genres,
-      description: movie.overview
+      genre: 0, // Valeur par défaut
+      description: movie.overview,
+      director: [],
+      actors: [],
+      minimumAge: 0,
+      isFavorite: false,
+      filmsSimilaires: [],
+      showtimes: [],
+      movieRatings: []
     };
   }
 }

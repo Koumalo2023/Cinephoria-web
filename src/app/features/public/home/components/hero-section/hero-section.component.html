@@ -1,0 +1,84 @@
+<section class="hero-section">
+  <div class="hero-background">
+    <div class="hero-overlay"></div>
+  </div>
+  
+  <div class="hero-container">
+    <div class="hero-content">
+      <!-- Titre principal -->
+      <h1 class="hero-title">
+        Bienvenue sur <span class="brand-name">Cinephoria</span>
+      </h1>
+      
+      <!-- Sous-titre -->
+      <p class="hero-subtitle">
+        Découvrez l'expérience cinéma ultime. Des films exceptionnels, 
+        des séances uniques et des moments inoubliables vous attendent.
+      </p>
+      
+      <!-- Barre de recherche -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (keypress)="onSearchKeyPress($event)"
+            placeholder="Rechercher un film, un réalisateur, un acteur..."
+            class="search-input"
+          />
+          <button
+            (click)="onSearch()"
+            class="search-button"
+            [class.search-button--active]="searchTerm.trim()"
+          >
+            <span class="search-icon">🔍</span>
+            Rechercher
+          </button>
+        </div>
+        
+        <!-- Suggestions rapides -->
+        <div class="search-suggestions" *ngIf="!searchTerm">
+          <span class="suggestion-label">Suggestions :</span>
+          <button class="suggestion-tag" (click)="searchTerm = 'action'; onSearch()">Action</button>
+          <button class="suggestion-tag" (click)="searchTerm = 'comédie'; onSearch()">Comédie</button>
+          <button class="suggestion-tag" (click)="searchTerm = 'drame'; onSearch()">Drame</button>
+        </div>
+      </div>
+      
+      <!-- Actions principales -->
+      <div class="hero-actions">
+        <button
+          (click)="navigateToMovies()"
+          class="action-button action-button--primary"
+        >
+          <span class="action-icon">🎬</span>
+          Voir tous les films
+        </button>
+        
+        <button
+          (click)="onQuickReservation()"
+          class="action-button action-button--secondary"
+        >
+          <span class="action-icon">🎟️</span>
+          Réservation rapide
+        </button>
+      </div>
+      
+      <!-- Statistiques rapides -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">150+</span>
+          <span class="stat-label">Films</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">5</span>
+          <span class="stat-label">Cinémas</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">50+</span>
+          <span class="stat-label">Séances/jour</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
