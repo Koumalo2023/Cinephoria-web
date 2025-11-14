@@ -1,1 +1,237 @@
-<p>user-dashboard works!</p>
+<div class="user-dashboard" *ngIf="dashboardData$ | async as data">
+  <!-- Section Header - Vue d'ensemble rapide -->
+  <section class="dashboard-header">
+    <div class="user-info">
+      <div class="avatar">
+        <img *ngIf="data.userProfile?.profilePictureUrl"
+             [src]="data.userProfile?.profilePictureUrl"
+             [alt]="(data.userProfile?.firstName || '') + ' ' + (data.userProfile?.lastName || '')"
+             class="avatar-image">
+        <div *ngIf="!data.userProfile?.profilePictureUrl" class="avatar-placeholder">
+          {{ (data.userProfile?.firstName?.charAt(0) || '') + (data.userProfile?.lastName?.charAt(0) || '') }}
+        </div>
+      </div>
+      <div class="user-details">
+        <h1>Bonjour, {{ data.userProfile?.firstName }} !</h1>
+        <div class="user-stats">
+          <span class="badge badge-primary">{{ data.userStats.membershipLevel }}</span>
+          <span class="points">{{ data.userStats.loyaltyPoints }} points</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="quick-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{ data.userStats.totalReservations }}</span>
+        <span class="stat-label">Réservations</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.userStats.totalReviews }}</span>
+        <span class="stat-label">Avis</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ data.unreadNotificationCount }}</span>
+        <span class="stat-label">Notifications</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Widgets principaux -->
+  <div class="dashboard-grid">
+    <!-- Réservations à venir -->
+    <section class="widget upcoming-reservations">
+      <div class="widget-header">
+        <h2>Réservations à venir</h2>
+        <button class="btn btn-text" routerLink="/user/reservations">
+          Voir tout
+        </button>
+      </div>
+      
+      <div class="widget-content">
+        <div *ngIf="data.upcomingReservations.length === 0" class="empty-state">
+          <p>Aucune réservation à venir</p>
+          <button class="btn btn-primary" routerLink="/movies">
+            Réserver un film
+          </button>
+        </div>
+        
+        <div *ngFor="let reservation of data.upcomingReservations" class="reservation-item">
+          <div class="reservation-summary">
+            <h4>{{ reservation.movieTitle }}</h4>
+            <p>{{ reservation.showtimeDate | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p>{{ reservation.theaterName }} - {{ reservation.seatNumbers.join(', ') }}</p>
+            <p class="reservation-status">{{ reservation.status }}</p>
+          </div>
+          <div class="reservation-actions">
+            <button class="btn btn-outline" (click)="onCancelReservation(reservation.reservationId)">
+              Annuler
+            </button>
+            <div class="qr-code">
+              <img [src]="reservation.qrCodeData" alt="QR Code" class="qr-image">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications récentes -->
+    <section class="widget recent-notifications">
+      <div class="widget-header">
+        <h2>Notifications récentes</h2>
+        <div class="widget-actions">
+          <button class="btn btn-text" 
+                  (click)="onMarkAllNotificationsAsRead()"
+                  *ngIf="data.unreadNotificationCount > 0">
+            Tout marquer comme lu
+          </button>
+          <button class="btn btn-text" routerLink="/user/notifications">
+            Voir tout
+          </button>
+        </div>
+      </div>
+      
+      <div class="widget-content">
+        <div *ngIf="data.recentNotifications.length === 0" class="empty-state">
+          <p>Aucune notification</p>
+        </div>
+        
+        <div *ngFor="let notification of data.recentNotifications" 
+             class="notification-item" 
+             [class.unread]="!notification.isRead">
+          <div class="notification-content">
+            <h4>{{ notification.title }}</h4>
+            <p>{{ notification.message }}</p>
+            <span class="notification-time">{{ notification.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <button class="btn btn-text" 
+                  (click)="onMarkNotificationAsRead(notification.id)"
+                  *ngIf="!notification.isRead">
+            Marquer comme lu
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Films favoris -->
+    <section class="widget favorite-movies">
+      <div class="widget-header">
+        <h2>Films favoris</h2>
+        <button class="btn btn-text" routerLink="/user/favorites">
+          Voir tout
+        </button>
+      </div>
+      
+      <div class="widget-content">
+        <div *ngIf="data.favoriteMovies.length === 0" class="empty-state">
+          <p>Aucun film favori</p>
+          <button class="btn btn-primary" routerLink="/movies">
+            Découvrir les films
+          </button>
+        </div>
+        
+        <div class="movies-grid">
+          <div *ngFor="let movie of data.favoriteMovies" class="movie-card">
+            <div class="movie-poster">
+              <img *ngIf="movie.posterUrls" [src]="movie.posterUrls" [alt]="movie.title">
+              <div *ngIf="!movie.posterUrls" class="poster-placeholder">
+                {{ movie.title }}
+              </div>
+            </div>
+            <div class="movie-info">
+              <h4>{{ movie.title }}</h4>
+              <p>{{ movie.genre }}</p>
+              <div class="movie-rating">
+                <span class="rating-stars">★★★★★</span>
+                <span class="rating-value">{{ movie.averageRating }}/5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistiques personnelles -->
+    <section class="widget personal-stats">
+      <div class="widget-header">
+        <h2>Mes statistiques</h2>
+        <button class="btn btn-text" (click)="refreshDashboard()">
+          Actualiser
+        </button>
+      </div>
+      
+      <div class="widget-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Activité mensuelle</h3>
+            <div class="progress-bar">
+              <div class="progress-fill" 
+                   [style.width.%]="(data.userStats.totalReservations / 20) * 100">
+                <span class="progress-text">{{ data.userStats.totalReservations }}/20</span>
+              </div>
+            </div>
+            <span class="stat-description">{{ data.userStats.totalReservations }} réservations ce mois</span>
+          </div>
+          
+          <div class="stat-card">
+            <h3>Niveau de fidélité</h3>
+            <div class="loyalty-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" 
+                     [style.width.%]="(data.userStats.loyaltyPoints / 1000) * 100">
+                  <span class="progress-text">{{ data.userStats.loyaltyPoints }}/1000</span>
+                </div>
+              </div>
+              <span class="loyalty-level">{{ data.userStats.membershipLevel }}</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <h3>Engagement</h3>
+            <div class="engagement-stats">
+              <div class="engagement-item">
+                <span class="engagement-value">{{ data.userStats.totalReviews }}</span>
+                <span class="engagement-label">Avis donnés</span>
+              </div>
+              <div class="engagement-item">
+                <span class="engagement-value">{{ data.favoriteMovies.length }}</span>
+                <span class="engagement-label">Films favoris</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Section Actions rapides -->
+  <section class="quick-actions">
+    <h2>Actions rapides</h2>
+    <div class="actions-grid">
+      <button class="btn btn-primary btn-large" routerLink="/movies">
+        <span class="btn-icon">🎬</span>
+        Nouvelle réservation
+      </button>
+      
+      <button class="btn btn-outline btn-large" routerLink="/user/reservations">
+        <span class="btn-icon">📋</span>
+        Mes réservations
+      </button>
+      
+      <button class="btn btn-outline btn-large" routerLink="/user/reviews">
+        <span class="btn-icon">⭐</span>
+        Écrire un avis
+      </button>
+      
+      <button class="btn btn-outline btn-large" routerLink="/user/profile">
+        <span class="btn-icon">⚙️</span>
+        Paramètres
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- Loading state -->
+<div *ngIf="!(dashboardData$ | async)" class="loading-state">
+  <div class="loading-spinner"></div>
+  <p>Chargement de votre tableau de bord...</p>
+</div>

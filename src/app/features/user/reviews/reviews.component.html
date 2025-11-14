@@ -1,1 +1,256 @@
-<p>reviews works!</p>
+<div class="reviews-page" *ngIf="reviewData$ | async as data">
+  <!-- Header de la page -->
+  <section class="reviews-header">
+    <div class="header-content">
+      <h1>Mes Avis</h1>
+      <p>Partagez votre expérience cinématographique avec la communauté</p>
+    </div>
+    
+    <!-- Navigation par onglets -->
+    <nav class="reviews-tabs">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'my-reviews'"
+        (click)="onTabChange('my-reviews')">
+        Mes Avis
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'write-review'"
+        (click)="onTabChange('write-review')">
+        Écrire un Avis
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'community'"
+        (click)="onTabChange('community')">
+        Communauté
+      </button>
+    </nav>
+  </section>
+
+  <!-- Onglet : Mes Avis -->
+  <section *ngIf="activeTab === 'my-reviews'" class="tab-content my-reviews">
+    <div class="reviews-stats">
+      <div class="stat-card">
+        <span class="stat-number">{{ data.userReviews.length }}</span>
+        <span class="stat-label">Avis publiés</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ data.favoriteMovies.length }}</span>
+        <span class="stat-label">Films favoris</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ data.recentMovies.length }}</span>
+        <span class="stat-label">Films récents</span>
+      </div>
+    </div>
+
+    <div class="reviews-list">
+      <h2>Mes Avis Récents</h2>
+      
+      <div *ngIf="data.userReviews.length === 0" class="empty-state">
+        <div class="empty-icon">⭐</div>
+        <h3>Aucun avis publié</h3>
+        <p>Partagez votre premier avis sur un film que vous avez vu !</p>
+        <button class="btn btn-primary" (click)="onTabChange('write-review')">
+          Écrire mon premier avis
+        </button>
+      </div>
+
+      <div *ngFor="let review of data.userReviews" class="review-item">
+        <div class="review-header">
+          <div class="movie-info">
+            <h4>Film #{{ review.movieId }}</h4>
+            <div class="review-meta">
+              <span class="rating-stars">{{ getRatingStars(review.rating) }}</span>
+              <span class="review-date">Avis publié</span>
+            </div>
+          </div>
+          <div class="review-actions">
+            <button class="btn btn-text" (click)="onEditReview(review.movieId)">
+              Modifier
+            </button>
+            <button class="btn btn-text btn-danger" (click)="onDeleteReview(review.movieId)">
+              Supprimer
+            </button>
+          </div>
+        </div>
+        
+        <div class="review-content">
+          <p>{{ review.description }}</p>
+        </div>
+        
+        <div class="review-footer">
+          <button class="btn btn-text" (click)="onLikeReview(review.movieId)">
+            👍 0
+          </button>
+          <button class="btn btn-text" (click)="onShareReview(review.movieId)">
+            Partager
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Onglet : Écrire un Avis -->
+  <section *ngIf="activeTab === 'write-review'" class="tab-content write-review">
+    <div class="review-form-container">
+      <h2>Écrire un nouvel avis</h2>
+      
+      <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()" class="review-form">
+        <!-- Sélection du film -->
+        <div class="form-group">
+          <label for="movieSelect">Choisir un film *</label>
+          <select 
+            id="movieSelect" 
+            formControlName="movieId"
+            class="form-select">
+            <option value="">Sélectionnez un film</option>
+            <option *ngFor="let movie of data.moviesToReview" [value]="movie.movieId">
+              {{ movie.title }} ({{ movie.releaseDate | date:'yyyy' }})
+            </option>
+            <option *ngFor="let movie of data.recentMovies" [value]="movie.movieId">
+              {{ movie.title }} ({{ movie.releaseDate | date:'yyyy' }})
+            </option>
+          </select>
+          <div *ngIf="reviewForm.get('movieId')?.invalid && reviewForm.get('movieId')?.touched" 
+               class="error-message">
+            Veuillez sélectionner un film
+          </div>
+        </div>
+
+        <!-- Notation -->
+        <div class="form-group">
+          <label>Votre note *</label>
+          <div class="rating-input">
+            <div class="stars-container">
+              <span *ngFor="let star of [1,2,3,4,5]"
+                    class="star"
+                    [class.active]="star <= reviewForm.get('rating')?.value"
+                    (click)="onRatingChange(star)">
+                {{ star <= reviewForm.get('rating')?.value ? '★' : '☆' }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="reviewForm.get('rating')?.invalid && reviewForm.get('rating')?.touched"
+               class="error-message">
+            Veuillez donner une note entre 1 et 5 étoiles
+          </div>
+        </div>
+
+        <!-- Commentaire -->
+        <div class="form-group">
+          <label for="comment">Votre avis *</label>
+          <textarea 
+            id="comment"
+            formControlName="comment"
+            placeholder="Partagez votre expérience, vos impressions, ce que vous avez aimé ou non..."
+            rows="6"
+            class="form-textarea">
+          </textarea>
+          <div class="character-count">
+            {{ reviewForm.get('comment')?.value?.length || 0 }}/500 caractères
+          </div>
+          <div *ngIf="reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched" 
+               class="error-message">
+            <span *ngIf="reviewForm.get('comment')?.errors?.['required']">
+              Veuillez écrire un commentaire
+            </span>
+            <span *ngIf="reviewForm.get('comment')?.errors?.['minlength']">
+              Le commentaire doit contenir au moins 10 caractères
+            </span>
+            <span *ngIf="reviewForm.get('comment')?.errors?.['maxlength']">
+              Le commentaire ne peut pas dépasser 500 caractères
+            </span>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn btn-outline"
+            (click)="onTabChange('my-reviews')">
+            Annuler
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="reviewForm.invalid">
+            Publier mon avis
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Suggestions de films -->
+    <div class="suggestions-section">
+      <h3>Films que vous pourriez aimer</h3>
+      <div class="suggestions-grid">
+        <div *ngFor="let movie of data.recentMovies.slice(0, 4)" class="suggestion-card">
+          <div class="movie-poster">
+            <img *ngIf="movie.posterUrls" [src]="movie.posterUrls" [alt]="movie.title">
+            <div *ngIf="!movie.posterUrls" class="poster-placeholder">
+              {{ movie.title }}
+            </div>
+          </div>
+          <div class="movie-info">
+            <h4>{{ movie.title }}</h4>
+            <p>{{ movie.genre }}</p>
+            <button 
+              class="btn btn-primary btn-small"
+              (click)="onMovieSelect(movie.movieId)">
+              Noter ce film
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Onglet : Communauté -->
+  <section *ngIf="activeTab === 'community'" class="tab-content community">
+    <div class="community-header">
+      <h2>Avis de la Communauté</h2>
+      <p>Découvrez ce que pensent les autres cinéphiles</p>
+    </div>
+
+    <div class="community-filters">
+      <div class="filter-group">
+        <label>Trier par :</label>
+        <select class="form-select">
+          <option>Plus récents</option>
+          <option>Plus populaires</option>
+          <option>Meilleures notes</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>Genre :</label>
+        <select class="form-select">
+          <option>Tous les genres</option>
+          <option>Action</option>
+          <option>Drame</option>
+          <option>Comédie</option>
+          <option>Science-Fiction</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="community-reviews">
+      <div class="placeholder-message">
+        <div class="placeholder-icon">👥</div>
+        <h3>Fonctionnalité en développement</h3>
+        <p>La section communauté sera bientôt disponible pour découvrir les avis des autres utilisateurs.</p>
+        <p>En attendant, vous pouvez consulter vos propres avis ou en écrire de nouveaux !</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Loading state -->
+<div *ngIf="!(reviewData$ | async)" class="loading-state">
+  <div class="loading-spinner"></div>
+  <p>Chargement de vos avis...</p>
+</div>

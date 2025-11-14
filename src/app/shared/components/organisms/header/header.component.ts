@@ -86,7 +86,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       case UserRole.User:
         return [
           ...baseItems,
-          { label: 'Mon espace', routerLink: ['/user/profile'], icon: 'user' },
+          { label: 'Mon espace', routerLink: ['/user/dashboard'], icon: 'user' },
           { label: 'Notifications', routerLink: ['/user/notifications'], icon: 'bell', badge: this.unreadNotifications }
         ];
 
