@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 // Interfaces core
-import { SecuritySettingsDto } from '../../../../core/interfaces/settings.interfaces';
 
 export interface SecuritySettings {
   twoFactorAuth: boolean;
@@ -19,11 +18,11 @@ export interface SecuritySettings {
 }
 
 // Composants atomiques
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
+import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
-import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
 
 @Component({
   selector: 'app-security-settings',
@@ -43,7 +42,7 @@ import { BadgeComponent } from '../../atoms/badge/badge.component';
 })
 export class SecuritySettingsComponent implements OnChanges {
   @Input() settings: SecuritySettings | null = null;
-  @Output() settingsChanged = new EventEmitter<SecuritySettingsDto>();
+  @Output() settingsChanged = new EventEmitter<SecuritySettings>();
   @Output() passwordChangeRequested = new EventEmitter<void>();
   @Output() sessionRevoked = new EventEmitter<string>();
 
@@ -93,13 +92,11 @@ export class SecuritySettingsComponent implements OnChanges {
   }
 
   onSecurityToggleChange(): void {
-    if (this.securityForm.valid) {
-      const securitySettings: SecuritySettingsDto = {
-        passwordExpirationDays: 90, // Valeur par défaut
-        maxLoginAttempts: 5, // Valeur par défaut
-        sessionTimeoutMinutes: 30, // Valeur par défaut
-        twoFactorAuthentication: this.securityForm.value.twoFactorAuth,
-        ipWhitelist: [] // Valeur par défaut
+    if (this.securityForm.valid && this.settings) {
+      const securitySettings: SecuritySettings = {
+        ...this.settings,
+        twoFactorAuth: this.securityForm.value.twoFactorAuth,
+        loginAlerts: this.securityForm.value.loginAlerts
       };
       this.settingsChanged.emit(securitySettings);
     }

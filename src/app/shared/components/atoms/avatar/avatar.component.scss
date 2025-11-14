@@ -15,7 +15,7 @@
     .avatar__content,
     .avatar__image,
     .avatar__fallback {
-      border-radius: 0.5rem;
+      border-radius: var(--border-radius-md);
     }
   }
   
@@ -27,7 +27,7 @@
     }
     
     .avatar__fallback {
-      font-size: 0.75rem;
+      font-size: var(--font-size-xs);
     }
     
     .avatar__status {
@@ -45,14 +45,14 @@
     }
     
     .avatar__fallback {
-      font-size: 0.875rem;
+      font-size: var(--font-size-sm);
     }
     
     .avatar__status {
       width: 0.5rem;
       height: 0.5rem;
-      right: 0.125rem;
-      bottom: 0.125rem;
+      right: var(--spacing-1);
+      bottom: var(--spacing-1);
     }
   }
   
@@ -63,14 +63,14 @@
     }
     
     .avatar__fallback {
-      font-size: 1rem;
+      font-size: var(--font-size-base);
     }
     
     .avatar__status {
       width: 0.625rem;
       height: 0.625rem;
-      right: 0.25rem;
-      bottom: 0.25rem;
+      right: var(--spacing-2);
+      bottom: var(--spacing-2);
     }
   }
   
@@ -81,14 +81,14 @@
     }
     
     .avatar__fallback {
-      font-size: 1.125rem;
+      font-size: var(--font-size-lg);
     }
     
     .avatar__status {
       width: 0.75rem;
       height: 0.75rem;
-      right: 0.375rem;
-      bottom: 0.375rem;
+      right: var(--spacing-3);
+      bottom: var(--spacing-3);
     }
   }
   
@@ -99,14 +99,22 @@
     }
     
     .avatar__fallback {
-      font-size: 1.5rem;
+      font-size: var(--font-size-xl);
     }
     
     .avatar__status {
       width: 1rem;
       height: 1rem;
-      right: 0.5rem;
-      bottom: 0.5rem;
+      right: var(--spacing-4);
+      bottom: var(--spacing-4);
+    }
+  }
+
+  // Variante spécifique pour le profil
+  &.avatar--profile {
+    .avatar__content {
+      border: var(--border-width-4) solid var(--color-primary);
+      box-shadow: var(--shadow-lg);
     }
   }
 }
@@ -116,7 +124,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--color-background);
-  border: 2px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   overflow: hidden;
   position: relative;
 }
@@ -135,14 +143,14 @@
   height: 100%;
   background-color: var(--color-primary);
   color: white;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: center;
 }
 
 .avatar__status {
   position: absolute;
   border-radius: 50%;
-  border: 2px solid white;
+  border: var(--border-width) solid white;
   background-color: var(--color-border);
   
   // États de statut
@@ -163,13 +171,39 @@
   }
 }
 
-// Variables CSS pour la cohérence
-:host {
-  --color-primary: #3b82f6;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-background: #f9fafb;
-  --color-border: #e5e7eb;
-  --color-text-muted: #6b7280;
+// Animation pour les changements d'image
+.avatar__image {
+  transition: opacity 0.3s ease;
+  
+  &.avatar--loading {
+    opacity: 0.5;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .avatar-wrapper {
+    &.avatar--xl {
+      .avatar__content {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+      
+      .avatar__fallback {
+        font-size: var(--font-size-lg);
+      }
+    }
+  }
+}
+
+// Mode sombre
+@media (prefers-color-scheme: dark) {
+  .avatar__content {
+    background-color: var(--color-background-dark);
+    border-color: var(--color-border-dark);
+  }
+  
+  .avatar__fallback {
+    background-color: var(--color-primary-dark);
+  }
 }

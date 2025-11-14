@@ -2,8 +2,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 1rem;
-  font-weight: 500;
+  border-radius: var(--border-radius-full);
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   vertical-align: middle;
   
@@ -16,7 +16,7 @@
   &.badge--secondary {
     background-color: var(--color-secondary);
     color: var(--color-text);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
   }
   
   &.badge--success {
@@ -38,10 +38,31 @@
     background-color: var(--color-info);
     color: white;
   }
+
+  // Variantes spécifiques pour le membership
+  &.badge--membership-bronze {
+    background-color: var(--color-bronze, #cd7f32);
+    color: white;
+  }
+  
+  &.badge--membership-silver {
+    background-color: var(--color-silver, #c0c0c0);
+    color: var(--color-text);
+  }
+  
+  &.badge--membership-gold {
+    background-color: var(--color-gold, #ffd700);
+    color: var(--color-text);
+  }
+  
+  &.badge--membership-platinum {
+    background-color: var(--color-platinum, #e5e4e2);
+    color: var(--color-text);
+  }
   
   // Tailles
   &.badge--small {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     line-height: 1;
     min-height: 1.25rem;
     
@@ -52,17 +73,17 @@
     }
     
     &.badge--count {
-      padding: 0.125rem 0.375rem;
+      padding: var(--spacing-1) var(--spacing-3);
       min-width: 1.25rem;
     }
     
     &:not(.badge--dot):not(.badge--count) {
-      padding: 0.125rem 0.5rem;
+      padding: var(--spacing-1) var(--spacing-4);
     }
   }
   
   &.badge--medium {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     line-height: 1.25;
     min-height: 1.5rem;
     
@@ -73,17 +94,17 @@
     }
     
     &.badge--count {
-      padding: 0.25rem 0.5rem;
+      padding: var(--spacing-2) var(--spacing-4);
       min-width: 1.5rem;
     }
     
     &:not(.badge--dot):not(.badge--count) {
-      padding: 0.25rem 0.75rem;
+      padding: var(--spacing-2) var(--spacing-6);
     }
   }
   
   &.badge--large {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     line-height: 1.5;
     min-height: 2rem;
     
@@ -94,12 +115,12 @@
     }
     
     &.badge--count {
-      padding: 0.375rem 0.75rem;
+      padding: var(--spacing-3) var(--spacing-6);
       min-width: 2rem;
     }
     
     &:not(.badge--dot):not(.badge--count) {
-      padding: 0.375rem 1rem;
+      padding: var(--spacing-3) var(--spacing-8);
     }
   }
   
@@ -109,8 +130,8 @@
   }
   
   &.badge--count {
-    border-radius: 1rem;
-    font-weight: 600;
+    border-radius: var(--border-radius-full);
+    font-weight: var(--font-weight-semibold);
   }
 }
 
@@ -120,24 +141,64 @@
 }
 
 .badge__count {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: center;
 }
 
 .badge__content {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--spacing-2);
 }
 
-// Variables CSS pour la cohérence
-:host {
-  --color-primary: #3b82f6;
-  --color-secondary: #f3f4f6;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #06b6d4;
-  --color-text: #1f2937;
-  --color-border: #d1d5db;
+// Animation pour les changements d'état
+.badge-wrapper {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .badge-wrapper {
+    &.badge--large {
+      font-size: var(--font-size-sm);
+      min-height: 1.75rem;
+      
+      &:not(.badge--dot):not(.badge--count) {
+        padding: var(--spacing-2) var(--spacing-5);
+      }
+    }
+  }
+}
+
+// Mode sombre
+@media (prefers-color-scheme: dark) {
+  .badge-wrapper {
+    &.badge--secondary {
+      background-color: var(--color-secondary-dark);
+      border-color: var(--color-border-dark);
+      color: var(--color-text-dark);
+    }
+    
+    &.badge--membership-silver,
+    &.badge--membership-gold,
+    &.badge--membership-platinum {
+      color: var(--color-text-dark);
+    }
+  }
+}
+
+// Accessibilité
+@media (prefers-reduced-motion: reduce) {
+  .badge-wrapper {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
+  }
 }

@@ -657,13 +657,15 @@ export interface EmployeeFavoriteResponseDto {
  */
 export interface UserReservationDto {
   reservationId: number;
-  showtime: ShowtimeDto;
-  seats: SeatDto[];
+  movieTitle: string;
+  showtimeDate: Date;
+  theaterName: string;
+  seatNumbers: string[];
   totalPrice: number;
-  qrCode: string;
-  isValidated: boolean;
-  status: ReservationStatus;
+  status: string;
   createdAt: Date;
+  paymentDueDate?: Date;
+  qrCodeData: string;
 }
 
 /**
@@ -709,6 +711,49 @@ export interface CreateShowtimeDto {
   isPromotion: boolean;
 }
 
+// DTOs pour les nouvelles fonctionnalités
+export interface ReminderResultDto {
+  message: string;
+  count: number;
+  error?: string;
+  timestamp: Date;
+}
+
+export interface ReminderStatsDto {
+  totalReservations: number;
+  pendingPaymentReminders: number;
+  pendingShowtimeReminders: number;
+  expiringReservations: number;
+  paymentRemindersSentToday: number;
+  showtimeRemindersSentToday: number;
+}
+
+export interface EmailStatsDto {
+  totalEmailsSent: number;
+  successfulEmails: number;
+  failedEmails: number;
+  lastEmailSent: Date;
+  emailTypes: { [key: string]: number };
+}
+
+export interface TestEmailResultDto {
+  isConfigured: boolean;
+  testEmailSent: boolean;
+  message: string;
+  error?: string;
+  timestamp: Date;
+}
+
+export interface ReservationReminderDto {
+  reservationId: number;
+  userEmail: string;
+  movieTitle: string;
+  showtimeDate: Date;
+  createdAt: Date;
+  lastReminderSent?: Date;
+  status: string;
+}
+
 /**
  * Mise à jour d'une séance
  * @see api-documentation.md#updateshowtimedto
@@ -723,6 +768,41 @@ export interface UpdateShowtimeDto {
   endTime: string; // Format ISO 8601
   priceAdjustment: number;
   isPromotion: boolean;
+}
+
+export interface ShowtimeStatusDto {
+  showtimeId: number;
+  movieTitle: string;
+  startTime: Date;
+  endTime: Date;
+  theaterName: string;
+  status: string;
+  statusDescription: string;
+  availableSeats: number;
+  totalSeats: number;
+}
+
+export interface ShowtimeStatusStatsDto {
+  totalShowtimes: number;
+  upcomingCount: number;
+  ongoingCount: number;
+  completedCount: number;
+  cancelledCount: number;
+  statusDistribution: { [key: string]: number };
+}
+
+export interface ShowtimeStatusUpdateDto {
+  status: string;
+}
+
+export interface MovieWithShowtimesDto {
+  movieId: number;
+  title: string;
+  showtimeCount: number;
+  nextShowtime?: Date;
+  lastShowtime?: Date;
+  totalSeatsAvailable: number;
+  totalSeatsBooked: number;
 }
 
 /**

@@ -1,0 +1,590 @@
+// =============================================
+// Profile Component - Styles Réorganisés
+// Structure modulaire utilisant les variables globales
+// =============================================
+
+// Import des mixins et utilitaires (si disponibles)
+@use '../../../styles/variables' as vars;
+
+// Layout Principal
+.profile-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "header header"
+    "content sidebar";
+  gap: var(--spacing-xl);
+  min-height: 100vh;
+  background: var(--color-background);
+  padding: var(--spacing-xl);
+
+  // États
+  &--loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  &--error {
+    .profile-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+// En-tête du Profil
+.profile-header {
+  grid-area: header;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+
+  &__content {
+    padding: var(--spacing-xl);
+    display: grid;
+    grid-template-columns: auto 1fr 300px;
+    gap: var(--spacing-xl);
+    align-items: start;
+  }
+}
+
+// Identité du Profil
+.profile-identity {
+  display: flex;
+  gap: var(--spacing-lg);
+  align-items: flex-start;
+
+  .avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    .profile-avatar {
+      border: 4px solid var(--color-primary);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .avatar-actions {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+  }
+
+  .profile-info {
+    flex: 1;
+
+    .profile-name {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin: 0 0 var(--spacing-xs);
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+
+      app-badge {
+        font-size: var(--font-size-sm);
+      }
+    }
+
+    .profile-email {
+      margin: 0 0 var(--spacing-xs);
+      font-size: var(--font-size-lg);
+      color: var(--color-text-secondary);
+    }
+
+    .profile-member-since {
+      margin: 0 0 var(--spacing-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: var(--spacing-lg);
+
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+
+        .stat-value {
+          font-size: var(--font-size-xl);
+          font-weight: var(--font-weight-bold);
+          color: var(--color-primary);
+        }
+
+        .stat-label {
+          font-size: var(--font-size-sm);
+          color: var(--color-text-secondary);
+          margin-top: var(--spacing-xs);
+        }
+      }
+    }
+  }
+}
+
+// Progression de Fidélité
+.loyalty-progress {
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+
+    .progress-label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-primary);
+    }
+
+    .progress-points {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--color-border);
+    border-radius: var(--border-radius-full);
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+      border-radius: var(--border-radius-full);
+      transition: width 0.3s ease;
+    }
+  }
+}
+
+// Navigation par Onglets
+.profile-tabs {
+  grid-area: header;
+  margin-top: var(--spacing-lg);
+  display: flex;
+  gap: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border);
+
+  .profile-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: var(--color-primary);
+      background: var(--color-surface-hover);
+    }
+
+    &--active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      background: var(--color-primary-light);
+    }
+
+    .tab-label {
+      font-weight: var(--font-weight-medium);
+    }
+  }
+}
+
+// Contenu Principal
+.profile-content {
+  grid-area: content;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+
+  .profile-loading,
+  .profile-error,
+  .profile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+
+    .spinning {
+      animation: spin 1s linear infinite;
+    }
+
+    h3 {
+      margin: var(--spacing-md) 0 var(--spacing-sm);
+      color: var(--color-text-primary);
+    }
+
+    p {
+      margin: 0 0 var(--spacing-md);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .profile-error {
+    app-icon {
+      color: var(--color-error);
+    }
+  }
+
+  .profile-empty {
+    app-icon {
+      color: var(--color-text-muted);
+      opacity: 0.5;
+    }
+  }
+}
+
+// Contenu des Onglets
+.tab-content {
+  padding: var(--spacing-xl);
+
+  .profile-section,
+  .preferences-section,
+  .history-section {
+    margin-bottom: var(--spacing-2xl);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      margin: 0 0 var(--spacing-lg);
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+    }
+  }
+}
+
+// Statistiques Détaillées
+.detailed-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--color-surface-alt);
+    border-radius: var(--border-radius-md);
+    border-left: 4px solid var(--color-primary);
+
+    app-icon {
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .stat-content {
+      .stat-number {
+        display: block;
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+      }
+
+      .stat-text {
+        display: block;
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-primary);
+      }
+
+      .stat-description {
+        display: block;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+        margin-top: var(--spacing-xs);
+      }
+    }
+  }
+}
+
+// Genres Favoris
+.favorite-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+
+  .no-data {
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+}
+
+// Préférences
+.preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+
+  .preference-item {
+    .preference-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .preference-value {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+  }
+}
+
+// Actions de Compte
+.account-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+// Historique
+.history-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+
+  app-icon {
+    color: var(--color-text-muted);
+    opacity: 0.5;
+    margin-bottom: var(--spacing-md);
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+// Barre Latérale
+.profile-sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+
+  .quick-actions,
+  .account-info {
+    background: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-lg);
+
+    .sidebar-title {
+      margin: 0 0 var(--spacing-lg);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+    }
+  }
+
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .account-info {
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--color-border-light);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+      }
+
+      .info-value {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-primary);
+      }
+    }
+  }
+}
+
+// Badges de Niveau de Membership
+.membership-badge {
+  &--bronze {
+    background: var(--color-bronze);
+    color: white;
+  }
+
+  &--silver {
+    background: var(--color-silver);
+    color: white;
+  }
+
+  &--gold {
+    background: var(--color-gold);
+    color: white;
+  }
+
+  &--platinum {
+    background: var(--color-platinum);
+    color: white;
+  }
+}
+
+// Animations
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "content";
+  }
+
+  .profile-header__content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .profile-identity {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-sidebar {
+    order: 2;
+  }
+
+  .profile-content {
+    order: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-layout {
+    padding: var(--spacing-md);
+    gap: var(--spacing-lg);
+  }
+
+  .profile-header__content,
+  .tab-content,
+  .profile-sidebar .quick-actions,
+  .profile-sidebar .account-info {
+    padding: var(--spacing-lg);
+  }
+
+  .profile-tabs {
+    flex-wrap: wrap;
+
+    .profile-tab {
+      flex: 1;
+      min-width: 120px;
+      justify-content: center;
+    }
+  }
+
+  .detailed-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .preferences-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-actions {
+    flex-direction: column;
+  }
+
+  .quick-stats {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-header__content,
+  .tab-content,
+  .profile-sidebar .quick-actions,
+  .profile-sidebar .account-info {
+    padding: var(--spacing-md);
+  }
+
+  .profile-name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm) !important;
+  }
+
+  .quick-stats {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
+
+// Mode Sombre
+@media (prefers-color-scheme: dark) {
+  .profile-layout {
+    background: var(--color-background-dark);
+  }
+
+  .profile-header,
+  .profile-content,
+  .profile-sidebar .quick-actions,
+  .profile-sidebar .account-info {
+    background: var(--color-surface-dark);
+  }
+
+  .detailed-stats .stat-card {
+    background: var(--color-surface-alt-dark);
+  }
+}
+
+// Accessibilité
+@media (prefers-reduced-motion: reduce) {
+  .spinning {
+    animation: none;
+  }
+
+  .progress-fill {
+    transition: none;
+  }
+}

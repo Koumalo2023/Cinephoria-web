@@ -1,0 +1,239 @@
+<div [class]="getContainerClasses()">
+  <!-- En-tête du profil -->
+  <div class="profile-header">
+    <div class="profile-avatar-section">
+      <app-avatar
+        [src]="userProfile?.profilePictureUrl || ''"
+        [alt]="userProfile?.firstName + ' ' + userProfile?.lastName"
+        size="large"
+        (click)="triggerAvatarUpload()"
+        class="clickable-avatar">
+      </app-avatar>
+      <div class="avatar-actions">
+        <app-button
+          variant="secondary"
+          size="small"
+          (click)="triggerAvatarUpload()">
+          <app-icon name="camera"></app-icon>
+          Changer la photo
+        </app-button>
+      </div>
+    </div>
+    
+    <div class="profile-info">
+      <h1 class="profile-name">
+        {{ userProfile?.firstName }} {{ userProfile?.lastName }}
+      </h1>
+      <p class="profile-email">{{ userProfile?.email }}</p>
+      <p class="profile-role">Membre depuis {{ userProfile?.createdAt | date:'MMMM yyyy' }}</p>
+    </div>
+  </div>
+
+  <!-- Navigation par onglets -->
+  <nav class="profile-tabs">
+    <button
+      *ngFor="let tab of tabs"
+      [class]="getTabClasses(tab.id)"
+      (click)="onTabChange(tab.id)">
+      <app-icon [name]="tab.icon"></app-icon>
+      {{ tab.label }}
+    </button>
+  </nav>
+
+  <!-- Contenu des onglets -->
+  <div class="tab-content">
+    
+    <!-- Onglet Profil -->
+    <div *ngIf="activeTab === 'profile'" class="tab-panel">
+      <form [formGroup]="profileForm" (ngSubmit)="onProfileSave()" class="profile-form">
+        <h2>Informations personnelles</h2>
+        
+        <div class="form-row">
+          <app-input
+            label="Prénom"
+            formControlName="firstName"
+            placeholder="Votre prénom"
+            [required]="true">
+          </app-input>
+          
+          <app-input
+            label="Nom"
+            formControlName="lastName"
+            placeholder="Votre nom"
+            [required]="true">
+          </app-input>
+        </div>
+
+        <app-input
+          label="Email"
+          type="email"
+          formControlName="email"
+          placeholder="votre@email.com"
+          [required]="true">
+        </app-input>
+
+        <app-input
+          label="Téléphone"
+          formControlName="phoneNumber"
+          placeholder="Votre numéro de téléphone">
+        </app-input>
+
+        <div class="form-actions">
+          <app-button
+            type="submit"
+            [disabled]="profileForm.invalid || loading"
+            [loading]="loading">
+            Enregistrer les modifications
+          </app-button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Onglet Sécurité -->
+    <div *ngIf="activeTab === 'security'" class="tab-panel">
+      <h2>Sécurité du compte</h2>
+      
+      <!-- Changement de mot de passe -->
+      <form [formGroup]="passwordForm" (ngSubmit)="onPasswordChange()" class="security-form">
+        <h3>Changer le mot de passe</h3>
+        
+        <app-password-input
+          label="Ancien mot de passe"
+          formControlName="oldPassword"
+          placeholder="Votre mot de passe actuel"
+          [required]="true">
+        </app-password-input>
+
+        <app-password-input
+          label="Nouveau mot de passe"
+          formControlName="newPassword"
+          placeholder="Votre nouveau mot de passe"
+          [required]="true">
+        </app-password-input>
+
+        <app-password-input
+          label="Confirmer le nouveau mot de passe"
+          formControlName="confirmPassword"
+          placeholder="Confirmez votre nouveau mot de passe"
+          [required]="true">
+        </app-password-input>
+
+        <div class="form-actions">
+          <app-button
+            type="submit"
+            [disabled]="passwordForm.invalid || loading"
+            [loading]="loading">
+            Changer le mot de passe
+          </app-button>
+        </div>
+      </form>
+
+      <!-- Paramètres de sécurité -->
+      <div class="security-settings" *ngIf="securitySettings">
+        <h3>Paramètres de sécurité</h3>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Authentification à deux facteurs</h4>
+            <p>Ajoutez une couche de sécurité supplémentaire à votre compte</p>
+          </div>
+          <app-toggle-switch
+            [checked]="securitySettings.twoFactorAuthentication"
+            (toggleChange)="onSecuritySettingChange('twoFactorAuthentication', $event)">
+          </app-toggle-switch>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Notifications -->
+    <div *ngIf="activeTab === 'notifications'" class="tab-panel">
+      <h2>Paramètres de notifications</h2>
+      
+      <div class="notification-settings" *ngIf="notificationSettings">
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Notifications par email</h4>
+            <p>Recevez des notifications importantes par email</p>
+          </div>
+          <app-toggle-switch
+            [checked]="notificationSettings.emailNotifications"
+            (toggleChange)="onNotificationSettingChange('emailNotifications', $event)">
+          </app-toggle-switch>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Notifications SMS</h4>
+            <p>Recevez des alertes importantes par SMS</p>
+          </div>
+          <app-toggle-switch
+            [checked]="notificationSettings.smsNotifications"
+            (toggleChange)="onNotificationSettingChange('smsNotifications', $event)">
+          </app-toggle-switch>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Rappels de réservation</h4>
+            <p>Rappels avant vos séances de cinéma</p>
+          </div>
+          <app-toggle-switch
+            [checked]="notificationSettings.reservationReminders"
+            (toggleChange)="onNotificationSettingChange('reservationReminders', $event)">
+          </app-toggle-switch>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Offres promotionnelles</h4>
+            <p>Recevez nos meilleures offres et promotions</p>
+          </div>
+          <app-toggle-switch
+            [checked]="notificationSettings.promotionNotifications"
+            (toggleChange)="onNotificationSettingChange('promotionNotifications', $event)">
+          </app-toggle-switch>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Newsletter</h4>
+            <p>Actualités et nouveautés du cinéma</p>
+          </div>
+          <app-toggle-switch
+            [checked]="notificationSettings.newsletter"
+            (toggleChange)="onNotificationSettingChange('newsletter', $event)">
+          </app-toggle-switch>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages d'état -->
+  <div *ngIf="error" class="error-message">
+    <div class="message-content">
+      <app-icon name="alert-circle"></app-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="close-button" (click)="clearError()">
+      <app-icon name="x"></app-icon>
+    </button>
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    <div class="message-content">
+      <app-icon name="check-circle"></app-icon>
+      <span>{{ successMessage }}</span>
+    </div>
+    <button class="close-button" (click)="successMessage = null">
+      <app-icon name="x"></app-icon>
+    </button>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner">
+      <app-icon name="loader" class="spinning"></app-icon>
+      <span>Chargement...</span>
+    </div>
+  </div>
+</div>

@@ -87,7 +87,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        loadComponent: () => import('./features/user/profile/profile.component').then(m => m.ProfileComponent),
+        loadComponent: () => import('./features/user/profile/simplified-profile.component').then(m => m.SimplifiedProfileComponent),
         title: 'Cinephoria - Mon Profil'
       },
       {
