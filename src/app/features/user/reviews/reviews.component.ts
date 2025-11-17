@@ -5,21 +5,13 @@ import { RouterModule } from '@angular/router';
 import { Observable, catchError, combineLatest, map, of, switchMap } from 'rxjs';
 
 // Services
-import { AuthService } from '../../../core/services/api/auth.service';
 import { MovieService } from '../../../core/services/api/movie.service';
 import { ProfileService } from '../../../core/services/api/profile.service';
+import { AuthManagerService } from '../../../core/services/auth/auth-manager.service';
 
 // Atoms
-import { AvatarComponent } from '../../../shared/components/atoms/avatar/avatar.component';
-import { BadgeComponent } from '../../../shared/components/atoms/badge/badge.component';
-import { ButtonComponent } from '../../../shared/components/atoms/button/button.component';
-import { IconComponent } from '../../../shared/components/atoms/icon/icon.component';
-import { InputComponent } from '../../../shared/components/atoms/input/input.component';
-import { RatingInputComponent } from '../../../shared/components/atoms/rating-input/rating-input.component';
 
 // Molecules
-import { FilmCardComponent } from '../../../shared/components/molecules/film-card/film-card.component';
-import { MovieRatingDisplayComponent } from '../../../shared/components/molecules/movie-rating-display/movie-rating-display.component';
 
 // Interfaces
 import { MovieDto, MovieReviewDto, UserProfileDto } from '../../../core/interfaces/core.interfaces';
@@ -43,17 +35,7 @@ interface ReviewFormData {
   imports: [
     CommonModule,
     RouterModule,
-    ReactiveFormsModule,
-    // Atoms
-    AvatarComponent,
-    BadgeComponent,
-    ButtonComponent,
-    IconComponent,
-    InputComponent,
-    RatingInputComponent,
-    // Molecules
-    FilmCardComponent,
-    MovieRatingDisplayComponent
+    ReactiveFormsModule
   ],
   templateUrl: './reviews.component.html',
   styleUrl: './reviews.component.scss',
@@ -62,7 +44,7 @@ interface ReviewFormData {
 export class ReviewsComponent implements OnInit {
   // Services
   private movieService = inject(MovieService);
-  private authService = inject(AuthService);
+  private authManager = inject(AuthManagerService);
   private profileService = inject(ProfileService);
   private fb = inject(FormBuilder);
 
@@ -106,7 +88,11 @@ export class ReviewsComponent implements OnInit {
   }
 
   private loadUserProfile(): Observable<UserProfileDto | null> {
-    return this.authService.getProfile().pipe(
+    const userId = this.authManager.getCurrentUserId();
+    if (!userId) {
+      return of(null);
+    }
+    return this.profileService.getUserProfile(userId).pipe(
       catchError(error => {
         console.warn('Erreur lors du chargement du profil utilisateur:', error);
         return of(null);
@@ -115,7 +101,11 @@ export class ReviewsComponent implements OnInit {
   }
 
   private loadUserReviews(): Observable<any[]> {
-    return this.authService.getProfile().pipe(
+    const userId = this.authManager.getCurrentUserId();
+    if (!userId) {
+      return of([]);
+    }
+    return this.profileService.getUserProfile(userId).pipe(
       switchMap(profile => {
         if (!profile?.appUserId) {
           return of([]);
@@ -152,7 +142,11 @@ export class ReviewsComponent implements OnInit {
   }
 
   private loadMoviesToReview(): Observable<MovieDto[]> {
-    return this.authService.getProfile().pipe(
+    const userId = this.authManager.getCurrentUserId();
+    if (!userId) {
+      return of([]);
+    }
+    return this.profileService.getUserProfile(userId).pipe(
       switchMap(profile => {
         if (!profile?.appUserId) {
           return of([]);
@@ -161,7 +155,7 @@ export class ReviewsComponent implements OnInit {
         return this.movieService.getMovieHistory(10).pipe(
           map(movies => {
             // Filtrer les films déjà notés
-            const reviewedMovieIds = new Set(profile.movieRatings?.map(rating => rating.movieId) || []);
+            const reviewedMovieIds = new Set(profile.movieRatings?.map((rating: any) => rating.movieId) || []);
             return movies.filter(movie => !reviewedMovieIds.has(movie.movieId));
           }),
           catchError(error => {

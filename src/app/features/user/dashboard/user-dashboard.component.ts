@@ -1,303 +1,254 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable, catchError, combineLatest, map, of, switchMap } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
-// Services
-import { AuthService } from '../../../core/services/api/auth.service';
-import { MovieService } from '../../../core/services/api/movie.service';
-import { NotificationPreferencesService } from '../../../core/services/api/notification-preferences.service';
+// Services API
 import { ProfileService } from '../../../core/services/api/profile.service';
-import { ReservationService } from '../../../core/services/api/reservation.service';
+import { AuthManagerService } from '../../../core/services/auth/auth-manager.service';
 
-// Atoms
+// Interfaces backend
+import { UserProfileDto } from '../../../core/interfaces/core.interfaces';
+import { UserStats } from '../../../core/services/api/profile.service';
+
+// Composants atomiques
 import { AvatarComponent } from '../../../shared/components/atoms/avatar/avatar.component';
-import { BadgeComponent } from '../../../shared/components/atoms/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/atoms/button/button.component';
-import { NotificationItemComponent } from '../../../shared/components/atoms/notification-item/notification-item.component';
-import { ProgressIndicatorComponent } from '../../../shared/components/atoms/progress-indicator/progress-indicator.component';
-import { QRCodeComponent } from '../../../shared/components/atoms/qr-code/qr-code.component';
-
-// Molecules
-import { FilmCardComponent } from '../../../shared/components/molecules/film-card/film-card.component';
-import { MovieRatingDisplayComponent } from '../../../shared/components/molecules/movie-rating-display/movie-rating-display.component';
-import { ReservationSummaryComponent } from '../../../shared/components/molecules/reservation-summary/reservation-summary.component';
-
-// Organisms
-import { NotificationsCenterComponent } from '../../../shared/components/organisms/notifications-center/notifications-center.component';
-
-// Interfaces
-import { MovieDto, UserProfileDto, UserReservationDto } from '../../../core/interfaces/core.interfaces';
-import { UserNotificationDto } from '../../../core/services/api/notification-preferences.service';
-
-interface DashboardData {
-  userProfile: UserProfileDto | null;
-  upcomingReservations: UserReservationDto[];
-  favoriteMovies: MovieDto[];
-  recentNotifications: UserNotificationDto[];
-  userStats: {
-    totalReservations: number;
-    totalReviews: number;
-    loyaltyPoints: number;
-    membershipLevel: string;
-    favoriteGenres: string[];
-    memberSince: string;
-    lastActivity: string;
-  };
-  unreadNotificationCount: number;
-}
+import { IconComponent } from '../../../shared/components/atoms/icon/icon.component';
 
 @Component({
   selector: 'app-user-dashboard',
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
-    // Atoms
     AvatarComponent,
-    BadgeComponent,
     ButtonComponent,
-    ProgressIndicatorComponent,
-    QRCodeComponent,
-    NotificationItemComponent,
-    // Molecules
-    FilmCardComponent,
-    MovieRatingDisplayComponent,
-    ReservationSummaryComponent,
-    // Organisms
-    NotificationsCenterComponent
+    IconComponent
   ],
   templateUrl: './user-dashboard.component.html',
-  styleUrl: './user-dashboard.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./user-dashboard.component.scss']
 })
 export class UserDashboardComponent implements OnInit {
-  // Services
+  private authManager = inject(AuthManagerService);
   private profileService = inject(ProfileService);
-  private reservationService = inject(ReservationService);
-  private movieService = inject(MovieService);
-  private notificationService = inject(NotificationPreferencesService);
-  private authService = inject(AuthService);
+  private destroy$ = new Subject<void>();
 
-  dashboardData$!: Observable<DashboardData>;
-  isLoading = true;
+  // Données utilisateur
+  userProfile: UserProfileDto | null = null;
+  userStats: UserStats | null = null;
+
+  // États
+  loading = false;
+  error: string | null = null;
+
+  // Statistiques calculées
+  get dashboardStats() {
+    if (!this.userProfile) return null;
+    
+    return {
+      totalReservations: this.userProfile.reservations?.length || 0,
+      totalRatings: this.userProfile.movieRatings?.length || 0,
+      favoriteMovies: this.userProfile.favoriteMovies?.length || 0,
+      totalSpent: this.calculateTotalSpent(),
+      memberSince: this.formatDate(this.userProfile.createdAt),
+      upcomingReservations: this.getUpcomingReservations(),
+      recentActivity: this.getRecentActivity()
+    };
+  }
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    console.log('🏁 UserDashboardComponent initialisé');
+    this.loadUserData();
   }
 
-  private loadDashboardData(): void {
-    this.dashboardData$ = combineLatest([
-      this.loadUserProfile(),
-      this.loadUpcomingReservations(),
-      this.loadFavoriteMovies(),
-      this.loadRecentNotifications(),
-      this.loadUserStats(),
-      this.loadUnreadNotificationCount()
-    ]).pipe(
-      map(([userProfile, upcomingReservations, favoriteMovies, recentNotifications, userStats, unreadNotificationCount]) => ({
-        userProfile,
-        upcomingReservations,
-        favoriteMovies,
-        recentNotifications,
-        userStats,
-        unreadNotificationCount
-      }))
-    );
-
-    this.isLoading = false;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private loadUserProfile(): Observable<UserProfileDto | null> {
-    return this.authService.getProfile().pipe(
-      catchError(error => {
-        console.warn('Erreur lors du chargement du profil utilisateur:', error);
-        return of(null);
-      })
-    );
-  }
+  /**
+   * Charge toutes les données utilisateur pour le dashboard
+   */
+  private loadUserData(): void {
+    console.log('🚀 Début du chargement des données dashboard...');
+    this.loading = true;
+    this.error = null;
 
-  private loadUpcomingReservations(): Observable<UserReservationDto[]> {
-    return this.authService.getProfile().pipe(
-      switchMap(profile => {
-        if (!profile?.appUserId) {
-          return of([]);
-        }
-        return this.reservationService.getUserReservations(profile.appUserId).pipe(
-          map(reservations => 
-            reservations.filter(reservation => 
-              new Date(reservation.showtimeDate) > new Date() && 
-              reservation.status === 'Confirmed'
-            ).slice(0, 3) // Limiter à 3 réservations à venir
-          ),
-          catchError(error => {
-            console.warn('Erreur lors du chargement des réservations:', error);
-            return of([]);
-          })
-        );
-      }),
-      catchError(error => {
-        console.warn('Erreur lors de la récupération du profil:', error);
-        return of([]);
-      })
-    );
-  }
-
-  private loadFavoriteMovies(): Observable<MovieDto[]> {
-    return this.movieService.getUserFavorites().pipe(
-      map(movies => movies.slice(0, 4)), // Limiter à 4 films favoris
-      catchError(error => {
-        console.warn('Erreur lors du chargement des films favoris:', error);
-        return of([]);
-      })
-    );
-  }
-
-  private loadRecentNotifications(): Observable<UserNotificationDto[]> {
-    return this.notificationService.getUserNotifications(5).pipe(
-      catchError(error => {
-        console.warn('Erreur lors du chargement des notifications:', error);
-        return of([]);
-      })
-    );
-  }
-
-  private loadUserStats(): Observable<{
-    totalReservations: number;
-    totalReviews: number;
-    loyaltyPoints: number;
-    membershipLevel: string;
-    favoriteGenres: string[];
-    memberSince: string;
-    lastActivity: string;
-  }> {
-    return this.authService.getProfile().pipe(
-      switchMap(profile => {
-        if (!profile?.appUserId) {
-          return of({
-            totalReservations: 0,
-            totalReviews: 0,
-            loyaltyPoints: 0,
-            membershipLevel: 'Bronze',
-            favoriteGenres: [],
-            memberSince: '',
-            lastActivity: ''
-          });
-        }
-        return this.profileService.getUserStats(profile.appUserId).pipe(
-          map(stats => ({
-            totalReservations: stats.totalReservations,
-            totalReviews: stats.totalReviews,
-            loyaltyPoints: stats.loyaltyPoints,
-            membershipLevel: stats.membershipLevel,
-            favoriteGenres: stats.favoriteGenres,
-            memberSince: stats.memberSince,
-            lastActivity: stats.lastActivity
-          })),
-          catchError(error => {
-            console.warn('Erreur lors du chargement des statistiques:', error);
-            return of({
-              totalReservations: 0,
-              totalReviews: 0,
-              loyaltyPoints: 0,
-              membershipLevel: 'Bronze',
-              favoriteGenres: [],
-              memberSince: '',
-              lastActivity: ''
-            });
-          })
-        );
-      }),
-      catchError(error => {
-        console.warn('Erreur lors de la récupération du profil:', error);
-        return of({
-          totalReservations: 0,
-          totalReviews: 0,
-          loyaltyPoints: 0,
-          membershipLevel: 'Bronze',
-          favoriteGenres: [],
-          memberSince: '',
-          lastActivity: ''
-        });
-      })
-    );
-  }
-
-  private loadUnreadNotificationCount(): Observable<number> {
-    return this.notificationService.getUnreadNotificationCount().pipe(
-      map(response => response.unreadCount),
-      catchError(error => {
-        console.warn('Erreur lors du chargement du compteur de notifications:', error);
-        return of(0);
-      })
-    );
-  }
-
-  onCancelReservation(reservationId: number): void {
-    this.reservationService.cancelReservation(reservationId).subscribe({
-      next: () => {
-        console.log('Réservation annulée avec succès:', reservationId);
-        this.refreshDashboard();
-      },
-      error: (error) => {
-        console.error('Erreur lors de l\'annulation de la réservation:', error);
-        alert('Erreur lors de l\'annulation de la réservation');
-      }
-    });
-  }
-
-  onMarkNotificationAsRead(notificationId: string): void {
-    this.notificationService.markNotificationAsRead(notificationId).subscribe({
-      next: () => {
-        console.log('Notification marquée comme lue:', notificationId);
-        this.refreshDashboard();
-      },
-      error: (error) => {
-        console.error('Erreur lors du marquage de la notification:', error);
-        alert('Erreur lors du marquage de la notification');
-      }
-    });
-  }
-
-  onMarkAllNotificationsAsRead(): void {
-    this.notificationService.markAllNotificationsAsRead().subscribe({
-      next: () => {
-        console.log('Toutes les notifications marquées comme lues');
-        this.refreshDashboard();
-      },
-      error: (error) => {
-        console.error('Erreur lors du marquage de toutes les notifications:', error);
-        alert('Erreur lors du marquage des notifications');
-      }
-    });
-  }
-
-  onToggleFavorite(movieId: number, isCurrentlyFavorite: boolean): void {
-    if (isCurrentlyFavorite) {
-      this.movieService.removeFromFavorites(movieId).subscribe({
-        next: () => {
-          console.log('Film retiré des favoris:', movieId);
-          this.refreshDashboard();
-        },
-        error: (error) => {
-          console.error('Erreur lors du retrait des favoris:', error);
-          alert('Erreur lors du retrait des favoris');
-        }
-      });
-    } else {
-      this.movieService.addToFavorites(movieId).subscribe({
-        next: () => {
-          console.log('Film ajouté aux favoris:', movieId);
-          this.refreshDashboard();
-        },
-        error: (error) => {
-          console.error('Erreur lors de l\'ajout aux favoris:', error);
-          alert('Erreur lors de l\'ajout aux favoris');
-        }
-      });
+    // Vérifier si l'utilisateur est authentifié
+    const isAuthenticated = this.authManager.isAuthenticated();
+    console.log('🔐 Utilisateur authentifié:', isAuthenticated);
+    
+    if (!isAuthenticated) {
+      console.warn('⚠️ Utilisateur non authentifié');
+      this.handleError('Utilisateur non authentifié. Veuillez vous connecter.', null);
+      return;
     }
+
+    // Charger les données du dashboard via ProfileService
+    const userId = this.authManager.getCurrentUserId();
+    if (!userId) {
+      console.error('❌ Aucun ID utilisateur trouvé');
+      this.handleError('Impossible de récupérer l\'ID utilisateur', null);
+      return;
+    }
+    
+    this.profileService.getUserProfile(userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (profile) => {
+          console.log('✅ Données dashboard récupérées avec succès');
+          this.userProfile = profile;
+          
+          // Charger les statistiques détaillées
+          this.loadUserStats(profile.appUserId);
+          
+          console.log('📊 Dashboard utilisateur chargé:', {
+            id: profile.appUserId,
+            nom: `${profile.firstName} ${profile.lastName}`,
+            reservations: profile.reservations?.length || 0,
+            notations: profile.movieRatings?.length || 0,
+            favoris: profile.favoriteMovies?.length || 0
+          });
+        },
+        error: (error) => {
+          console.error('❌ Erreur lors du chargement du dashboard:', error);
+          this.handleError('Erreur lors du chargement du dashboard', error);
+        }
+      });
   }
 
-  refreshDashboard(): void {
-    this.loadDashboardData();
+  /**
+   * Charge les statistiques utilisateur détaillées
+   */
+  private loadUserStats(userId: string): void {
+    this.profileService.getUserStats(userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          console.log('📈 Statistiques utilisateur chargées:', stats);
+          this.userStats = stats;
+          this.loading = false;
+        },
+        error: (error) => {
+          console.warn('⚠️ Impossible de charger les statistiques:', error);
+          this.loading = false;
+          // On continue sans les statistiques détaillées
+        }
+      });
+  }
+
+  /**
+   * Calcule le total dépensé
+   */
+  private calculateTotalSpent(): number {
+    if (!this.userProfile?.reservations) return 0;
+    
+    return this.userProfile.reservations.reduce((total, reservation) => {
+      return total + (reservation.totalPrice || 0);
+    }, 0);
+  }
+
+  /**
+   * Récupère les réservations à venir
+   */
+  private getUpcomingReservations(): number {
+    if (!this.userProfile?.reservations) return 0;
+    
+    // Compter les réservations avec statut "Active" (4)
+    return this.userProfile.reservations.filter(reservation => 
+      reservation.status === 4
+    ).length;
+  }
+
+  /**
+   * Détermine l'activité récente
+   */
+  private getRecentActivity(): string {
+    if (!this.userProfile) return 'Aucune activité récente';
+    
+    const hasReservations = this.userProfile.reservations?.length > 0;
+    const hasRatings = this.userProfile.movieRatings?.length > 0;
+    const hasFavorites = this.userProfile.favoriteMovies?.length > 0;
+
+    if (hasReservations) return 'Réservations récentes';
+    if (hasRatings) return 'Notations récentes';
+    if (hasFavorites) return 'Films favoris ajoutés';
+    
+    return 'Nouveau membre';
+  }
+
+  /**
+   * Formate une date pour l'affichage
+   */
+  private formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  /**
+   * Gestion des erreurs
+   */
+  private handleError(message: string, error: any): void {
+    console.error(message, error);
+    this.error = message;
+    this.loading = false;
+  }
+
+  /**
+   * Obtient les réservations récentes (limitées à 3)
+   */
+  get recentReservations() {
+    if (!this.userProfile?.reservations) return [];
+    
+    return this.userProfile.reservations
+      .sort((a, b) => b.reservationId - a.reservationId) // Trier par ID (plus récent en premier)
+      .slice(0, 3);
+  }
+
+  /**
+   * Obtient les notations récentes (limitées à 3)
+   */
+  get recentRatings() {
+    if (!this.userProfile?.movieRatings) return [];
+    
+    return this.userProfile.movieRatings
+      .sort((a, b) => b.movieRatingId - a.movieRatingId) // Trier par ID (plus récent en premier)
+      .slice(0, 3);
+  }
+
+  /**
+   * Obtient les films favoris (limités à 3)
+   */
+  get favoriteMovies() {
+    if (!this.userProfile?.favoriteMovies) return [];
+    
+    return this.userProfile.favoriteMovies.slice(0, 3);
+  }
+
+  /**
+   * Vérifie si l'utilisateur a des données d'activité
+   */
+  get hasActivityData(): boolean {
+    return !!(this.userProfile?.reservations?.length || 
+              this.userProfile?.movieRatings?.length || 
+              this.userProfile?.favoriteMovies?.length);
+  }
+
+  /**
+   * Rafraîchir les données
+   */
+  refreshData(): void {
+    this.loadUserData();
+  }
+
+  /**
+   * Effacer l'erreur
+   */
+  clearError(): void {
+    this.error = null;
   }
 }
