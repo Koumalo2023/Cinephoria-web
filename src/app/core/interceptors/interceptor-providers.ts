@@ -1,6 +1,5 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
-import { CorsFallbackInterceptor } from './cors-fallback.interceptor';
 import { ErrorInterceptor } from './error.interceptor';
 import { ProfileErrorInterceptor } from './profile-error.interceptor';
 
@@ -24,9 +23,4 @@ export const httpInterceptorProviders = [
     useClass: ProfileErrorInterceptor,
     multi: true
   },
-  {
-    provide: HTTP_INTERCEPTORS,
-    useClass: CorsFallbackInterceptor,
-    multi: true
-  }
 ];

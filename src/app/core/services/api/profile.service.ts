@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   ChangeUserPasswordDto,
@@ -10,7 +10,6 @@ import {
   UpdateAppUserDto,
   UserProfileDto
 } from '../../interfaces/core.interfaces';
-import { ProfileMockService } from './profile-mock.service';
 
 export interface UserStats {
   totalReservations: number;
@@ -22,6 +21,14 @@ export interface UserStats {
   membershipLevel: 'bronze' | 'silver' | 'gold' | 'platinum';
 }
 
+export interface UserActivity {
+  id: string;
+  type: string;
+  description: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,18 +36,33 @@ export class ProfileService {
   private readonly baseUrl = `${environment.apiUrl}/Auth`;
   private readonly settingsUrl = `${environment.apiUrl}/settings`;
   private http = inject(HttpClient);
-  private mockService = inject(ProfileMockService);
 
   // Cache pour optimiser les performances
   private readonly cache = new Map<string, any>();
-  private useMockData = false; // Basculer vers les données mockées en cas d'erreur CORS
 
   // =============================================
   // Gestion du Profil Utilisateur
   // =============================================
 
   /**
-   * Récupère le profil utilisateur complet
+   * Récupère le profil utilisateur complet via l'endpoint /user-profile/{userId}
+   * Retourne un UserProfileDto avec toutes les données (réservations, notations, favoris, etc.)
+   * Format retourné par l'API :
+   * {
+   *   "appUserId": "303e4936-ac46-4f00-8737-9db3fee71573",
+   *   "firstName": "Utilisateur",
+   *   "lastName": "Standard",
+   *   "email": "user@exemple.com",
+   *   "createdAt": "2025-10-18T04:49:24.464936Z",
+   *   "updatedAt": "2025-10-18T04:49:24.464885Z",
+   *   "reservations": [...],
+   *   "phoneNumber": "062598631459",
+   *   "movieRatings": [...],
+   *   "role": "User",
+   *   "favoriteMovies": [...],
+   *   "userMovieHistories": [...],
+   *   "employeeFavorites": [...]
+   * }
    */
   getUserProfile(userId: string): Observable<UserProfileDto> {
     const cacheKey = `profile_${userId}`;
@@ -49,16 +71,20 @@ export class ProfileService {
       return of(this.cache.get(cacheKey));
     }
 
-    if (this.useMockData) {
-      return this.mockService.getUserProfile(userId);
-    }
-
     return this.http.get<UserProfileDto>(`${this.baseUrl}/user-profile/${userId}`).pipe(
-      tap(profile => this.cache.set(cacheKey, profile)),
+      tap(profile => {
+        this.cache.set(cacheKey, profile);
+        console.log('📊 Profil utilisateur chargé via ProfileService:', {
+          id: profile.appUserId,
+          nom: `${profile.firstName} ${profile.lastName}`,
+          reservations: profile.reservations?.length || 0,
+          notations: profile.movieRatings?.length || 0,
+          favoris: profile.favoriteMovies?.length || 0
+        });
+      }),
       catchError(error => {
-        console.warn('API error, falling back to mock data for user profile');
-        this.useMockData = true;
-        return this.mockService.getUserProfile(userId);
+        console.error('❌ Erreur lors du chargement du profil utilisateur:', error);
+        return throwError(() => error);
       })
     );
   }
@@ -127,17 +153,8 @@ export class ProfileService {
       return of(this.cache.get(cacheKey));
     }
 
-    if (this.useMockData) {
-      return this.mockService.getNotificationSettings();
-    }
-
     return this.http.get<NotificationSettingsDto>(`${this.settingsUrl}/notifications`).pipe(
-      tap(settings => this.cache.set(cacheKey, settings)),
-      catchError(error => {
-        console.warn('API error, falling back to mock data for notification settings');
-        this.useMockData = true;
-        return this.mockService.getNotificationSettings();
-      })
+      tap(settings => this.cache.set(cacheKey, settings))
     );
   }
 
@@ -167,17 +184,8 @@ export class ProfileService {
       return of(this.cache.get(cacheKey));
     }
 
-    if (this.useMockData) {
-      return this.mockService.getSecuritySettings();
-    }
-
     return this.http.get<SecuritySettingsDto>(`${this.settingsUrl}/security`).pipe(
-      tap(settings => this.cache.set(cacheKey, settings)),
-      catchError(error => {
-        console.warn('API error, falling back to mock data for security settings');
-        this.useMockData = true;
-        return this.mockService.getSecuritySettings();
-      })
+      tap(settings => this.cache.set(cacheKey, settings))
     );
   }
 
@@ -213,7 +221,8 @@ export class ProfileService {
   // =============================================
 
   /**
-   * Récupère les statistiques de l'utilisateur
+   * Récupère les statistiques de l'utilisateur basées sur son profil
+   * Utilise les données du profil pour calculer les statistiques
    */
   getUserStats(userId: string): Observable<UserStats> {
     const cacheKey = `stats_${userId}`;
@@ -222,37 +231,117 @@ export class ProfileService {
       return of(this.cache.get(cacheKey));
     }
 
-    // Pour l'instant, on retourne des données mockées
-    // À remplacer par un appel API réel quand disponible
-    const mockStats: UserStats = {
-      totalReservations: 12,
-      totalReviews: 8,
-      favoriteGenres: ['Action', 'Drame', 'Comédie'],
-      memberSince: '2023-01-15',
-      lastActivity: '2024-11-01',
-      loyaltyPoints: 1250,
-      membershipLevel: 'silver'
-    };
-
-    if (this.useMockData) {
-      return this.mockService.getUserStats(userId);
-    }
-
-    // Pour l'instant, on retourne des données mockées
-    // À remplacer par un appel API réel quand disponible
-    const userStats: UserStats = {
-      totalReservations: 12,
-      totalReviews: 8,
-      favoriteGenres: ['Action', 'Drame', 'Comédie'],
-      memberSince: '2023-01-15',
-      lastActivity: '2024-11-01',
-      loyaltyPoints: 1250,
-      membershipLevel: 'silver'
-    };
-
-    return of(userStats).pipe(
+    return this.getUserProfile(userId).pipe(
+      map((profile: any) => {
+        const stats: UserStats = {
+          totalReservations: profile.reservations?.length || 0,
+          totalReviews: profile.movieRatings?.length || 0,
+          favoriteGenres: this.extractFavoriteGenres(profile),
+          memberSince: profile.createdAt.toISOString().split('T')[0],
+          lastActivity: this.getLastActivity(profile),
+          loyaltyPoints: this.calculateLoyaltyPoints(profile),
+          membershipLevel: this.getMembershipLevel(profile)
+        };
+        
+        console.log('📈 Statistiques utilisateur calculées:', stats);
+        return stats;
+      }),
       tap(stats => this.cache.set(cacheKey, stats))
     );
+  }
+
+  /**
+   * Extrait les genres favoris de l'utilisateur
+   */
+  private extractFavoriteGenres(profile: UserProfileDto): string[] {
+    const genreCounts = new Map<string, number>();
+    
+    // Compter les genres des films favoris
+    profile.favoriteMovies?.forEach(movie => {
+      const genre = movie.genre;
+      genreCounts.set(genre.toString(), (genreCounts.get(genre.toString()) || 0) + 1);
+    });
+    
+    // Compter les genres des films notés
+    profile.movieRatings?.forEach(rating => {
+      if (rating.movie) {
+        const genre = rating.movie.genre;
+        genreCounts.set(genre.toString(), (genreCounts.get(genre.toString()) || 0) + 1);
+      }
+    });
+    
+    // Trier par fréquence et retourner les 3 premiers
+    return Array.from(genreCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([genre]) => genre);
+  }
+
+  /**
+   * Calcule la dernière activité de l'utilisateur
+   */
+  private getLastActivity(profile: UserProfileDto): string {
+    const activities: Date[] = [];
+    
+    // Dernière réservation
+    if (profile.reservations?.length > 0) {
+      const lastReservation = new Date(Math.max(...profile.reservations.map((r: any) => new Date(r.reservationDate || r.createdAt).getTime())));
+      activities.push(lastReservation);
+    }
+    
+    // Dernière notation
+    if (profile.movieRatings?.length > 0) {
+      const lastRating = new Date(Math.max(...profile.movieRatings.map(r => new Date(r.createdAt).getTime())));
+      activities.push(lastRating);
+    }
+    
+    // Dernière consultation d'historique
+    if (profile.userMovieHistories?.length > 0) {
+      const lastHistory = new Date(Math.max(...profile.userMovieHistories.map(h => new Date(h.lastViewedAt).getTime())));
+      activities.push(lastHistory);
+    }
+    
+    if (activities.length === 0) {
+      return profile.createdAt.toISOString().split('T')[0];
+    }
+    
+    return new Date(Math.max(...activities.map(d => d.getTime()))).toISOString().split('T')[0];
+  }
+
+  /**
+   * Calcule les points de fidélité
+   */
+  private calculateLoyaltyPoints(profile: UserProfileDto): number {
+    let points = 0;
+    
+    // Points pour les réservations
+    points += (profile.reservations?.length || 0) * 10;
+    
+    // Points pour les notations
+    points += (profile.movieRatings?.length || 0) * 5;
+    
+    // Points pour les films favoris
+    points += (profile.favoriteMovies?.length || 0) * 3;
+    
+    // Points bonus pour l'ancienneté
+    const memberSince = new Date(profile.createdAt);
+    const now = new Date();
+    const monthsAsMember = (now.getFullYear() - memberSince.getFullYear()) * 12 + (now.getMonth() - memberSince.getMonth());
+    points += Math.floor(monthsAsMember * 2);
+    
+    return points;
+  }
+
+  /**
+   * Détermine le niveau de fidélité
+   */
+  private getMembershipLevel(profile: UserProfileDto): 'bronze' | 'silver' | 'gold' | 'platinum' {
+    const points = this.calculateLoyaltyPoints(profile);
+    
+    if (points >= 500) return 'platinum';
+    if (points >= 200) return 'gold';
+    if (points >= 100) return 'silver';
+    return 'bronze';
   }
 
   // =============================================
@@ -274,27 +363,85 @@ export class ProfileService {
   }
 
   /**
-   * Force l'utilisation des données mockées
+   * Récupère les préférences de notifications de l'utilisateur
    */
-  forceMockData(): void {
-    this.useMockData = true;
-    this.cache.clear();
+  getUserNotificationPreferences(userId: string): Observable<NotificationSettingsDto> {
+    const cacheKey = `notification_preferences_${userId}`;
+    
+    if (this.cache.has(cacheKey)) {
+      return of(this.cache.get(cacheKey));
+    }
+
+    return this.http.get<NotificationSettingsDto>(
+      `${this.settingsUrl}/notification-preferences/${userId}`
+    ).pipe(
+      tap(preferences => this.cache.set(cacheKey, preferences))
+    );
   }
 
   /**
-   * Réactive les appels API réels
+   * Met à jour les préférences de notifications de l'utilisateur
    */
-  enableRealApi(): void {
-    this.useMockData = false;
-    this.cache.clear();
+  updateUserNotificationPreferences(
+    userId: string, 
+    preferences: NotificationSettingsDto
+  ): Observable<NotificationSettingsDto> {
+    const cacheKey = `notification_preferences_${userId}`;
+    
+    return this.http.put<NotificationSettingsDto>(
+      `${this.settingsUrl}/notification-preferences/${userId}`,
+      preferences
+    ).pipe(
+      tap(updatedPreferences => {
+        this.cache.set(cacheKey, updatedPreferences);
+      })
+    );
   }
 
   /**
-   * Vérifie si on utilise les données mockées
+   * Vérifie si l'email est disponible
    */
-  isUsingMockData(): boolean {
-    return this.useMockData;
+  checkEmailAvailability(email: string): Observable<{ available: boolean }> {
+    return this.http.get<{ available: boolean }>(
+      `${this.baseUrl}/check-email-availability`,
+      { params: { email } }
+    );
+  }
+
+  /**
+   * Vérifie si le nom d'utilisateur est disponible
+   */
+  checkUsernameAvailability(username: string): Observable<{ available: boolean }> {
+    return this.http.get<{ available: boolean }>(
+      `${this.baseUrl}/check-username-availability`,
+      { params: { username } }
+    );
+  }
+
+  /**
+   * Récupère l'historique des activités de l'utilisateur
+   */
+  getUserActivityHistory(userId: string): Observable<UserActivity[]> {
+    const cacheKey = `activity_history_${userId}`;
+    
+    if (this.cache.has(cacheKey)) {
+      return of(this.cache.get(cacheKey));
+    }
+
+    return this.http.get<UserActivity[]>(`${this.baseUrl}/user-activity/${userId}`).pipe(
+      tap(activities => this.cache.set(cacheKey, activities))
+    );
+  }
+
+  /**
+   * Supprime le compte utilisateur
+   */
+  deleteUserAccount(userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/delete-account/${userId}`).pipe(
+      tap(() => {
+        // Vider le cache après suppression du compte
+        this.cache.clear();
+      })
+    );
   }
 }
-
-

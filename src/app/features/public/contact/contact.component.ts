@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 
 // Services
-import { AuthService } from '../../../core/services/api/auth.service';
+import { AuthManagerService } from '../../../core/services/auth/auth-manager.service';
 
 // Interfaces
 import { ContactRequest } from '../../../core/interfaces/core.interfaces';
@@ -135,7 +135,7 @@ export class ContactComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService
+    private authManager: AuthManagerService
   ) {
     this.contactForm = this.createContactForm();
   }
@@ -169,7 +169,7 @@ export class ContactComponent implements OnInit {
       console.log('Envoi du formulaire de contact:', formData);
 
       // Appel API réel
-      this.authService.sendContactMessage(formData).subscribe({
+      this.authManager.sendContactMessage(formData).subscribe({
         next: () => {
           this.isSubmitting = false;
           this.isSubmitted = true;

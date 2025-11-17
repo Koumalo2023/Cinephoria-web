@@ -11,7 +11,7 @@ export { StorageService } from './storage.service';
 export * from './api';
 
 // Services Auth - Gestion d'authentification
-export { AuthService } from './auth/auth.service';
+export { AuthManagerService } from './auth/auth-manager.service';
 
 // Services Mapping - Transformation données API ↔ UI
 export * from './mapping';
