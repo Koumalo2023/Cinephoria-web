@@ -9,7 +9,6 @@ import { MovieService } from '../../../core/services/api/movie.service';
 import { ShowtimeService } from '../../../core/services/api/showtime.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { ReservationModalService } from '../../../core/services/reservation-modal.service';
 
 // Interfaces
 import { MovieDetailsDto, MovieReviewDto, ShowtimeDto } from '../../../core/interfaces/core.interfaces';
@@ -54,7 +53,6 @@ export class MovieDetailComponent implements OnInit, OnDestroy {
     private showtimeService: ShowtimeService,
     private loadingService: LoadingService,
     private notificationService: NotificationService,
-    private modalService: ReservationModalService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -156,10 +154,12 @@ export class MovieDetailComponent implements OnInit, OnDestroy {
   onShowtimeSelected(showtime: ShowtimeDto): void {
     if (!this.movieDetails) return;
 
-    // Ouvrir la modale de réservation
-    this.modalService.openMovieReservationModal({
-      showtime: showtime,
-      movie: this.movieDetails
+    // Navigation vers le flux de réservation
+    this.router.navigate(['/reservation'], {
+      queryParams: {
+        showtimeId: showtime.showtimeId,
+        movieId: this.movieDetails.movieId
+      }
     });
   }
 
