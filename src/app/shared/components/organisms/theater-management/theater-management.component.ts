@@ -5,10 +5,7 @@ import { of } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
 
 // Composants atomiques
-import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
-import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
-import { ChipComponent } from '../../atoms/chip/chip.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { SelectComponent } from '../../atoms/select/select.component';
@@ -45,10 +42,7 @@ export interface TheaterStats {
     ButtonComponent,
     IconComponent,
     InputComponent,
-    SelectComponent,
-    CheckboxComponent,
-    BadgeComponent,
-    ChipComponent,
+    SelectComponent, 
     TheaterCardComponent,
     SeatGridComponent,
     SeatManagementComponent,

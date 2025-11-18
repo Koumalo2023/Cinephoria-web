@@ -152,4 +152,24 @@ export class ReservationModalService {
   isModalOpen(): boolean {
     return this.modalComponentRef !== null;
   }
+  /**
+   * Ouvre une modale de réservation pour un film
+   */
+  openMovieReservationModal(data: { showtime: any; movie: any }): void {
+    // Pour l'instant, on utilise simplement la méthode existante avec des données vides
+    // Cette méthode sera implémentée plus tard avec le composant de réservation approprié
+    const placeholderReservation: UserReservationDto = {
+      reservationId: 0,
+      movieTitle: data.movie?.title || 'Film',
+      showtimeDate: data.showtime?.startTime || new Date(),
+      theaterName: 'Cinéma',
+      seatNumbers: [],
+      totalPrice: data.showtime?.price || 0,
+      status: 'confirmed',
+      createdAt: new Date(),
+      qrCodeData: ''
+    };
+    
+    this.openReservationModal(placeholderReservation);
+  }
 }

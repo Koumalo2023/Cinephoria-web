@@ -8,8 +8,8 @@ import { Subscription } from 'rxjs';
 import { MovieService } from '../../../core/services/api/movie.service';
 import { ShowtimeService } from '../../../core/services/api/showtime.service';
 import { LoadingService } from '../../../core/services/loading.service';
-import { ModalService } from '../../../core/services/modal.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ReservationModalService } from '../../../core/services/reservation-modal.service';
 
 // Interfaces
 import { MovieDetailsDto, MovieReviewDto, ShowtimeDto } from '../../../core/interfaces/core.interfaces';
@@ -19,7 +19,6 @@ import { RatingInputComponent } from '../../../shared/components/atoms/rating-in
 import { MovieDetailsCardComponent } from '../../../shared/components/molecules/movie-details-card/movie-details-card.component';
 import { MovieRatingDisplayComponent } from '../../../shared/components/molecules/movie-rating-display/movie-rating-display.component';
 import { ShowtimeSelectorComponent } from '../../../shared/components/molecules/showtime-selector/showtime-selector.component';
-import { ReservationFlowComponent } from '../../../shared/components/organisms/reservation-flow/reservation-flow.component';
 
 @Component({
   selector: 'app-movie-detail',
@@ -55,7 +54,7 @@ export class MovieDetailComponent implements OnInit, OnDestroy {
     private showtimeService: ShowtimeService,
     private loadingService: LoadingService,
     private notificationService: NotificationService,
-    private modalService: ModalService,
+    private modalService: ReservationModalService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -158,12 +157,9 @@ export class MovieDetailComponent implements OnInit, OnDestroy {
     if (!this.movieDetails) return;
 
     // Ouvrir la modale de réservation
-    this.modalService.open(ReservationFlowComponent, {
-      data: {
-        showtime: showtime,
-        movie: this.movieDetails
-      },
-      size: 'xl'
+    this.modalService.openMovieReservationModal({
+      showtime: showtime,
+      movie: this.movieDetails
     });
   }
 

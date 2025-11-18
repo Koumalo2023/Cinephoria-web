@@ -7,6 +7,7 @@ import {
   EmailStatsDto,
   ReminderResultDto,
   ReminderStatsDto,
+  ReservationDto,
   ReservationReminderDto,
   SeatDto,
   ShowtimeDto,
@@ -69,6 +70,13 @@ export class ReservationService {
    */
   cancelReservation(reservationId: number): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/cancel/${reservationId}`);
+  }
+
+  /**
+   * Obtenir une réservation spécifique par son ID
+   */
+  getReservationById(reservationId: number): Observable<ReservationDto> {
+    return this.http.get<ReservationDto>(`${this.baseUrl}/${reservationId}`);
   }
 
   // ============ NOUVELLES MÉTHODES ============
