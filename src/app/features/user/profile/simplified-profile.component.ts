@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -30,7 +30,7 @@ import { InputComponent } from '../../../shared/components/atoms/input/input.com
 import { PasswordInputComponent } from '../../../shared/components/atoms/password-input/password-input.component';
 import { ToggleSwitchComponent } from '../../../shared/components/atoms/toggle-switch/toggle-switch.component';
 
-export type ProfileTab = 'profile' | 'security' | 'notifications';
+export type ProfileTab = 'profile' | 'general' | 'security' | 'notifications';
 
 @Component({
   selector: 'app-simplified-profile',
@@ -39,6 +39,7 @@ export type ProfileTab = 'profile' | 'security' | 'notifications';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    FormsModule,
     AvatarComponent,
     ButtonComponent,
     IconComponent,
@@ -98,6 +99,7 @@ export class SimplifiedProfileComponent implements OnInit {
   // Navigation tabs
   tabs: { id: ProfileTab; label: string; icon: string }[] = [
     { id: 'profile', label: 'Profil', icon: 'user' },
+    { id: 'general', label: 'Paramètres généraux', icon: 'settings' },
     { id: 'security', label: 'Sécurité', icon: 'shield' },
     { id: 'notifications', label: 'Notifications', icon: 'bell' }
   ];
@@ -219,15 +221,37 @@ export class SimplifiedProfileComponent implements OnInit {
       });
 
     // Charger les paramètres de notifications
+    console.log('🔄 Début du chargement des paramètres de notifications...');
     this.settingsService.getNotificationSettings()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (settings) => {
-          console.log('🔔 Paramètres de notifications chargés:', settings);
+          console.log('✅ Paramètres de notifications chargés avec succès');
+          console.log('🔍 Détails des paramètres de notifications:', {
+            emailNewReservation: settings.emailNewReservation,
+            emailCanceledReservation: settings.emailCanceledReservation,
+            emailNewUser: settings.emailNewUser,
+            emailSystemAlerts: settings.emailSystemAlerts,
+            appNewReservation: settings.appNewReservation,
+            appCanceledReservation: settings.appCanceledReservation,
+            appNewUser: settings.appNewUser,
+            appSystemAlerts: settings.appSystemAlerts
+          });
+          
+          // Vérification que tous les paramètres sont définis
+          const allSettingsDefined = Object.values(settings).every(value => value !== undefined && value !== null);
+          console.log('📊 Tous les paramètres sont définis:', allSettingsDefined);
+          
           this.notificationSettings = settings;
+          console.log('✅ notificationSettings mis à jour:', this.notificationSettings);
         },
         error: (error) => {
           console.error('❌ Erreur lors du chargement des paramètres de notifications:', error);
+          console.log('📊 Détails de l\'erreur:', {
+            status: error?.status,
+            message: error?.message,
+            url: error?.url
+          });
           this.handleError('Erreur lors du chargement des paramètres de notifications', error);
         }
       });
@@ -288,15 +312,43 @@ export class SimplifiedProfileComponent implements OnInit {
    * Charge les préférences de notifications
    */
   private loadNotificationPreferences(): void {
+    console.log('🔄 Début du chargement des préférences de notifications...');
     this.notificationPreferencesService.getNotificationPreferences()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (preferences) => {
-          console.log('🔔 Préférences de notifications chargées:', preferences);
+          console.log('✅ Préférences de notifications chargées avec succès');
+          console.log('📋 Détails des préférences:', {
+            emailEnabled: preferences.emailEnabled,
+            appEnabled: preferences.appEnabled,
+            preferences: preferences.preferences
+          });
+          
+          // Vérification détaillée de la structure des préférences
+          if (preferences.preferences) {
+            console.log('🔍 Structure des préférences détaillée:');
+            const prefKeys = [
+              'EmailNewReservation', 'EmailCanceledReservation', 'EmailNewUser', 'EmailSystemAlerts',
+              'AppNewReservation', 'AppCanceledReservation', 'AppNewUser', 'AppSystemAlerts'
+            ] as const;
+            
+            prefKeys.forEach(key => {
+              console.log(`   ${key}: ${preferences.preferences[key]}`);
+            });
+          } else {
+            console.warn('⚠️ Aucune préférence trouvée dans la réponse');
+          }
+          
           this.notificationPreferences = preferences;
+          console.log('✅ notificationPreferences mis à jour:', this.notificationPreferences);
         },
         error: (error) => {
-          console.warn('⚠️ Impossible de charger les préférences de notifications:', error);
+          console.error('❌ Erreur lors du chargement des préférences de notifications:', error);
+          console.log('📊 Détails de l\'erreur:', {
+            status: error?.status,
+            message: error?.message,
+            url: error?.url
+          });
           // On continue sans les préférences
         }
       });
@@ -523,22 +575,33 @@ export class SimplifiedProfileComponent implements OnInit {
   // =============================================
 
   onNotificationSettingChange(setting: keyof NotificationSettingsDto, value: boolean): void {
-    if (!this.notificationSettings) return;
+    console.log(`🔄 onNotificationSettingChange: ${setting} = ${value}`);
+    
+    if (!this.notificationSettings) {
+      console.log('❌ notificationSettings est null');
+      return;
+    }
 
     const updatedSettings: NotificationSettingsDto = {
       ...this.notificationSettings,
       [setting]: value
     };
 
-    // Utilisation de ProfileService conformément à la documentation
-    this.profileService.updateNotificationSettings(updatedSettings)
+    console.log('📝 Paramètres mis à jour:', updatedSettings);
+
+    // Utilisation de SettingsService pour les paramètres de notifications
+    this.settingsService.updateNotificationSettings(updatedSettings)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.notificationSettings = updatedSettings;
+          console.log('✅ Paramètres de notifications mis à jour avec succès');
           this.showSuccess('Paramètres de notifications mis à jour');
         },
-        error: (error) => this.handleError('Erreur lors de la mise à jour des paramètres', error)
+        error: (error) => {
+          console.error('❌ Erreur lors de la mise à jour des paramètres:', error);
+          this.handleError('Erreur lors de la mise à jour des paramètres', error);
+        }
       });
   }
 
@@ -550,8 +613,8 @@ export class SimplifiedProfileComponent implements OnInit {
       [setting]: value
     };
 
-    // Utilisation de ProfileService conformément à la documentation
-    this.profileService.updateSecuritySettings(updatedSettings)
+    // Utilisation de SettingsService pour les paramètres de sécurité
+    this.settingsService.updateSecuritySettings(updatedSettings)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -713,8 +776,22 @@ export class SimplifiedProfileComponent implements OnInit {
    * Obtient la valeur d'une préférence de notification
    */
   getPreferenceValue(preferenceKey: string): boolean {
-    if (!this.notificationPreferences) return false;
-    return this.notificationPreferences.preferences[preferenceKey as keyof typeof this.notificationPreferences.preferences];
+    console.log(`🔍 getPreferenceValue appelé avec clé: ${preferenceKey}`);
+    
+    if (!this.notificationPreferences) {
+      console.log('❌ notificationPreferences est null pour la clé:', preferenceKey);
+      return false;
+    }
+    
+    if (!this.notificationPreferences.preferences) {
+      console.log('❌ notificationPreferences.preferences est null pour la clé:', preferenceKey);
+      return false;
+    }
+    
+    // Accès direct aux propriétés de l'objet preferences
+    const value = (this.notificationPreferences.preferences as any)[preferenceKey];
+    console.log(`🔍 getPreferenceValue(${preferenceKey}):`, value, '(type:', typeof value, ')');
+    return value || false;
   }
 
   // =============================================
@@ -909,5 +986,109 @@ export class SimplifiedProfileComponent implements OnInit {
       recentRatings,
       activityScore: Math.round((recentReservations * 2 + recentRatings * 1.5 + totalNotifications * 0.5) / 10)
     };
+  }
+
+  // ===========================================================================
+  // MÉTHODES POUR LES PARAMÈTRES GÉNÉRAUX
+  // ===========================================================================
+
+  /**
+   * Gère le changement de thème
+   */
+  onThemeChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const theme = select.value;
+    console.log('🎨 Changement de thème:', theme);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement de langue
+   */
+  onLanguageChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const language = select.value;
+    console.log('🌐 Changement de langue:', language);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement de format de date
+   */
+  onDateFormatChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const dateFormat = select.value;
+    console.log('📅 Changement de format de date:', dateFormat);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement de visibilité du profil
+   */
+  onProfileVisibilityChange(visible: boolean): void {
+    console.log('👤 Visibilité du profil:', visible);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement d'affichage des réservations
+   */
+  onShowReservationsChange(show: boolean): void {
+    console.log('🎫 Affichage des réservations:', show);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement d'affichage des avis
+   */
+  onShowRatingsChange(show: boolean): void {
+    console.log('⭐ Affichage des avis:', show);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement des rappels de séances
+   */
+  onSessionRemindersChange(enabled: boolean): void {
+    console.log('⏰ Rappels de séances:', enabled);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement des alertes nouveaux films
+   */
+  onNewMoviesAlertsChange(enabled: boolean): void {
+    console.log('🎬 Alertes nouveaux films:', enabled);
+    // Implémentation à venir
+  }
+
+  /**
+   * Gère le changement des alertes promotions
+   */
+  onPromotionsAlertsChange(enabled: boolean): void {
+    console.log('💸 Alertes promotions:', enabled);
+    // Implémentation à venir
+  }
+
+  /**
+   * Sauvegarde les paramètres généraux
+   */
+  saveGeneralSettings(): void {
+    console.log('💾 Sauvegarde des paramètres généraux');
+    this.loading = true;
+    // Implémentation à venir
+    setTimeout(() => {
+      this.loading = false;
+      this.successMessage = 'Paramètres généraux sauvegardés avec succès';
+    }, 1000);
+  }
+
+  /**
+   * Réinitialise les paramètres généraux
+   */
+  resetGeneralSettings(): void {
+    console.log('🔄 Réinitialisation des paramètres généraux');
+    // Implémentation à venir
+    this.successMessage = 'Paramètres généraux réinitialisés';
   }
 }

@@ -12,13 +12,22 @@
  * @see api-documentation.md#generalsettingsdto
  */
 export interface GeneralSettingsDto {
-  cinemaName: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
-  openingHours: string;
+  companyName: string;
+  companyAddress: string;
+  contactEmail: string;
+  contactPhone: string;
+  language: string;
+  timezone: string;
+  dateFormat: string;
   currency: string;
-  timeZone: string;
+  
+  // Paramètres utilisateur
+  profileVisibility: boolean;
+  showReservations: boolean;
+  showRatings: boolean;
+  sessionReminders: boolean;
+  newMoviesAlerts: boolean;
+  promotionsAlerts: boolean;
 }
 
 /**
@@ -26,11 +35,15 @@ export interface GeneralSettingsDto {
  * @see api-documentation.md#notificationsettingsdto
  */
 export interface NotificationSettingsDto {
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  reservationReminders: boolean;
-  promotionNotifications: boolean;
-  newsletter: boolean;
+  emailNewReservation: boolean;
+  emailCanceledReservation: boolean;
+  emailNewUser: boolean;
+  emailSystemAlerts: boolean;
+  appNewReservation: boolean;
+  appCanceledReservation: boolean;
+  appNewUser: boolean;
+  appSystemAlerts: boolean;
+  retention: string;
 }
 
 /**
@@ -38,11 +51,11 @@ export interface NotificationSettingsDto {
  * @see api-documentation.md#securitysettingsdto
  */
 export interface SecuritySettingsDto {
-  passwordExpirationDays: number;
-  maxLoginAttempts: number;
-  sessionTimeoutMinutes: number;
-  twoFactorAuthentication: boolean;
-  ipWhitelist: string[];
+  passwordMinLength: number;
+  passwordRequireUppercase: boolean;
+  passwordRequireNumber: boolean;
+  passwordRequireSpecial: boolean;
+  passwordExpiry: string;
 }
 
 // =============================================

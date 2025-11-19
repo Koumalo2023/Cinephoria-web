@@ -99,6 +99,121 @@
       </ng-template>
     </div>
 
+    <!-- Onglet Paramètres généraux -->
+    <div *ngIf="activeTab === 'general'" class="tab-panel">
+      <h2>Paramètres généraux</h2>
+      
+      <!-- Paramètres de notifications de base -->
+      <div class="notification-settings" *ngIf="notificationSettings; else loadingNotificationSettings">
+        <h3>Paramètres de notifications</h3>
+        
+        <!-- Notifications par email -->
+        <div class="notification-category">
+          <h4>Notifications par Email</h4>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Nouvelles réservations par email</h5>
+              <p>Recevez des notifications pour les nouvelles réservations par email</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.emailNewReservation"
+              (toggleChange)="onNotificationSettingChange('emailNewReservation', $event)">
+            </app-toggle-switch>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Réservations annulées par email</h5>
+              <p>Recevez des alertes pour les réservations annulées par email</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.emailCanceledReservation"
+              (toggleChange)="onNotificationSettingChange('emailCanceledReservation', $event)">
+            </app-toggle-switch>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Nouveaux utilisateurs par email</h5>
+              <p>Recevez des notifications pour les nouveaux utilisateurs par email</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.emailNewUser"
+              (toggleChange)="onNotificationSettingChange('emailNewUser', $event)">
+            </app-toggle-switch>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Alertes système par email</h5>
+              <p>Recevez des alertes système importantes par email</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.emailSystemAlerts"
+              (toggleChange)="onNotificationSettingChange('emailSystemAlerts', $event)">
+            </app-toggle-switch>
+          </div>
+        </div>
+
+        <!-- Notifications dans l'application -->
+        <div class="notification-category">
+          <h4>Notifications dans l'Application</h4>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Nouvelles réservations dans l'app</h5>
+              <p>Recevez des notifications pour les nouvelles réservations dans l'application</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.appNewReservation"
+              (toggleChange)="onNotificationSettingChange('appNewReservation', $event)">
+            </app-toggle-switch>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Réservations annulées dans l'app</h5>
+              <p>Recevez des alertes pour les réservations annulées dans l'application</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.appCanceledReservation"
+              (toggleChange)="onNotificationSettingChange('appCanceledReservation', $event)">
+            </app-toggle-switch>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Nouveaux utilisateurs dans l'app</h5>
+              <p>Recevez des notifications pour les nouveaux utilisateurs dans l'application</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.appNewUser"
+              (toggleChange)="onNotificationSettingChange('appNewUser', $event)">
+            </app-toggle-switch>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h5>Alertes système dans l'app</h5>
+              <p>Recevez des alertes système importantes dans l'application</p>
+            </div>
+            <app-toggle-switch
+              [checked]="notificationSettings.appSystemAlerts"
+              (toggleChange)="onNotificationSettingChange('appSystemAlerts', $event)">
+            </app-toggle-switch>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #loadingNotificationSettings>
+        <div class="loading-section">
+          <app-icon name="loader" class="spinning"></app-icon>
+          <span>Chargement des paramètres de notifications...</span>
+        </div>
+      </ng-template>
+    </div>
+
     <!-- Onglet Sécurité -->
     <div *ngIf="activeTab === 'security'" class="tab-panel">
       <h2>Sécurité du compte</h2>
@@ -144,12 +259,34 @@
         
         <div class="setting-item">
           <div class="setting-info">
-            <h4>Authentification à deux facteurs</h4>
-            <p>Ajoutez une couche de sécurité supplémentaire à votre compte</p>
+            <h4>Mot de passe avec majuscules</h4>
+            <p>Exiger au moins une lettre majuscule dans les mots de passe</p>
           </div>
           <app-toggle-switch
-            [checked]="securitySettings.twoFactorAuthentication"
-            (toggleChange)="onSecuritySettingChange('twoFactorAuthentication', $event)">
+            [checked]="securitySettings.passwordRequireUppercase"
+            (toggleChange)="onSecuritySettingChange('passwordRequireUppercase', $event)">
+          </app-toggle-switch>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Mot de passe avec chiffres</h4>
+            <p>Exiger au moins un chiffre dans les mots de passe</p>
+          </div>
+          <app-toggle-switch
+            [checked]="securitySettings.passwordRequireNumber"
+            (toggleChange)="onSecuritySettingChange('passwordRequireNumber', $event)">
+          </app-toggle-switch>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h4>Mot de passe avec caractères spéciaux</h4>
+            <p>Exiger au moins un caractère spécial dans les mots de passe</p>
+          </div>
+          <app-toggle-switch
+            [checked]="securitySettings.passwordRequireSpecial"
+            (toggleChange)="onSecuritySettingChange('passwordRequireSpecial', $event)">
           </app-toggle-switch>
         </div>
       </div>
@@ -291,66 +428,8 @@
         </div>
       </div>
 
-      <!-- Paramètres de notifications de base (compatibilité) -->
-      <div class="notification-settings" *ngIf="notificationSettings">
-        <h3>Paramètres généraux</h3>
-        <div class="setting-item">
-          <div class="setting-info">
-            <h4>Notifications par email</h4>
-            <p>Recevez des notifications importantes par email</p>
-          </div>
-          <app-toggle-switch
-            [checked]="notificationSettings.emailNotifications"
-            (toggleChange)="onNotificationSettingChange('emailNotifications', $event)">
-          </app-toggle-switch>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h4>Notifications SMS</h4>
-            <p>Recevez des alertes importantes par SMS</p>
-          </div>
-          <app-toggle-switch
-            [checked]="notificationSettings.smsNotifications"
-            (toggleChange)="onNotificationSettingChange('smsNotifications', $event)">
-          </app-toggle-switch>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h4>Rappels de réservation</h4>
-            <p>Rappels avant vos séances de cinéma</p>
-          </div>
-          <app-toggle-switch
-            [checked]="notificationSettings.reservationReminders"
-            (toggleChange)="onNotificationSettingChange('reservationReminders', $event)">
-          </app-toggle-switch>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h4>Offres promotionnelles</h4>
-            <p>Recevez nos meilleures offres et promotions</p>
-          </div>
-          <app-toggle-switch
-            [checked]="notificationSettings.promotionNotifications"
-            (toggleChange)="onNotificationSettingChange('promotionNotifications', $event)">
-          </app-toggle-switch>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h4>Newsletter</h4>
-            <p>Actualités et nouveautés du cinéma</p>
-          </div>
-          <app-toggle-switch
-            [checked]="notificationSettings.newsletter"
-            (toggleChange)="onNotificationSettingChange('newsletter', $event)">
-          </app-toggle-switch>
-        </div>
-      </div>
     </div>
-  </div>
+      </div>
 
   <!-- Messages d'état -->
   <div *ngIf="error" class="error-message">

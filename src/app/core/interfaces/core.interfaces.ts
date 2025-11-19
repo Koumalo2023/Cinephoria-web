@@ -1109,31 +1109,6 @@ export interface IncidentActivity {
 // Interfaces Settings
 // =============================================
 
-export interface GeneralSettingsDto {
-  cinemaName: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
-  openingHours: string;
-  currency: string;
-  timeZone: string;
-}
-
-export interface NotificationSettingsDto {
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  reservationReminders: boolean;
-  promotionNotifications: boolean;
-  newsletter: boolean;
-}
-
-export interface SecuritySettingsDto {
-  passwordExpirationDays: number;
-  maxLoginAttempts: number;
-  sessionTimeoutMinutes: number;
-  twoFactorAuthentication: boolean;
-  ipWhitelist: string[];
-}
 
 // =============================================
 // Interfaces TMDb

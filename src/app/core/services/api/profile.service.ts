@@ -5,11 +5,13 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   ChangeUserPasswordDto,
-  NotificationSettingsDto,
-  SecuritySettingsDto,
   UpdateAppUserDto,
   UserProfileDto
 } from '../../interfaces/core.interfaces';
+import {
+  NotificationSettingsDto,
+  SecuritySettingsDto
+} from '../../interfaces/settings.interfaces';
 
 export interface UserStats {
   totalReservations: number;
