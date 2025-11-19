@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 // Services API conformes à la documentation
+import { NotificationPreferencesDto, NotificationPreferencesService, UserNotificationDto } from '../../../core/services/api/notification-preferences.service';
 import { ProfileService } from '../../../core/services/api/profile.service';
 import { SettingsService } from '../../../core/services/api/settings.service';
 import { AuthManagerService } from '../../../core/services/auth/auth-manager.service';
@@ -52,6 +53,7 @@ export class SimplifiedProfileComponent implements OnInit {
   // Services conformes à la documentation
   private profileService = inject(ProfileService);
   private settingsService = inject(SettingsService);
+  private notificationPreferencesService = inject(NotificationPreferencesService);
   private authManager = inject(AuthManagerService);
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<void>();
@@ -61,6 +63,9 @@ export class SimplifiedProfileComponent implements OnInit {
   generalSettings: GeneralSettingsDto | null = null;
   notificationSettings: NotificationSettingsDto | null = null;
   securitySettings: SecuritySettingsDto | null = null;
+  notificationPreferences: NotificationPreferencesDto | null = null;
+  userNotifications: UserNotificationDto[] = [];
+  unreadNotificationCount: number = 0;
   userStats: any = null;
 
   // États
@@ -97,8 +102,20 @@ export class SimplifiedProfileComponent implements OnInit {
     { id: 'notifications', label: 'Notifications', icon: 'bell' }
   ];
 
+  // Types de notifications disponibles
+  notificationTypes = [
+    { key: 'EmailNewReservation', label: 'Nouvelles réservations par email', category: 'email' },
+    { key: 'EmailCanceledReservation', label: 'Réservations annulées par email', category: 'email' },
+    { key: 'EmailNewUser', label: 'Nouveaux utilisateurs par email', category: 'email' },
+    { key: 'EmailSystemAlerts', label: 'Alertes système par email', category: 'email' },
+    { key: 'AppNewReservation', label: 'Nouvelles réservations dans l\'app', category: 'app' },
+    { key: 'AppCanceledReservation', label: 'Réservations annulées dans l\'app', category: 'app' },
+    { key: 'AppNewUser', label: 'Nouveaux utilisateurs dans l\'app', category: 'app' },
+    { key: 'AppSystemAlerts', label: 'Alertes système dans l\'app', category: 'app' }
+  ];
+
   constructor() {
-    // Initialisation du formulaire profil
+    // Initialisation du formulaire profil (valeurs vides, seront remplies par l'API)
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
@@ -106,7 +123,7 @@ export class SimplifiedProfileComponent implements OnInit {
       phoneNumber: ['']
     });
 
-    // Initialisation du formulaire mot de passe
+    // Initialisation du formulaire mot de passe (valeurs vides)
     this.passwordForm = this.fb.group({
       oldPassword: ['', [Validators.required]],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
@@ -229,6 +246,12 @@ export class SimplifiedProfileComponent implements OnInit {
           this.handleError('Erreur lors du chargement des paramètres de sécurité', error);
         }
       });
+
+    // Charger les préférences de notifications
+    this.loadNotificationPreferences();
+
+    // Charger les notifications utilisateur
+    this.loadUserNotifications();
   }
 
   /**
@@ -262,23 +285,75 @@ export class SimplifiedProfileComponent implements OnInit {
   }
 
   /**
+   * Charge les préférences de notifications
+   */
+  private loadNotificationPreferences(): void {
+    this.notificationPreferencesService.getNotificationPreferences()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (preferences) => {
+          console.log('🔔 Préférences de notifications chargées:', preferences);
+          this.notificationPreferences = preferences;
+        },
+        error: (error) => {
+          console.warn('⚠️ Impossible de charger les préférences de notifications:', error);
+          // On continue sans les préférences
+        }
+      });
+  }
+
+  /**
+   * Charge les notifications utilisateur
+   */
+  private loadUserNotifications(): void {
+    this.notificationPreferencesService.getUserNotifications(10, 0)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (notifications) => {
+          console.log('📨 Notifications utilisateur chargées:', notifications);
+          this.userNotifications = notifications;
+        },
+        error: (error) => {
+          console.warn('⚠️ Impossible de charger les notifications:', error);
+        }
+      });
+
+    // Charger le nombre de notifications non lues
+    this.notificationPreferencesService.getUnreadNotificationCount()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.unreadNotificationCount = response.unreadCount;
+        },
+        error: (error) => {
+          console.warn('⚠️ Impossible de charger le nombre de notifications non lues:', error);
+        }
+      });
+  }
+
+  /**
    * Calcule la dernière activité de l'utilisateur
    */
   private getLastActivity(): string {
-    if (!this.userProfile) return 'N/A';
+    if (!this.userProfile) return 'Aucune activité';
     
     const activities: Date[] = [];
     
-    // Dernière réservation
+    // Dernière réservation (utiliser la date de création du profil si pas de date de réservation)
     if (this.userProfile.reservations?.length > 0) {
-      const lastReservation = new Date(Math.max(...this.userProfile.reservations.map(r => new Date().getTime()))); // Utiliser la date actuelle comme fallback
-      activities.push(lastReservation);
+      // Si les réservations n'ont pas de date, utiliser la date de création du profil
+      activities.push(this.userProfile.createdAt);
     }
     
     // Dernière notation
     if (this.userProfile.movieRatings?.length > 0) {
-      const lastRating = new Date(Math.max(...this.userProfile.movieRatings.map(r => new Date(r.createdAt).getTime())));
-      activities.push(lastRating);
+      const ratingDates = this.userProfile.movieRatings
+        .map(r => r.createdAt ? new Date(r.createdAt) : null)
+        .filter(date => date !== null) as Date[];
+      if (ratingDates.length > 0) {
+        const lastRating = new Date(Math.max(...ratingDates.map(d => d.getTime())));
+        activities.push(lastRating);
+      }
     }
     
     if (activities.length === 0) {
@@ -297,7 +372,7 @@ export class SimplifiedProfileComponent implements OnInit {
     const now = new Date();
     return this.userProfile.reservations.filter(reservation => {
       // Vérifier si la réservation est pour une séance future
-      // Note: Cette logique peut être améliorée selon la structure des données
+      // Cette logique peut être adaptée selon la structure réelle des données
       return reservation.status === 4; // Status "Active" ou équivalent
     }).length;
   }
@@ -341,8 +416,21 @@ export class SimplifiedProfileComponent implements OnInit {
    * Gestion des erreurs
    */
   private handleError(message: string, error: any): void {
-    console.error(message, error);
-    this.error = message;
+    console.error('Erreur API:', message, error);
+    
+    // Gestion spécifique des erreurs d'authentification
+    if (error?.status === 401 || error?.status === 403) {
+      this.error = 'Session expirée. Veuillez vous reconnecter.';
+      // Optionnel: rediriger vers la page de connexion
+      // this.router.navigate(['/login']);
+    } else if (error?.status === 404) {
+      this.error = 'Ressource non trouvée.';
+    } else if (error?.status >= 500) {
+      this.error = 'Erreur serveur. Veuillez réessayer plus tard.';
+    } else {
+      this.error = message;
+    }
+    
     this.loading = false;
   }
 
@@ -475,6 +563,161 @@ export class SimplifiedProfileComponent implements OnInit {
   }
 
   // =============================================
+  // Gestion des Préférences de Notifications
+  // =============================================
+
+  /**
+   * Met à jour une préférence de notification spécifique
+   */
+  onNotificationPreferenceChange(preferenceKey: string, value: boolean): void {
+    if (!this.notificationPreferences) return;
+
+    const updatedPreferences = {
+      ...this.notificationPreferences.preferences,
+      [preferenceKey]: value
+    };
+
+    const updateData = {
+      emailEnabled: this.notificationPreferences.emailEnabled,
+      appEnabled: this.notificationPreferences.appEnabled,
+      preferences: updatedPreferences
+    };
+
+    this.notificationPreferencesService.updateNotificationPreferences(updateData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          if (this.notificationPreferences) {
+            this.notificationPreferences.preferences = updatedPreferences;
+          }
+          this.showSuccess('Préférence de notification mise à jour');
+        },
+        error: (error) => this.handleError('Erreur lors de la mise à jour de la préférence', error)
+      });
+  }
+
+  /**
+   * Active/désactive toutes les notifications par email
+   */
+  onEmailNotificationsToggle(value: boolean): void {
+    if (!this.notificationPreferences) return;
+
+    const updateData = {
+      emailEnabled: value,
+      appEnabled: this.notificationPreferences.appEnabled,
+      preferences: this.notificationPreferences.preferences
+    };
+
+    this.notificationPreferencesService.updateNotificationPreferences(updateData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          if (this.notificationPreferences) {
+            this.notificationPreferences.emailEnabled = value;
+          }
+          this.showSuccess('Notifications email ' + (value ? 'activées' : 'désactivées'));
+        },
+        error: (error) => this.handleError('Erreur lors de la mise à jour', error)
+      });
+  }
+
+  /**
+   * Active/désactive toutes les notifications dans l'app
+   */
+  onAppNotificationsToggle(value: boolean): void {
+    if (!this.notificationPreferences) return;
+
+    const updateData = {
+      emailEnabled: this.notificationPreferences.emailEnabled,
+      appEnabled: value,
+      preferences: this.notificationPreferences.preferences
+    };
+
+    this.notificationPreferencesService.updateNotificationPreferences(updateData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          if (this.notificationPreferences) {
+            this.notificationPreferences.appEnabled = value;
+          }
+          this.showSuccess('Notifications app ' + (value ? 'activées' : 'désactivées'));
+        },
+        error: (error) => this.handleError('Erreur lors de la mise à jour', error)
+      });
+  }
+
+  /**
+   * Marque une notification comme lue
+   */
+  markNotificationAsRead(notificationId: string): void {
+    this.notificationPreferencesService.markNotificationAsRead(notificationId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Mettre à jour localement la notification
+          const notification = this.userNotifications.find(n => n.id === notificationId);
+          if (notification) {
+            notification.isRead = true;
+          }
+          // Mettre à jour le compteur
+          this.unreadNotificationCount = Math.max(0, this.unreadNotificationCount - 1);
+          this.showSuccess('Notification marquée comme lue');
+        },
+        error: (error) => this.handleError('Erreur lors du marquage de la notification', error)
+      });
+  }
+
+  /**
+   * Marque toutes les notifications comme lues
+   */
+  markAllNotificationsAsRead(): void {
+    this.notificationPreferencesService.markAllNotificationsAsRead()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Mettre à jour localement toutes les notifications
+          this.userNotifications.forEach(notification => {
+            notification.isRead = true;
+          });
+          this.unreadNotificationCount = 0;
+          this.showSuccess('Toutes les notifications marquées comme lues');
+        },
+        error: (error) => this.handleError('Erreur lors du marquage des notifications', error)
+      });
+  }
+
+  /**
+   * Obtient les notifications non lues
+   */
+  get unreadNotifications(): UserNotificationDto[] {
+    return this.userNotifications.filter(notification => !notification.isRead);
+  }
+
+  /**
+   * Obtient les notifications récentes (limitées à 5)
+   */
+  get recentNotifications(): UserNotificationDto[] {
+    return this.userNotifications
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+  }
+
+  /**
+   * Obtient les préférences de notification par catégorie
+   */
+  getNotificationPreferencesByCategory(category: 'email' | 'app'): any[] {
+    return this.notificationTypes.filter(type => type.category === category);
+  }
+
+  /**
+   * Obtient la valeur d'une préférence de notification
+   */
+  getPreferenceValue(preferenceKey: string): boolean {
+    if (!this.notificationPreferences) return false;
+    return this.notificationPreferences.preferences[preferenceKey as keyof typeof this.notificationPreferences.preferences];
+  }
+
+  // =============================================
   // Gestion de la Photo de Profil
   // =============================================
 
@@ -489,18 +732,24 @@ export class SimplifiedProfileComponent implements OnInit {
         return;
       }
 
+      this.loading = true;
+      
       // Utilisation de ProfileService conformément à la documentation
       this.profileService.uploadProfileImage(this.userProfile?.appUserId || '', file)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
+            this.loading = false;
             // Mettre à jour l'URL de la photo de profil dans le profil utilisateur
             if (this.userProfile && response.url) {
               this.userProfile.profilePictureUrl = response.url;
               this.showSuccess('Photo de profil mise à jour');
             }
           },
-          error: (error) => this.handleError('Erreur lors de l\'upload de la photo', error)
+          error: (error) => {
+            this.loading = false;
+            this.handleError('Erreur lors de l\'upload de la photo', error);
+          }
         });
     }
   }
@@ -587,5 +836,78 @@ export class SimplifiedProfileComponent implements OnInit {
 
   refreshData(): void {
     this.loadUserData();
+  }
+
+  // =============================================
+  // Statistiques de Notifications
+  // =============================================
+
+  /**
+   * Obtient les statistiques des notifications
+   */
+  get notificationStats() {
+    const totalNotifications = this.userNotifications.length;
+    const unreadNotifications = this.unreadNotifications.length;
+    const readNotifications = totalNotifications - unreadNotifications;
+    
+    // Calculer les statistiques par type
+    const typeStats: { [key: string]: number } = {};
+    this.userNotifications.forEach(notification => {
+      typeStats[notification.type] = (typeStats[notification.type] || 0) + 1;
+    });
+
+    // Calculer les statistiques par période (7 derniers jours)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentNotifications = this.userNotifications.filter(
+      notification => new Date(notification.createdAt) >= sevenDaysAgo
+    ).length;
+
+    return {
+      total: totalNotifications,
+      unread: unreadNotifications,
+      read: readNotifications,
+      readPercentage: totalNotifications > 0 ? Math.round((readNotifications / totalNotifications) * 100) : 0,
+      recent: recentNotifications,
+      types: Object.keys(typeStats).map(type => ({
+        type: type,
+        count: typeStats[type],
+        percentage: Math.round((typeStats[type] / totalNotifications) * 100) || 0
+      }))
+    };
+  }
+
+  /**
+   * Obtient les statistiques d'activité de l'utilisateur
+   */
+  get activityStats() {
+    if (!this.userProfile) return null;
+
+    const totalReservations = this.userProfile.reservations?.length || 0;
+    const totalRatings = this.userProfile.movieRatings?.length || 0;
+    const totalFavorites = this.userProfile.favoriteMovies?.length || 0;
+    const totalNotifications = this.userNotifications.length;
+
+    // Calculer l'activité des 30 derniers jours
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentReservations = this.userProfile.reservations?.filter(
+      reservation => new Date() >= thirtyDaysAgo
+    ).length || 0;
+
+    const recentRatings = this.userProfile.movieRatings?.filter(
+      rating => new Date(rating.createdAt) >= thirtyDaysAgo
+    ).length || 0;
+
+    return {
+      totalReservations,
+      totalRatings,
+      totalFavorites,
+      totalNotifications,
+      recentReservations,
+      recentRatings,
+      activityScore: Math.round((recentReservations * 2 + recentRatings * 1.5 + totalNotifications * 0.5) / 10)
+    };
   }
 }

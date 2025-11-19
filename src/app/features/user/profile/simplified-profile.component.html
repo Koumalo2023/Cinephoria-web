@@ -25,7 +25,8 @@
         {{ userProfile?.firstName }} {{ userProfile?.lastName }}
       </h1>
       <p class="profile-email">{{ userProfile?.email }}</p>
-      <p class="profile-role">Membre depuis {{ userProfile?.createdAt | date:'MMMM yyyy' }}</p>
+      <p class="profile-role" *ngIf="userProfile">Membre depuis {{ userProfile.createdAt | date:'MMMM yyyy' }}</p>
+      <p class="profile-role" *ngIf="!userProfile">Chargement du profil...</p>
     </div>
   </div>
 
@@ -45,48 +46,57 @@
     
     <!-- Onglet Profil -->
     <div *ngIf="activeTab === 'profile'" class="tab-panel">
-      <form [formGroup]="profileForm" (ngSubmit)="onProfileSave()" class="profile-form">
-        <h2>Informations personnelles</h2>
-        
-        <div class="form-row">
-          <app-input
-            label="Prénom"
-            formControlName="firstName"
-            placeholder="Votre prénom"
-            [required]="true">
-          </app-input>
+      <div *ngIf="userProfile; else loadingProfile">
+        <form [formGroup]="profileForm" (ngSubmit)="onProfileSave()" class="profile-form">
+          <h2>Informations personnelles</h2>
           
+          <div class="form-row">
+            <app-input
+              label="Prénom"
+              formControlName="firstName"
+              placeholder="Votre prénom"
+              [required]="true">
+            </app-input>
+            
+            <app-input
+              label="Nom"
+              formControlName="lastName"
+              placeholder="Votre nom"
+              [required]="true">
+            </app-input>
+          </div>
+
           <app-input
-            label="Nom"
-            formControlName="lastName"
-            placeholder="Votre nom"
+            label="Email"
+            type="email"
+            formControlName="email"
+            placeholder="votre@email.com"
             [required]="true">
           </app-input>
+
+          <app-input
+            label="Téléphone"
+            formControlName="phoneNumber"
+            placeholder="Votre numéro de téléphone">
+          </app-input>
+
+          <div class="form-actions">
+            <app-button
+              type="submit"
+              [disabled]="profileForm.invalid || loading"
+              [loading]="loading">
+              Enregistrer les modifications
+            </app-button>
+          </div>
+        </form>
+      </div>
+      
+      <ng-template #loadingProfile>
+        <div class="loading-section">
+          <app-icon name="loader" class="spinning"></app-icon>
+          <span>Chargement des informations du profil...</span>
         </div>
-
-        <app-input
-          label="Email"
-          type="email"
-          formControlName="email"
-          placeholder="votre@email.com"
-          [required]="true">
-        </app-input>
-
-        <app-input
-          label="Téléphone"
-          formControlName="phoneNumber"
-          placeholder="Votre numéro de téléphone">
-        </app-input>
-
-        <div class="form-actions">
-          <app-button
-            type="submit"
-            [disabled]="profileForm.invalid || loading"
-            [loading]="loading">
-            Enregistrer les modifications
-          </app-button>
-        </div>
-      </form>
+      </ng-template>
     </div>
 
     <!-- Onglet Sécurité -->
@@ -129,7 +139,7 @@
       </form>
 
       <!-- Paramètres de sécurité -->
-      <div class="security-settings" *ngIf="securitySettings">
+      <div class="security-settings" *ngIf="securitySettings; else loadingSecurity">
         <h3>Paramètres de sécurité</h3>
         
         <div class="setting-item">
@@ -143,13 +153,147 @@
           </app-toggle-switch>
         </div>
       </div>
+      
+      <ng-template #loadingSecurity>
+        <div class="loading-section">
+          <app-icon name="loader" class="spinning"></app-icon>
+          <span>Chargement des paramètres de sécurité...</span>
+        </div>
+      </ng-template>
     </div>
 
     <!-- Onglet Notifications -->
     <div *ngIf="activeTab === 'notifications'" class="tab-panel">
       <h2>Paramètres de notifications</h2>
       
+      <!-- Section Notifications récentes -->
+      <div class="notifications-section">
+        <div *ngIf="userNotifications.length > 0">
+          <div class="section-header">
+            <h3>Notifications récentes</h3>
+            <div class="section-actions">
+              <span class="badge" *ngIf="unreadNotificationCount > 0">
+                {{ unreadNotificationCount }} non lue(s)
+              </span>
+              <app-button
+                variant="secondary"
+                size="small"
+                (click)="markAllNotificationsAsRead()"
+                *ngIf="unreadNotificationCount > 0">
+                <app-icon name="check-all"></app-icon>
+                Tout marquer comme lu
+              </app-button>
+            </div>
+          </div>
+          
+          <div class="notifications-list">
+            <div *ngFor="let notification of recentNotifications"
+                 class="notification-item"
+                 [class.unread]="!notification.isRead">
+              <div class="notification-content">
+                <div class="notification-header">
+                  <h4>{{ notification.title }}</h4>
+                  <span class="notification-time">
+                    {{ notification.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                  </span>
+                </div>
+                <p class="notification-message">{{ notification.message }}</p>
+                <span class="notification-type">{{ notification.type }}</span>
+              </div>
+              <div class="notification-actions" *ngIf="!notification.isRead">
+                <app-button
+                  variant="ghost"
+                  size="small"
+                  (click)="markNotificationAsRead(notification.id)">
+                  <app-icon name="check"></app-icon>
+                  Marquer comme lu
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="userNotifications.length === 0" class="empty-state">
+          <app-icon name="bell-off" size="large"></app-icon>
+          <h3>Aucune notification</h3>
+          <p>Vous n'avez pas encore reçu de notifications.</p>
+        </div>
+      </div>
+
+      <!-- Section Préférences de notifications détaillées -->
+      <div class="notification-preferences-section">
+        <div *ngIf="notificationPreferences">
+          <h3>Préférences de notifications</h3>
+          
+          <!-- Paramètres globaux -->
+          <div class="global-settings">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Notifications par email</h4>
+                <p>Activer/désactiver toutes les notifications par email</p>
+              </div>
+              <app-toggle-switch
+                [checked]="notificationPreferences.emailEnabled"
+                (toggleChange)="onEmailNotificationsToggle($event)">
+              </app-toggle-switch>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Notifications dans l'application</h4>
+                <p>Activer/désactiver toutes les notifications dans l'app</p>
+              </div>
+              <app-toggle-switch
+                [checked]="notificationPreferences.appEnabled"
+                (toggleChange)="onAppNotificationsToggle($event)">
+              </app-toggle-switch>
+            </div>
+          </div>
+
+          <!-- Préférences par type - Email -->
+          <div class="preferences-category" *ngIf="notificationPreferences.emailEnabled">
+            <h4>Notifications par Email</h4>
+            <div class="preferences-list">
+              <div *ngFor="let pref of getNotificationPreferencesByCategory('email')"
+                   class="preference-item">
+                <div class="preference-info">
+                  <h5>{{ pref.label }}</h5>
+                  <p>Recevoir ce type de notification par email</p>
+                </div>
+                <app-toggle-switch
+                  [checked]="getPreferenceValue(pref.key)"
+                  (toggleChange)="onNotificationPreferenceChange(pref.key, $event)">
+                </app-toggle-switch>
+              </div>
+            </div>
+          </div>
+
+          <!-- Préférences par type - Application -->
+          <div class="preferences-category" *ngIf="notificationPreferences.appEnabled">
+            <h4>Notifications dans l'Application</h4>
+            <div class="preferences-list">
+              <div *ngFor="let pref of getNotificationPreferencesByCategory('app')"
+                   class="preference-item">
+                <div class="preference-info">
+                  <h5>{{ pref.label }}</h5>
+                  <p>Recevoir ce type de notification dans l'application</p>
+                </div>
+                <app-toggle-switch
+                  [checked]="getPreferenceValue(pref.key)"
+                  (toggleChange)="onNotificationPreferenceChange(pref.key, $event)">
+                </app-toggle-switch>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!notificationPreferences" class="loading-section">
+          <app-icon name="loader" class="spinning"></app-icon>
+          <span>Chargement des paramètres de notifications...</span>
+        </div>
+      </div>
+
+      <!-- Paramètres de notifications de base (compatibilité) -->
       <div class="notification-settings" *ngIf="notificationSettings">
+        <h3>Paramètres généraux</h3>
         <div class="setting-item">
           <div class="setting-info">
             <h4>Notifications par email</h4>
