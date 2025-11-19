@@ -89,11 +89,15 @@ export class ReservationsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadingService.start('movies-by-cinema', 'Chargement des films...');
 
-    this.movieService.getMoviesByCinema(cinemaId)
+    // Utiliser getMoviesWithShowtimes() et filtrer par cinéma côté frontend
+    this.movieService.getMoviesWithShowtimes()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (movies) => {
-          this.movies = movies;
+          // Filtrer les films qui ont des séances dans le cinéma sélectionné
+          this.movies = movies.filter(movie =>
+            movie.showtimes?.some(showtime => showtime.cinemaId === cinemaId)
+          );
           this.isLoading = false;
           this.loadingService.stop('movies-by-cinema');
         },
