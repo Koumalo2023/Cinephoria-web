@@ -410,7 +410,7 @@
         <app-button
           *ngIf="!isLastStep()"
           variant="primary"
-          (click)="nextStep()"
+          (click)="onMainButtonClick()"
           [disabled]="!canProceedToNextStep()"
           class="next-button"
         >
@@ -421,12 +421,12 @@
         <app-button
           *ngIf="isLastStep() && !reservationConfirmed"
           variant="primary"
-          (click)="confirmReservation()"
-          [disabled]="isLoading || !reservationForm.valid"
+          (click)="onMainButtonClick()"
+          [disabled]="isLoading || (!isViewMode && !reservationForm.valid)"
           class="confirm-button"
         >
           <app-icon name="check" size="small"></app-icon>
-          Confirmer la réservation
+          {{ getStepButtonText() }}
         </app-button>
 
         <app-button

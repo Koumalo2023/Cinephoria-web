@@ -11,6 +11,7 @@
       [initialSeats]="initialSeats"
       [showtimes]="showtimes"
       [seats]="availableSeats"
+      [existingReservation]="existingReservation"
       (reservationComplete)="onReservationComplete($event)"
       (reservationCanceled)="onReservationCanceled()"
       (cinemaSelected)="loadMoviesByCinema($event)"

@@ -1,2 +1,472 @@
+<div class="cinema-management">
+  <!-- En-tête avec statistiques -->
+  <header class="management-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">
+          <app-icon name="building" size="large"></app-icon>
+          Gestion des Cinémas
+        </h1>
+        <p class="subtitle">Gérez vos cinémas et salles de projection</p>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalCinemas }}</div>
+          <div class="stat-label">Cinémas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalTheaters }}</div>
+          <div class="stat-label">Salles</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.averageRating }}/5</div>
+          <div class="stat-label">Note moyenne</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalCapacity }}</div>
+          <div class="stat-label">Capacité totale</div>
+        </div>
+      </div>
+    </div>
+  </header>
 
-<app-cinema-management></app-cinema-management>
+  <!-- Barre d'outils -->
+  <div class="management-toolbar">
+    <div class="toolbar-left">
+      <!-- Sélecteur de vue -->
+      <div class="view-selector">
+        <app-button 
+          [variant]="activeView === 'cinemas' ? 'primary' : 'ghost'"
+          (clicked)="setView('cinemas')">
+          <app-icon name="building"></app-icon>
+          Cinémas
+        </app-button>
+        <app-button
+          [variant]="activeView === 'theaters' ? 'primary' : 'ghost'"
+          (clicked)="setView('theaters')">
+          <app-icon name="home"></app-icon>
+          Salles
+        </app-button>
+        <app-button
+          [variant]="activeView === 'seats' ? 'primary' : 'ghost'"
+          (clicked)="setView('seats')"
+          *ngIf="selectedTheater">
+          <app-icon name="chair"></app-icon>
+          Sièges
+        </app-button>
+        <app-button
+          [variant]="activeView === 'seat-management' ? 'primary' : 'ghost'"
+          (clicked)="setView('seat-management')"
+          *ngIf="selectedTheater">
+          <app-icon name="settings"></app-icon>
+          Gestion sièges
+        </app-button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="search-container">
+        <app-search-input
+          [placeholder]="activeView === 'cinemas' ? 'Rechercher un cinéma...' : 'Rechercher une salle...'"
+          (search)="onSearch($event)"
+          [clearable]="true">
+        </app-search-input>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Actions principales -->
+      <app-button
+        variant="primary"
+        (clicked)="activeView === 'cinemas' ? addNewCinema() : addNewTheater()"
+        *ngIf="activeView !== 'seat-management'">
+        <app-icon name="plus"></app-icon>
+        {{ activeView === 'cinemas' ? 'Ajouter un cinéma' : 'Ajouter une salle' }}
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="management-content">
+    <!-- Panneau latéral des filtres -->
+    <aside class="filters-sidebar">
+      <app-filter-panel
+        [context]="filterContext"
+        [appliedFilters]="appliedFilters"
+        [showHeader]="true"
+        [showActions]="true"
+        [showAppliedFilters]="true"
+        [collapsible]="true"
+        (filtersChange)="onFiltersChange($event)"
+        (filtersApply)="onFiltersApply($event)"
+        (filtersReset)="onFiltersReset()"
+        (filterRemove)="onFilterRemove($event)">
+      </app-filter-panel>
+    </aside>
+
+    <!-- Zone de contenu principale -->
+    <main class="content-main">
+      <!-- Vue Cinémas -->
+      <section *ngIf="activeView === 'cinemas'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Liste des Cinémas</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ filteredCinemas.length }} cinéma(s)</span>
+          </div>
+        </div>
+
+        <!-- Grille des cinémas -->
+        <div class="cinemas-grid">
+          <div *ngFor="let cinema of filteredCinemas" class="cinema-item">
+            <app-cinema-card
+              [cinema]="cinema"
+              [showDetails]="true"
+              (cinemaSelected)="onCinemaSelected($event)"
+              (favoriteToggled)="onCinemaFavoriteToggled($event)"
+              (directionsRequested)="onCinemaDirectionsRequested($event)">
+            </app-cinema-card>
+            
+            <!-- Actions rapides -->
+            <div class="cinema-actions">
+              <app-button 
+                variant="ghost" 
+                size="small"
+                (clicked)="editCinema(cinema)">
+                <app-icon name="edit"></app-icon>
+                Modifier
+              </app-button>
+              <app-button
+                variant="ghost"
+                size="small"
+                (clicked)="setView('theaters', cinema)">
+                <app-icon name="home"></app-icon>
+                Salles
+              </app-button>
+              <app-button 
+                variant="ghost" 
+                size="small"
+                (clicked)="deleteCinema(cinema.cinemaId.toString())">
+                <app-icon name="trash-2"></app-icon>
+                Supprimer
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message vide -->
+        <div *ngIf="filteredCinemas.length === 0" class="empty-state">
+          <app-icon name="building" size="large"></app-icon>
+          <h3>Aucun cinéma trouvé</h3>
+          <p>Aucun cinéma ne correspond à vos critères de recherche.</p>
+          <app-button variant="primary" (clicked)="addNewCinema()">
+            <app-icon name="plus"></app-icon>
+            Ajouter le premier cinéma
+          </app-button>
+        </div>
+      </section>
+
+      <!-- Vue Salles -->
+      <section *ngIf="activeView === 'theaters'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Gestion des Salles</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ filteredTheaters.length }} salle(s)</span>
+            <app-button variant="ghost" size="small" *ngIf="selectedCinema" (clicked)="setView('cinemas')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour aux cinémas
+            </app-button>
+            <app-button variant="primary" size="small" *ngIf="selectedCinema" (clicked)="addNewTheater()">
+              <app-icon name="plus"></app-icon>
+              Créer une nouvelle salle
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Sélecteur de cinéma -->
+        <div *ngIf="!selectedCinema" class="cinema-selector">
+          <h3>Sélectionnez un cinéma</h3>
+          <p>Choisissez un cinéma pour gérer ses salles</p>
+          <div class="cinemas-list">
+            <div *ngFor="let cinema of cinemas" class="cinema-option">
+              <app-button
+                variant="secondary"
+                (clicked)="onCinemaSelected(cinema.cinemaId.toString())">
+                {{ cinema.name }}
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grille des salles -->
+        <div *ngIf="selectedCinema" class="theaters-section">
+          <div class="selected-cinema">
+            <h3>{{ selectedCinema.name }}</h3>
+            <p>{{ selectedCinema.address }}, {{ selectedCinema.city }}</p>
+          </div>
+
+          <div class="theaters-grid">
+            <div *ngFor="let theater of filteredTheaters" class="theater-item">
+              <app-theater-card
+                [theater]="theater"
+                [showActions]="true"
+                (theaterSelected)="onTheaterSelected($event)"
+                (manageSeats)="onManageSeats($event)"
+                (viewSchedule)="onViewSchedule($event)">
+              </app-theater-card>
+              
+              <!-- Actions rapides -->
+              <div class="theater-actions">
+                <app-button
+                  variant="ghost"
+                  size="small"
+                  (clicked)="editTheater(theater)">
+                  <app-icon name="edit"></app-icon>
+                  Modifier
+                </app-button>
+                <app-button
+                  variant="ghost"
+                  size="small"
+                  (clicked)="deleteTheater(theater.theaterId.toString())">
+                  <app-icon name="trash-2"></app-icon>
+                  Supprimer
+                </app-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Message vide -->
+          <div *ngIf="filteredTheaters.length === 0" class="empty-state">
+            <app-icon name="home" size="large"></app-icon>
+            <h3>Aucune salle trouvée</h3>
+            <p>Aucune salle ne correspond à vos critères de recherche.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Sièges -->
+      <section *ngIf="activeView === 'seats'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Gestion des Sièges</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ selectedSeats.length }} siège(s) sélectionné(s)</span>
+            <app-button variant="ghost" (clicked)="setView('theaters')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour aux salles
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Salle sélectionnée -->
+        <div *ngIf="selectedTheater" class="selected-theater">
+          <h3>{{ selectedTheater.name }}</h3>
+          <p>Cinéma ID: {{ selectedTheater.cinemaId }} • {{ selectedTheater.seatCount }} sièges</p>
+        </div>
+
+        <!-- Grille de sièges -->
+        <div class="seats-container">
+          <app-seat-grid
+            [seats]="uiSeats"
+            [selectedSeats]="selectedSeats"
+            [maxSelection]="10"
+            [showScreen]="true"
+            [showLegend]="true"
+            (seatSelected)="onSeatSelected($event)"
+            (seatDeselected)="onSeatDeselected($event)"
+            (selectionChanged)="onSelectionChanged($event)">
+          </app-seat-grid>
+        </div>
+
+        <!-- Actions sur les sièges -->
+        <div class="seats-actions">
+          <div class="seats-info">
+            <div class="info-item">
+              <span class="info-label">Sièges sélectionnés:</span>
+              <span class="info-value">{{ selectedSeats.length }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Prix total:</span>
+              <span class="info-value">{{ getTotalPrice() }}€</span>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <app-button variant="ghost" (clicked)="selectedSeats = []">
+              <app-icon name="refresh-cw"></app-icon>
+              Effacer
+            </app-button>
+            <app-button variant="primary">
+              <app-icon name="save"></app-icon>
+              Sauvegarder
+            </app-button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Gestion sièges -->
+      <section *ngIf="activeView === 'seat-management'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Gestion détaillée des sièges</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ seats.length }} siège(s)</span>
+            <app-button variant="ghost" (clicked)="setView('theaters')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour aux salles
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Salle sélectionnée -->
+        <div *ngIf="selectedTheater" class="selected-theater">
+          <h3>{{ selectedTheater.name }}</h3>
+          <p>Cinéma ID: {{ selectedTheater.cinemaId }} • {{ selectedTheater.seatCount }} sièges</p>
+        </div>
+
+        <!-- Liste des sièges avec gestion individuelle -->
+        <div class="seats-management-container">
+          <div *ngFor="let seat of seats" class="seat-item">
+            <app-seat-management
+              [seat]="seat"
+              [theaterId]="selectedTheater?.theaterId || null"
+              (seatUpdated)="loadTheaterSeats(selectedTheater?.theaterId || 0)">
+            </app-seat-management>
+          </div>
+        </div>
+
+        <!-- Message vide -->
+        <div *ngIf="seats.length === 0" class="empty-state">
+          <app-icon name="chair" size="large"></app-icon>
+          <h3>Aucun siège trouvé</h3>
+          <p>Aucun siège n'est disponible pour cette salle.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal d'édition de cinéma -->
+  <div *ngIf="isEditing" class="edit-modal-overlay">
+    <div class="edit-modal">
+      <div class="modal-header">
+        <h3>{{ selectedCinema ? 'Modifier le cinéma' : 'Ajouter un cinéma' }}</h3>
+        <app-button variant="ghost" (clicked)="cancelEdit()">
+          <app-icon name="x"></app-icon>
+        </app-button>
+      </div>
+      
+      <div class="modal-content">
+        <form [formGroup]="cinemaForm" class="cinema-form">
+          <div class="form-row">
+            <app-input
+              label="Nom du cinéma"
+              formControlName="name"
+              placeholder="Ex: Cinéma Pathé Bellecour">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Adresse"
+              formControlName="address"
+              placeholder="Ex: Place Bellecour">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Ville"
+              formControlName="city"
+              placeholder="Ex: Lyon">
+            </app-input>
+            
+            <app-input
+              label="Pays"
+              formControlName="country"
+              placeholder="Ex: France">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Numéro de téléphone"
+              formControlName="phoneNumber"
+              placeholder="Ex: +33 1 23 45 67 89">
+            </app-input>
+            
+            <app-input
+              label="Heures d'ouverture"
+              formControlName="openingHours"
+              placeholder="Ex: 9h-23h du lundi au dimanche">
+            </app-input>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-actions">
+        <app-button variant="ghost" (clicked)="cancelEdit()">
+          Annuler
+        </app-button>
+        <app-button variant="primary" (clicked)="saveCinema()">
+          <app-icon name="save"></app-icon>
+          Sauvegarder
+        </app-button>
+      </div>
+    
+    </div>
+  </div>
+
+  <!-- Modal d'édition de salle -->
+  <div *ngIf="isEditingTheater" class="edit-modal-overlay">
+    <div class="edit-modal">
+      <div class="modal-header">
+        <h3>{{ selectedTheater ? 'Modifier la salle' : 'Ajouter une salle' }}</h3>
+        <app-button variant="ghost" (clicked)="cancelTheaterEdit()">
+          <app-icon name="x"></app-icon>
+        </app-button>
+      </div>
+      
+      <div class="modal-content">
+        <form [formGroup]="theaterForm" class="theater-form">
+          <div class="form-row">
+            <app-input
+              label="Nom de la salle"
+              formControlName="name"
+              placeholder="Ex: Salle 1 - IMAX">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-select
+              label="Cinéma"
+              formControlName="cinemaId"
+              [options]="cinemaOptions">
+            </app-select>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Capacité"
+              formControlName="seatCount"
+              type="number"
+              placeholder="Ex: 350">
+            </app-input>
+            
+            <app-select
+              label="Qualité de projection"
+              formControlName="projectionQuality"
+              [options]="projectionQualityOptions">
+            </app-select>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-actions">
+        <app-button variant="ghost" (clicked)="cancelTheaterEdit()">
+          Annuler
+        </app-button>
+        <app-button variant="primary" (clicked)="saveTheater()">
+          <app-icon name="save"></app-icon>
+          Sauvegarder
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,275 @@
-<p>user-dashboard works!</p>
+<div class="user-dashboard" [class.user-dashboard--loading]="loading">
+  <!-- En-tête du dashboard -->
+  <header class="dashboard-header">
+    <div class="dashboard-header__content">
+      <div class="dashboard-header__user">
+        <app-avatar
+          [src]="userProfile?.profilePictureUrl || ''"
+          [alt]="userProfile?.firstName + ' ' + userProfile?.lastName"
+          size="large"
+        ></app-avatar>
+        <div class="dashboard-header__info">
+          <h1 class="dashboard-header__title">
+            Bienvenue, {{ userProfile?.firstName }} !
+          </h1>
+          <p class="dashboard-header__subtitle">
+            Voici votre tableau de bord personnel
+          </p>
+        </div>
+      </div>
+      <div class="dashboard-header__actions">
+        <app-button
+          variant="secondary"
+          size="small"
+          (click)="refreshData()"
+          [disabled]="loading"
+        >
+          <app-icon name="refresh" size="small"></app-icon>
+          Actualiser
+        </app-button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Message d'erreur -->
+  @if (error) {
+    <div class="dashboard-error">
+      <div class="dashboard-error__content">
+        <app-icon name="alert-circle" size="medium"></app-icon>
+        <p class="dashboard-error__message">{{ error }}</p>
+        <app-button
+          variant="ghost"
+          size="small"
+          (click)="clearError()"
+        >
+          <app-icon name="x" size="small"></app-icon>
+        </app-button>
+      </div>
+    </div>
+  }
+
+  <!-- Statistiques principales -->
+  @if (dashboardStats && !loading) {
+    <section class="dashboard-stats">
+      <h2 class="dashboard-stats__title">Vos Statistiques</h2>
+      <div class="stats-grid">
+        <!-- Total des réservations -->
+        <div class="stat-card">
+          <div class="stat-card__icon">
+            <app-icon name="ticket" size="medium"></app-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__value">{{ dashboardStats.totalReservations }}</h3>
+            <p class="stat-card__label">Réservations</p>
+          </div>
+        </div>
+
+        <!-- Total des notations -->
+        <div class="stat-card">
+          <div class="stat-card__icon">
+            <app-icon name="star" size="medium"></app-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__value">{{ dashboardStats.totalRatings }}</h3>
+            <p class="stat-card__label">Notations</p>
+          </div>
+        </div>
+
+        <!-- Films favoris -->
+        <div class="stat-card">
+          <div class="stat-card__icon">
+            <app-icon name="heart" size="medium"></app-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__value">{{ dashboardStats.favoriteMovies }}</h3>
+            <p class="stat-card__label">Favoris</p>
+          </div>
+        </div>
+
+        <!-- Total dépensé -->
+        <div class="stat-card">
+          <div class="stat-card__icon">
+            <app-icon name="euro" size="medium"></app-icon>
+          </div>
+          <div class="stat-card__content">
+            <h3 class="stat-card__value">{{ dashboardStats.totalSpent | currency:'EUR' }}</h3>
+            <p class="stat-card__label">Total dépensé</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Statistiques avancées -->
+  @if (userStats && !loading) {
+    <section class="dashboard-advanced-stats">
+      <h2 class="dashboard-advanced-stats__title">Votre Profil Cinéphile</h2>
+      <div class="advanced-stats-grid">
+        <!-- Niveau de fidélité -->
+        <div class="advanced-stat-card">
+          <div class="advanced-stat-card__header">
+            <app-icon name="award" size="medium"></app-icon>
+            <h3 class="advanced-stat-card__title">Niveau</h3>
+          </div>
+          <div class="advanced-stat-card__content">
+            <span class="membership-level membership-level--{{ userStats.membershipLevel }}">
+              {{ userStats.membershipLevel | titlecase }}
+            </span>
+            <p class="advanced-stat-card__description">
+              {{ userStats.loyaltyPoints }} points de fidélité
+            </p>
+          </div>
+        </div>
+
+        <!-- Genres favoris -->
+        <div class="advanced-stat-card">
+          <div class="advanced-stat-card__header">
+            <app-icon name="film" size="medium"></app-icon>
+            <h3 class="advanced-stat-card__title">Genres Préférés</h3>
+          </div>
+          <div class="advanced-stat-card__content">
+            @if (userStats.favoriteGenres.length > 0) {
+              <div class="genres-list">
+                @for (genre of userStats.favoriteGenres; track genre) {
+                  <span class="genre-tag">{{ genre }}</span>
+                }
+              </div>
+            } @else {
+              <p class="advanced-stat-card__description">Aucun genre favori</p>
+            }
+          </div>
+        </div>
+
+        <!-- Membre depuis -->
+        <div class="advanced-stat-card">
+          <div class="advanced-stat-card__header">
+            <app-icon name="calendar" size="medium"></app-icon>
+            <h3 class="advanced-stat-card__title">Membre depuis</h3>
+          </div>
+          <div class="advanced-stat-card__content">
+            <p class="advanced-stat-card__description">{{ userStats.memberSince }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Activités récentes -->
+  @if (hasActivityData && !loading) {
+    <section class="dashboard-activities">
+      <div class="activities-header">
+        <h2 class="activities-header__title">Activités Récentes</h2>
+        <p class="activities-header__subtitle">{{ dashboardStats?.recentActivity }}</p>
+      </div>
+
+      <div class="activities-grid">
+        <!-- Réservations récentes -->
+        @if (recentReservations.length > 0) {
+          <div class="activity-section">
+            <h3 class="activity-section__title">
+              <app-icon name="ticket" size="small"></app-icon>
+              Dernières Réservations
+            </h3>
+            <div class="activity-list">
+              @for (reservation of recentReservations; track reservation.reservationId) {
+                <div class="activity-item">
+                  <div class="activity-item__icon">
+                    <app-icon name="ticket" size="small"></app-icon>
+                  </div>
+                  <div class="activity-item__content">
+                    <p class="activity-item__title">Réservation #{{ reservation.reservationId }}</p>
+                    <p class="activity-item__description">
+                      {{ reservation.numberOfSeats }} place(s) - {{ reservation.totalPrice | currency:'EUR' }}
+                    </p>
+                  </div>
+                  <div class="activity-item__status">
+                    <span class="status-badge status-badge--{{ reservation.status === 4 ? 'active' : 'inactive' }}">
+                      {{ reservation.status === 4 ? 'Active' : 'Terminée' }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Notations récentes -->
+        @if (recentRatings.length > 0) {
+          <div class="activity-section">
+            <h3 class="activity-section__title">
+              <app-icon name="star" size="small"></app-icon>
+              Dernières Notations
+            </h3>
+            <div class="activity-list">
+              @for (rating of recentRatings; track rating.movieRatingId) {
+                <div class="activity-item">
+                  <div class="activity-item__icon">
+                    <app-icon name="star" size="small"></app-icon>
+                  </div>
+                  <div class="activity-item__content">
+                    <p class="activity-item__title">{{ rating.movie?.title || 'Film' }}</p>
+                    <p class="activity-item__description">
+                      {{ rating.rating }}/5 - {{ rating.comment || 'Aucun commentaire' }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Films favoris -->
+        @if (favoriteMovies.length > 0) {
+          <div class="activity-section">
+            <h3 class="activity-section__title">
+              <app-icon name="heart" size="small"></app-icon>
+              Films Favoris
+            </h3>
+            <div class="activity-list">
+              @for (movie of favoriteMovies; track movie.movieId) {
+                <div class="activity-item">
+                  <div class="activity-item__icon">
+                    <app-icon name="film" size="small"></app-icon>
+                  </div>
+                  <div class="activity-item__content">
+                    <p class="activity-item__title">{{ movie.title }}</p>
+                    <p class="activity-item__description">{{ movie.genre }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- État de chargement -->
+  @if (loading) {
+    <div class="dashboard-loading">
+      <div class="dashboard-loading__content">
+        <app-icon name="loader" size="large" class="spinning"></app-icon>
+        <p class="dashboard-loading__message">Chargement de vos données...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Aucune donnée -->
+  @if (!loading && !hasActivityData && userProfile) {
+    <div class="dashboard-empty">
+      <div class="dashboard-empty__content">
+        <app-icon name="film" size="large"></app-icon>
+        <h2 class="dashboard-empty__title">Bienvenue sur Cinephoria !</h2>
+        <p class="dashboard-empty__description">
+          Commencez par réserver votre première séance ou noter un film pour voir vos statistiques ici.
+        </p>
+        <div class="dashboard-empty__actions">
+          <app-button variant="primary" routerLink="/movies">
+            <app-icon name="search" size="small"></app-icon>
+            Découvrir les films
+          </app-button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

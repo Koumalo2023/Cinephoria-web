@@ -1,0 +1,118 @@
+<div class="mes-reservations-container">
+  <div class="header">
+    <h1>Mes Réservations</h1>
+    <p class="subtitle">Gérez vos réservations de films</p>
+  </div>
+
+  <!-- Bouton de rafraîchissement -->
+  <div class="actions-bar">
+    <app-button 
+      variant="secondary" 
+      size="small"
+      (click)="refreshReservations()"
+      [disabled]="isLoading">
+      <app-icon name="refresh" size="small"></app-icon>
+      Actualiser
+    </app-button>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="isLoading" class="loading-container">
+    <app-spinner size="large"></app-spinner>
+    <p>Chargement de vos réservations...</p>
+  </div>
+
+  <!-- Message si aucune réservation -->
+  <div *ngIf="!isLoading && reservations.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <app-icon name="ticket" size="large"></app-icon>
+    </div>
+    <h3>Aucune réservation trouvée</h3>
+    <p>Vous n'avez pas encore effectué de réservation.</p>
+    <app-button 
+      variant="primary" 
+      (click)="navigateToMovies()">
+      Voir les films
+    </app-button>
+  </div>
+
+  <!-- Liste des réservations -->
+  <div *ngIf="!isLoading && reservations.length > 0" class="reservations-list">
+    <div *ngFor="let reservation of reservations" class="reservation-card">
+      <div class="reservation-header">
+        <div class="movie-info">
+          <h3 class="movie-title">{{ reservation.movieTitle }}</h3>
+          <div class="reservation-meta">
+            <span class="theater">{{ reservation.theaterName }}</span>
+            <span class="separator">•</span>
+            <span class="date">{{ formatShowtimeDate(reservation.showtimeDate) }}</span>
+          </div>
+        </div>
+        <div class="status-section">
+          <app-badge
+            [variant]="getReservationStatusDisplay(reservation).color"
+            size="medium">
+            <app-icon
+              [name]="getReservationStatusDisplay(reservation).icon"
+              size="small">
+            </app-icon>
+            {{ getReservationStatusDisplay(reservation).text }}
+          </app-badge>
+        </div>
+      </div>
+
+      <div class="reservation-details">
+        <div class="detail-row">
+          <div class="detail-item">
+            <span class="label">Sièges :</span>
+            <span class="value">{{ reservation.seatNumbers?.join(', ') || 'Non spécifié' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Prix total :</span>
+            <span class="value price">{{ reservation.totalPrice }} €</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-item">
+            <span class="label">Réservé le :</span>
+            <span class="value">{{ reservation.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">ID Réservation :</span>
+            <span class="value reservation-id">#{{ reservation.reservationId }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations d'expiration -->
+      <div *ngIf="getExpirationInfo(reservation).isExpiring" class="expiration-warning">
+        <app-icon name="timer" size="small"></app-icon>
+        <span>Expire dans {{ getExpirationInfo(reservation).timeRemaining }}</span>
+      </div>
+
+      <div class="reservation-actions">
+        <app-button
+          variant="secondary"
+          size="small"
+          (click)="viewReservationDetails(reservation)">
+          <app-icon name="eye" size="small"></app-icon>
+          Détails
+        </app-button>
+
+        <app-button
+          *ngIf="canCancelReservation(reservation)"
+          variant="danger"
+          size="small"
+          (click)="cancelReservation(reservation)">
+          <app-icon name="x" size="small"></app-icon>
+          Annuler
+        </app-button>
+
+        <div *ngIf="!canCancelReservation(reservation)" class="cancel-info">
+          <app-icon name="info" size="small"></app-icon>
+          <span>Non annulable</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

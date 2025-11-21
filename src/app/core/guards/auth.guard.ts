@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AuthService } from '../services/auth/auth.service';
+import { AuthManagerService } from '../services/auth/auth-manager.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth/auth.service';
 export class AuthGuard implements CanActivate {
 
   constructor(
-    private authService: AuthService,
+    private authManager: AuthManagerService,
     private router: Router
   ) {}
 
@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     
     // Vérifier si l'utilisateur est authentifié
-    if (this.authService.isAuthenticated()) {
+    if (this.authManager.isAuthenticated()) {
       return true;
     }
 

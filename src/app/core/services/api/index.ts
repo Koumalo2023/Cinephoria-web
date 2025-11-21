@@ -4,7 +4,6 @@
  */
 
 export { AdminDashboardService } from './admin-dashboard.service';
-export { AuthService } from './auth.service';
 export { CinemaService } from './cinema.service';
 export { IncidentService } from './incident.service';
 export { MovieRatingService } from './movie-rating.service';

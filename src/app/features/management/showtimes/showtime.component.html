@@ -48,33 +48,17 @@
 
   <!-- Barre de Recherche et Filtres -->
   <div class="filters-section">
-    <div class="search-container">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Rechercher par film, salle ou cinéma..."
-        #searchInput
-        (input)="onSearch(searchInput.value)">
-    </div>
-    
-    <div class="filters-container">
-      <!-- Filtres simples - à étendre avec un composant dédié -->
-      <div class="filter-group">
-        <select class="filter-select" (change)="onCinemaFilterChange($event)">
-          <option value="">Tous les cinémas</option>
-          <option *ngFor="let cinema of cinemas" [value]="cinema.cinemaId">
-            {{ cinema.name }}
-          </option>
-        </select>
-        
-        <select class="filter-select" (change)="onMovieFilterChange($event)">
-          <option value="">Tous les films</option>
-          <option *ngFor="let movie of movies" [value]="movie.movieId">
-            {{ movie.title }}
-          </option>
-        </select>
-      </div>
-    </div>
+    <!-- Composant de filtres unifié -->
+    <app-filter-panel
+      [context]="'showtimes'"
+      [showHeader]="true"
+      [showActions]="true"
+      [showAppliedFilters]="true"
+      [collapsible]="true"
+      [collapsed]="false"
+      (filtersChange)="onFiltersChange($event)"
+      class="showtime-filters">
+    </app-filter-panel>
   </div>
 
   <!-- Tableau des Séances -->

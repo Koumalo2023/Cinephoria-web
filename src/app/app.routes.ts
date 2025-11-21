@@ -81,13 +81,18 @@ export const routes: Routes = [
         title: 'Cinephoria - Mes Réservations'
       },
       {
+        path: 'mes-reservations',
+        loadComponent: () => import('./features/user/mes-reservations/mes-reservations.component').then(m => m.MesReservationsComponent),
+        title: 'Cinephoria - Mes Réservations'
+      },
+      {
         path: 'reviews',
         loadComponent: () => import('./features/user/reviews/reviews.component').then(m => m.ReviewsComponent),
         title: 'Cinephoria - Mes Avis'
       },
       {
         path: 'profile',
-        loadComponent: () => import('./features/user/profile/profile.component').then(m => m.ProfileComponent),
+        loadComponent: () => import('./features/user/profile/simplified-profile.component').then(m => m.SimplifiedProfileComponent),
         title: 'Cinephoria - Mon Profil'
       },
       {
@@ -126,7 +131,7 @@ export const routes: Routes = [
         title: 'Cinephoria - Gestion Salles'
       },
       {
-        path: 'reservations',
+        path: 'gestion-reservations',
         loadComponent: () => import('./features/management/users/user-management.component').then(m => m.UserManagementComponent),
         title: 'Cinephoria - Validation Réservations'
       },
@@ -171,8 +176,8 @@ export const routes: Routes = [
         title: 'Cinephoria - Gestion Salles'
       },
       {
-        path: 'reservations',
-        loadComponent: () => import('./features/management/users/user-management.component').then(m => m.UserManagementComponent),
+        path: 'gestion-reservations',
+        loadComponent: () => import('./features/management/reservations/gestion-reservations.component').then(m => m.GestionReservationsComponent),
         title: 'Cinephoria - Gestion Réservations'
       },
       {

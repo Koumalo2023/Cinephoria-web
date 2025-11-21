@@ -9,6 +9,7 @@ import { AppUserDto, CinemaDto, CreateReservationDto, MovieDto, SeatDto, Showtim
 // Services
 import { ReservationService } from 'src/app/core/services/api/reservation.service';
 import { UserStateService } from 'src/app/core/services/auth/user-state.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 // Utilitaires de conversion
 import { organizeSeatsByRow } from 'src/app/core/utils/data-converters.util';
@@ -86,6 +87,13 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
       this.seatRows = [];
     }
   }
+
+  // Propriété pour afficher une réservation existante
+  @Input() set existingReservation(reservation: any) {
+    if (reservation) {
+      this.loadExistingReservationData(reservation);
+    }
+  }
   @Output() reservationComplete = new EventEmitter<ReservationData>();
   @Output() reservationCanceled = new EventEmitter<void>();
   @Output() cinemaSelected = new EventEmitter<number>();
@@ -145,6 +153,7 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   reservationData: ReservationData | null = null;
   isLoading = false;
   reservationConfirmed = false;
+  isViewMode = false; // Mode consultation (true) vs création (false)
   
   // Propriété publique pour l'accès au template
   get isUserAuthenticated(): boolean {
@@ -155,7 +164,8 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private router: Router,
     private userStateService: UserStateService,
-    private reservationService: ReservationService
+    private reservationService: ReservationService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -359,6 +369,12 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   }
 
   confirmReservation(): void {
+    if (this.isViewMode) {
+      // En mode consultation, on ne peut pas confirmer une réservation existante
+      this.notificationService.info('Information', 'Cette réservation est déjà confirmée.');
+      return;
+    }
+
     if (!this.reservationData || !this.selectedShowtime) return;
 
     // Vérifier que l'utilisateur est connecté
@@ -453,11 +469,15 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
   }
 
   getStepButtonText(): string {
+    if (this.isViewMode && this.currentStep === 3) {
+      return 'Retour aux réservations';
+    }
+    
     switch (this.currentStep) {
       case 0: return 'Continuer vers les films';
       case 1: return 'Continuer vers les sièges';
       case 2: return 'Continuer vers la confirmation';
-      case 3: return 'Confirmer la réservation';
+      case 3: return this.isViewMode ? 'Retour aux réservations' : 'Confirmer la réservation';
       default: return 'Continuer';
     }
   }
@@ -495,5 +515,53 @@ export class ReservationFlowComponent implements OnInit, OnDestroy {
       active: step.active,
       disabled: index > this.currentStep
     }));
+  }
+
+  /**
+   * Charge les données d'une réservation existante pour l'affichage
+   */
+  private loadExistingReservationData(reservation: any): void {
+    this.isViewMode = true;
+    
+    // Pré-remplir les données de réservation
+    this.selectedCinema = reservation.cinema || null;
+    this.selectedMovie = reservation.movie || null;
+    this.selectedShowtime = reservation.showtime || null;
+    this.selectedSeats = reservation.seats || [];
+    
+    // Préparer les données pour l'affichage
+    this.prepareReservationData();
+    
+    // Aller directement à la dernière étape (confirmation)
+    this.currentStep = 3;
+    
+    // Marquer toutes les étapes comme complétées
+    this.steps.forEach(step => {
+      step.completed = true;
+      step.active = false;
+    });
+    this.steps[3].active = true;
+    
+    // Désactiver le formulaire en mode consultation
+    if (this.reservationForm) {
+      this.reservationForm.disable();
+    }
+  }
+
+  /**
+   * Gère le clic sur le bouton principal selon le mode
+   */
+  onMainButtonClick(): void {
+    if (this.isViewMode && this.currentStep === 3) {
+      // En mode consultation, retourner aux réservations
+      this.router.navigate(['/user/mes-reservations']);
+      return;
+    }
+    
+    if (this.currentStep === 3) {
+      this.confirmReservation();
+    } else {
+      this.nextStep();
+    }
   }
 }

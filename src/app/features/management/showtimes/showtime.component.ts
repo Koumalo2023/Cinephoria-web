@@ -33,6 +33,7 @@ import { SelectComponent } from 'src/app/shared/components/atoms/select/select.c
 import { SpinnerComponent } from 'src/app/shared/components/atoms/spinner/spinner.component';
 import { TimePickerComponent } from 'src/app/shared/components/atoms/time-picker/time-picker.component';
 import { ToastNotificationComponent } from 'src/app/shared/components/atoms/toast-notification/toast-notification.component';
+import { FilterPanelComponent } from 'src/app/shared/components/molecules/filter-panel/filter-panel.component';
 import { FormFieldComponent } from 'src/app/shared/components/molecules/form-field/form-field.component';
 import { PaginationComponent } from 'src/app/shared/components/molecules/pagination/pagination.component';
 
@@ -66,6 +67,7 @@ export interface ShowtimeStats {
     BadgeComponent,
     SpinnerComponent,
     ToastNotificationComponent,
+    FilterPanelComponent,
     FormFieldComponent,
     SelectComponent,
     DatePickerComponent,
@@ -319,6 +321,61 @@ export class ShowtimeComponent implements OnInit, OnDestroy {
   applyFilters(filters: ShowtimeFilters): void {
     this.filters = { ...filters };
     this.filterShowtimes();
+  }
+
+  onFiltersChange(filterGroups: any): void {
+    // Convertir les FilterGroup[] en ShowtimeFilters
+    const newFilters: ShowtimeFilters = {};
+    
+    if (Array.isArray(filterGroups)) {
+      filterGroups.forEach(group => {
+        switch (group.id) {
+          case 'movie':
+            if (group.value) {
+              // Trouver l'ID du film par son titre
+              const movie = this.movies.find(m => m.title === group.value);
+              newFilters.movieId = movie?.movieId;
+            }
+            break;
+          case 'theater':
+            if (group.value) {
+              // Trouver l'ID de la salle par son nom
+              const theater = this.theaters.find(t => t.name === group.value);
+              newFilters.theaterId = theater?.theaterId;
+            }
+            break;
+          case 'status':
+            // Gérer les statuts multiples
+            if (Array.isArray(group.value) && group.value.length > 0) {
+              // Pour l'instant, on prend le premier statut
+              // À améliorer pour gérer plusieurs statuts
+              const status = group.value[0];
+              // Convertir le statut en logique de filtrage si nécessaire
+            }
+            break;
+          case 'date':
+            // Gérer la plage de dates
+            if (group.value && group.value.min && group.value.max) {
+              newFilters.dateFrom = new Date(group.value.min);
+              newFilters.dateTo = new Date(group.value.max);
+            }
+            break;
+          case 'occupancy':
+            // Gérer la plage d'occupation
+            if (group.value && group.value.min && group.value.max) {
+              // À implémenter selon la logique métier
+            }
+            break;
+          case 'search':
+            if (group.value) {
+              this.searchTerm = group.value;
+            }
+            break;
+        }
+      });
+    }
+
+    this.applyFilters(newFilters);
   }
 
   onSearch(searchTerm: string): void {

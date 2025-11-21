@@ -1,69 +1,69 @@
 .notification-settings {
   max-width: 700px;
   margin: 0 auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-xl);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
 
   .settings-header {
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-xl);
     text-align: center;
 
     h2 {
-      margin: 0 0 0.5rem 0;
-      color: #333;
-      font-size: 1.5rem;
-      font-weight: 600;
+      margin: 0 0 var(--spacing-sm) 0;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
     }
 
     .settings-description {
       margin: 0;
-      color: #6c757d;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-normal);
     }
   }
 
   .settings-form {
     .notification-category {
-      margin-bottom: 2.5rem;
-      padding: 1.5rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border: 1px solid #e9ecef;
+      margin-bottom: var(--spacing-2xl);
+      padding: var(--spacing-lg);
+      background: var(--color-background-alt);
+      border-radius: var(--border-radius-md);
+      border: var(--border-width) solid var(--color-border);
 
       .category-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #dee2e6;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: var(--border-width) solid var(--color-border-light);
 
         h3 {
           margin: 0;
-          color: #495057;
-          font-size: 1.2rem;
-          font-weight: 600;
+          color: var(--color-text-secondary);
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
         }
 
         .category-actions {
           display: flex;
-          gap: 0.5rem;
+          gap: var(--spacing-sm);
 
           .btn-toggle-all {
-            padding: 0.4rem 0.8rem;
-            background: #6c757d;
+            padding: var(--spacing-3) var(--spacing-5);
+            background: var(--color-text-muted);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
 
             &:hover {
-              background: #545b62;
+              background: var(--color-text-secondary);
               transform: translateY(-1px);
             }
           }
@@ -73,16 +73,16 @@
       .notification-item {
         display: flex;
         align-items: flex-start;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background: white;
-        border-radius: 6px;
-        border: 1px solid #e9ecef;
-        transition: all 0.3s ease;
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+        background: var(--color-surface);
+        border-radius: var(--border-radius);
+        border: var(--border-width) solid var(--color-border);
+        transition: all var(--transition-normal);
 
         &:hover {
-          border-color: #007bff;
-          box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+          border-color: var(--color-primary);
+          box-shadow: var(--shadow-sm);
         }
 
         &:last-child {
@@ -92,7 +92,7 @@
         .toggle-label {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: var(--spacing-md);
           cursor: pointer;
           flex: 1;
 
@@ -100,7 +100,7 @@
             display: none;
 
             &:checked + .toggle-slider {
-              background: #28a745;
+              background: var(--color-success);
               
               &::before {
                 transform: translateX(20px);
@@ -112,9 +112,9 @@
             position: relative;
             width: 50px;
             height: 24px;
-            background: #6c757d;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            background: var(--color-text-muted);
+            border-radius: var(--border-radius-full);
+            transition: all var(--transition-normal);
             flex-shrink: 0;
 
             &::before {
@@ -126,59 +126,77 @@
               border-radius: 50%;
               top: 2px;
               left: 2px;
-              transition: all 0.3s ease;
+              transition: all var(--transition-normal);
             }
           }
 
           .toggle-text {
-            font-weight: 500;
-            color: #495057;
-            font-size: 1rem;
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-primary);
+            font-size: var(--font-size-base);
           }
         }
 
         .notification-description {
-          margin: 0.25rem 0 0 66px;
-          color: #6c757d;
-          font-size: 0.85rem;
-          line-height: 1.4;
+          margin: var(--spacing-2) 0 0 66px;
+          color: var(--color-text-muted);
+          font-size: var(--font-size-sm);
+          line-height: var(--line-height-normal);
         }
       }
     }
   }
 
   .settings-footer {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 2px solid #f0f0f0;
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: var(--border-width-2) solid var(--color-border);
 
     .settings-note {
       margin: 0;
-      color: #6c757d;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-normal);
       text-align: center;
 
       strong {
-        color: #495057;
+        color: var(--color-text-secondary);
       }
     }
+  }
+}
+
+// Animation pour les changements d'état
+.notification-item {
+  &.changed {
+    animation: highlightChange 0.6s ease;
+  }
+}
+
+@keyframes highlightChange {
+  0% {
+    background: var(--color-warning-light);
+    border-color: var(--color-warning);
+  }
+  100% {
+    background: var(--color-surface);
+    border-color: var(--color-border);
   }
 }
 
 // Responsive design
 @media (max-width: 768px) {
   .notification-settings {
-    padding: 1rem;
+    padding: var(--spacing-lg);
 
     .settings-form {
       .notification-category {
-        padding: 1rem;
+        padding: var(--spacing-md);
 
         .category-header {
           flex-direction: column;
           align-items: flex-start;
-          gap: 1rem;
+          gap: var(--spacing-md);
 
           .category-actions {
             width: 100%;
@@ -203,20 +221,92 @@
   }
 }
 
-// Animation pour les changements d'état
-.notification-item {
-  &.changed {
-    animation: highlightChange 0.6s ease;
+// Variante compacte pour intégration dans les onglets
+.notification-settings--compact {
+  max-width: none;
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+
+  .settings-header {
+    margin-bottom: var(--spacing-lg);
+    
+    h2 {
+      font-size: var(--font-size-lg);
+    }
+  }
+
+  .settings-form {
+    .notification-category {
+      margin-bottom: var(--spacing-xl);
+      padding: var(--spacing-md);
+    }
   }
 }
 
-@keyframes highlightChange {
-  0% {
-    background: #fff3cd;
-    border-color: #ffc107;
+// Mode sombre
+@media (prefers-color-scheme: dark) {
+  .notification-settings {
+    background: var(--color-surface-dark);
+
+    .settings-form {
+      .notification-category {
+        background: var(--color-background-alt-dark);
+        border-color: var(--color-border-dark);
+
+        .notification-item {
+          background: var(--color-surface-dark);
+          border-color: var(--color-border-dark);
+        }
+      }
+    }
+
+    .settings-footer {
+      border-top-color: var(--color-border-dark);
+    }
   }
-  100% {
-    background: white;
-    border-color: #e9ecef;
+
+  @keyframes highlightChange {
+    0% {
+      background: var(--color-warning-light-dark);
+      border-color: var(--color-warning-dark);
+    }
+    100% {
+      background: var(--color-surface-dark);
+      border-color: var(--color-border-dark);
+    }
+  }
+}
+
+// Accessibilité
+@media (prefers-reduced-motion: reduce) {
+  .notification-item {
+    &.changed {
+      animation: none;
+    }
+  }
+
+  .notification-settings {
+    .category-actions .btn-toggle-all,
+    .notification-item {
+      transition: none;
+      
+      &:hover {
+        transform: none;
+      }
+    }
+  }
+}
+
+// Améliorations pour les écrans tactiles
+@media (hover: none) and (pointer: coarse) {
+  .notification-settings {
+    .toggle-label {
+      min-height: 44px; // Taille minimale pour les écrans tactiles
+    }
+
+    .category-actions .btn-toggle-all {
+      min-height: 36px;
+      min-width: 44px;
+    }
   }
 }

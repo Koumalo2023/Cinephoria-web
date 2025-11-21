@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AuthService } from '../services/auth/auth.service';
+import { AuthManagerService } from '../services/auth/auth-manager.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth/auth.service';
 export class RoleGuard implements CanActivate {
 
   constructor(
-    private authService: AuthService,
+    private authManager: AuthManagerService,
     private router: Router
   ) {}
 
@@ -19,7 +19,7 @@ export class RoleGuard implements CanActivate {
   ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     
     // Vérifier d'abord si l'utilisateur est authentifié
-    if (!this.authService.isAuthenticated()) {
+    if (!this.authManager.isAuthenticated()) {
       return this.router.createUrlTree(['/auth/login'], {
         queryParams: { returnUrl: state.url }
       });
@@ -34,7 +34,7 @@ export class RoleGuard implements CanActivate {
     }
 
     // Vérifier si l'utilisateur a au moins un des rôles requis
-    const userRole = this.authService.getUserRole();
+    const userRole = this.authManager.getUserRole();
     const hasRequiredRole = requiredRoles.some(role => userRole === role);
 
     if (hasRequiredRole) {

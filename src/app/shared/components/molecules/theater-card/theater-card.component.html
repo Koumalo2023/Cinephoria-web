@@ -42,32 +42,42 @@
     <!-- Occupation actuelle -->
     <div class="occupancy-section">
       <div class="occupancy-header">
-        <span class="occupancy-label">Occupation actuelle</span>
-        <app-badge 
+        <span class="occupancy-label">Occupation moyenne</span>
+        <app-badge
           [variant]="occupancyColor"
           size="small">
-          {{ occupancyPercentage }}%
+          {{ occupancyPercentage$ | async }}%
         </app-badge>
       </div>
       
       <div class="occupancy-bar">
-        <div 
+        <div
           class="occupancy-fill"
           [class]="'occupancy-' + occupancyStatus"
-          [style.width.%]="occupancyPercentage">
+          [style.width.%]="occupancyPercentage$ | async">
         </div>
       </div>
       
       <div class="occupancy-numbers">
-        <span>0 / {{ theater?.seatCount }} sièges</span>
+        <span>{{ occupiedSeats$ | async }} / {{ theater?.seatCount }} sièges</span>
       </div>
     </div>
 
     <!-- Prochaine séance -->
-    <div class="next-showtime">
+    <div class="next-showtime" *ngIf="nextShowtime$ | async as nextShowtime; else noShowtime">
       <app-icon name="calendar" size="small"></app-icon>
-      <span class="showtime-text">Aucune séance programmée</span>
+      <div class="showtime-details">
+        <span class="showtime-movie">{{ nextShowtime.movieTitle }}</span>
+        <span class="showtime-time">{{ (nextShowtime$ | async)?.startTime | date:'HH:mm' }}</span>
+      </div>
     </div>
+    
+    <ng-template #noShowtime>
+      <div class="next-showtime">
+        <app-icon name="calendar" size="small"></app-icon>
+        <span class="showtime-text">Aucune séance programmée</span>
+      </div>
+    </ng-template>
 
     <!-- Équipements -->
     <div class="facilities-section" *ngIf="getFacilities().length">

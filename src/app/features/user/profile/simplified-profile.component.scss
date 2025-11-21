@@ -1,0 +1,347 @@
+@use '../../../../styles/variables' as vars;
+
+.simplified-profile {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: vars.$spacing-8;
+
+  &--loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  &--error {
+    border: 1px solid vars.$error-color;
+  }
+}
+
+// En-tête du profil
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-6;
+  margin-bottom: vars.$spacing-12;
+  padding-bottom: vars.$spacing-6;
+  border-bottom: 1px solid vars.$gray-200;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.profile-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: vars.$spacing-4;
+}
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.avatar-actions {
+  display: flex;
+  gap: vars.$spacing-2;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: vars.$font-size-2xl;
+  font-weight: vars.$font-weight-bold;
+  color: vars.$gray-800;
+  margin: 0 0 vars.$spacing-1;
+}
+
+.profile-email {
+  font-size: vars.$font-size-lg;
+  color: vars.$gray-600;
+  margin: 0 0 vars.$spacing-1;
+}
+
+.profile-role {
+  font-size: vars.$font-size-sm;
+  color: vars.$gray-500;
+  margin: 0;
+}
+
+// Navigation par onglets
+.profile-tabs {
+  display: flex;
+  gap: vars.$spacing-1;
+  margin-bottom: vars.$spacing-8;
+  border-bottom: 1px solid vars.$gray-200;
+  overflow-x: auto;
+
+  @media (max-width: 768px) {
+    gap: 0;
+  }
+}
+
+.profile-tab {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-2;
+  padding: vars.$spacing-4 vars.$spacing-6;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: vars.$gray-600;
+  font-size: vars.$font-size-base;
+  font-weight: vars.$font-weight-medium;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: vars.$primary-color;
+    background-color: rgba(vars.$primary-color, 0.05);
+  }
+
+  &--active {
+    color: vars.$primary-color;
+    border-bottom-color: vars.$primary-color;
+    background-color: rgba(vars.$primary-color, 0.05);
+  }
+
+  @media (max-width: 768px) {
+    padding: vars.$spacing-2 vars.$spacing-4;
+    font-size: vars.$font-size-sm;
+  }
+}
+
+// Contenu des onglets
+.tab-content {
+  min-height: 400px;
+}
+
+.tab-panel {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Formulaires
+.profile-form,
+.security-form {
+  max-width: 500px;
+
+  h2, h3 {
+    margin-bottom: vars.$spacing-6;
+    color: vars.$gray-800;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: vars.$spacing-4;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-actions {
+  margin-top: vars.$spacing-8;
+  display: flex;
+  gap: vars.$spacing-4;
+}
+
+// Paramètres
+.security-settings,
+.notification-settings {
+  margin-top: vars.$spacing-12;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: vars.$spacing-6;
+  border: 1px solid vars.$gray-200;
+  border-radius: vars.$border-radius-md;
+  margin-bottom: vars.$spacing-4;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: vars.$primary-color;
+  }
+}
+
+.setting-info {
+  flex: 1;
+  margin-right: vars.$spacing-6;
+
+  h4 {
+    margin: 0 0 vars.$spacing-1;
+    color: vars.$gray-800;
+    font-size: vars.$font-size-base;
+    font-weight: vars.$font-weight-medium;
+  }
+
+  p {
+    margin: 0;
+    color: vars.$gray-600;
+    font-size: vars.$font-size-sm;
+    line-height: 1.4;
+  }
+}
+
+// Messages d'état
+.error-message,
+.success-message {
+  position: fixed;
+  top: vars.$spacing-8;
+  right: vars.$spacing-8;
+  z-index: vars.$z-index-toast;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: vars.$spacing-4 vars.$spacing-6;
+  border-radius: vars.$border-radius-md;
+  box-shadow: vars.$shadow-lg;
+  max-width: 400px;
+  animation: slideInRight 0.3s ease;
+
+  @media (max-width: 768px) {
+    left: vars.$spacing-4;
+    right: vars.$spacing-4;
+    max-width: none;
+  }
+}
+
+.error-message {
+  background-color: lighten(vars.$error-color, 45%);
+  border: 1px solid vars.$error-color;
+  color: darken(vars.$error-color, 10%);
+}
+
+.success-message {
+  background-color: lighten(vars.$success-color, 45%);
+  border: 1px solid vars.$success-color;
+  color: darken(vars.$success-color, 10%);
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-2;
+  flex: 1;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: vars.$spacing-1;
+  border-radius: vars.$border-radius-sm;
+  margin-left: vars.$spacing-2;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Indicateur de chargement
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: vars.$z-index-modal;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: vars.$spacing-4;
+  padding: vars.$spacing-8;
+  background-color: white;
+  border-radius: vars.$border-radius-lg;
+  box-shadow: vars.$shadow-lg;
+  color: vars.$gray-600;
+  font-weight: vars.$font-weight-medium;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .simplified-profile {
+    padding: vars.$spacing-4;
+  }
+
+  .profile-header {
+    gap: vars.$spacing-4;
+    margin-bottom: vars.$spacing-6;
+  }
+
+  .profile-name {
+    font-size: vars.$font-size-xl;
+  }
+
+  .profile-email {
+    font-size: vars.$font-size-base;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: vars.$spacing-4;
+  }
+
+  .setting-info {
+    margin-right: 0;
+  }
+}

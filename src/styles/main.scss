@@ -8,6 +8,50 @@
 // Import du reset CSS
 @use 'reset';
 
+// Variables CSS personnalisées pour les composants
+:root {
+  // Couleurs sémantiques
+  --color-primary: #{$primary-color};
+  --color-primary-dark: #{darken($primary-color, 10%)};
+  --color-secondary: #{$secondary-color};
+  --color-success: #{$success-color};
+  --color-success-dark: #{darken($success-color, 10%)};
+  --color-warning: #{$warning-color};
+  --color-warning-dark: #{darken($warning-color, 10%)};
+  --color-error: #{$error-color};
+  --color-error-dark: #{darken($error-color, 10%)};
+  --color-info: #{$info-color};
+  --color-info-dark: #{darken($info-color, 10%)};
+  
+  // Couleurs de texte
+  --color-text-primary: #{$gray-800};
+  --color-text-secondary: #{$gray-600};
+  --color-text-muted: #{$gray-400};
+  --color-text-primary-dark: #{$white};
+  --color-text-secondary-dark: #{$gray-300};
+  --color-text-muted-dark: #{$gray-500};
+  
+  // Espacements
+  --spacing-xs: #{$spacing-1};
+  --spacing-sm: #{$spacing-2};
+  --spacing-md: #{$spacing-3};
+  --spacing-lg: #{$spacing-4};
+  --spacing-xl: #{$spacing-5};
+  
+  // Typographie
+  --font-size-base: #{$font-size-base};
+  --font-weight-medium: #{$font-weight-medium};
+  
+  // Bordures
+  --border-radius-full: #{$border-radius-full};
+  
+  // Ombres
+  --shadow-sm: #{$shadow-sm};
+  
+  // Transitions
+  --transition-normal: #{$transition-normal};
+}
+
 // Styles de base pour l'application
 .app-container {
   min-height: 100vh;

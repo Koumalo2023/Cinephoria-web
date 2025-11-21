@@ -2,15 +2,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-// Services
-
-// Interfaces
-
-// Composants réutilisables
-
-// Atoms
-
-// Molecules
 
 @Component({
   selector: 'app-management-dashboard',

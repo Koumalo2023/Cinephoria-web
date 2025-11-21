@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 
 // Interfaces API
@@ -35,6 +35,7 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   initialSeats: SeatDto[] = [];
   showtimes: ShowtimeDto[] = [];
   availableSeats: SeatDto[] = [];
+  existingReservation: any = null;
   
   isLoading = false;
   private destroy$ = new Subject<void>();
@@ -46,11 +47,13 @@ export class ReservationsComponent implements OnInit, OnDestroy {
     private userStateService: UserStateService,
     private loadingService: LoadingService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.checkForReservationDetails();
   }
 
   ngOnDestroy(): void {
@@ -86,11 +89,15 @@ export class ReservationsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadingService.start('movies-by-cinema', 'Chargement des films...');
 
-    this.movieService.getMoviesByCinema(cinemaId)
+    // Utiliser getMoviesWithShowtimes() et filtrer par cinéma côté frontend
+    this.movieService.getMoviesWithShowtimes()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (movies) => {
-          this.movies = movies;
+          // Filtrer les films qui ont des séances dans le cinéma sélectionné
+          this.movies = movies.filter(movie =>
+            movie.showtimes?.some(showtime => showtime.cinemaId === cinemaId)
+          );
           this.isLoading = false;
           this.loadingService.stop('movies-by-cinema');
         },
@@ -191,5 +198,43 @@ export class ReservationsComponent implements OnInit, OnDestroy {
   // Méthode pour recharger les données si nécessaire
   refreshData(): void {
     this.loadInitialData();
+  }
+  /**
+   * Vérifie si des paramètres de réservation sont présents dans l'URL
+   */
+  private checkForReservationDetails(): void {
+    this.route.queryParams.subscribe(params => {
+      const reservationId = params['reservationId'];
+      const viewMode = params['viewMode'];
+      
+      if (reservationId && viewMode === 'details') {
+        this.loadExistingReservation(parseInt(reservationId, 10));
+      }
+    });
+  }
+
+  /**
+   * Charge une réservation existante pour affichage
+   */
+  loadExistingReservation(reservationId: number): void {
+    this.isLoading = true;
+    this.loadingService.start('existing-reservation', 'Chargement de la réservation...');
+
+    this.reservationService.getReservationById(reservationId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (reservation) => {
+          console.log('Réservation chargée:', reservation);
+          this.existingReservation = reservation;
+          this.isLoading = false;
+          this.loadingService.stop('existing-reservation');
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement de la réservation:', error);
+          this.notificationService.error('Erreur', 'Impossible de charger la réservation');
+          this.isLoading = false;
+          this.loadingService.stop('existing-reservation');
+        }
+      });
   }
 }

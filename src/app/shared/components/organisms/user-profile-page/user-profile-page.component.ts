@@ -1,17 +1,17 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 // Composants atomiques
-import { ButtonComponent } from '../../atoms/button/button.component';
-import { IconComponent } from '../../atoms/icon/icon.component';
 import { AvatarComponent } from '../../atoms/avatar/avatar.component';
 import { BadgeComponent } from '../../atoms/badge/badge.component';
+import { ButtonComponent } from '../../atoms/button/button.component';
+import { IconComponent } from '../../atoms/icon/icon.component';
 
 // Composants molécules
-import { UserProfileFormComponent, UserProfile } from '../../molecules/user-profile-form/user-profile-form.component';
-import { SecuritySettingsComponent, SecuritySettings } from '../../molecules/security-settings/security-settings.component';
-import { NotificationSettingsComponent, NotificationSettings } from '../../molecules/notification-settings/notification-settings.component';
+import { NotificationSettings, NotificationSettingsComponent } from '../../molecules/notification-settings/notification-settings.component';
+import { SecuritySettings, SecuritySettingsComponent } from '../../molecules/security-settings/security-settings.component';
+import { UserProfile, UserProfileFormComponent } from '../../molecules/user-profile-form/user-profile-form.component';
 
 export interface UserStats {
   totalReservations: number;

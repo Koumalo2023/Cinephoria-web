@@ -42,7 +42,7 @@
       <div class="password-info">
         <p>
           <strong>Dernier changement :</strong> 
-          {{ settings?.passwordLastChanged ? (settings.passwordLastChanged | date:'dd/MM/yyyy') : 'Non disponible' }}
+          {{ settings?.passwordLastChanged ? (settings?.passwordLastChanged | date:'dd/MM/yyyy') : 'Non disponible' }}
         </p>
         <button 
           type="button" 
