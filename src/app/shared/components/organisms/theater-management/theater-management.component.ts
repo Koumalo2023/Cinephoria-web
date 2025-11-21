@@ -65,6 +65,7 @@ export class TheaterManagementComponent implements OnInit {
   isEditing: boolean = false;
   theaterForm: FormGroup;
   isLoading: boolean = false;
+  filterContext: 'cinemas' | 'theaters' | 'showtimes' | 'custom' = 'theaters';
 
   // Données réelles
   theaters: TheaterDto[] = [];
@@ -83,44 +84,7 @@ export class TheaterManagementComponent implements OnInit {
     averageRating: 0
   };
 
-  filterGroups: FilterGroup[] = [
-    {
-      id: 'status',
-      label: 'Statut',
-      type: 'checkbox',
-      options: [
-        { id: 'active', label: 'Actif', value: 'active' },
-        { id: 'inactive', label: 'Inactif', value: 'inactive' },
-        { id: 'maintenance', label: 'Maintenance', value: 'maintenance' }
-      ],
-      multiple: true,
-      value: ['active']
-    },
-    {
-      id: 'screenType',
-      label: 'Type d\'écran',
-      type: 'checkbox',
-      options: [
-        { id: 'imax', label: 'IMAX', value: 'imax' },
-        { id: 'dolby', label: 'Dolby Cinema', value: 'dolby' },
-        { id: '4k', label: '4K Laser', value: '4k' },
-        { id: 'standard', label: 'Standard', value: 'standard' }
-      ],
-      multiple: true,
-      value: []
-    },
-    {
-      id: 'capacity',
-      label: 'Capacité',
-      type: 'select',
-      options: [
-        { id: 'small', label: 'Petite (< 150)', value: 'small' },
-        { id: 'medium', label: 'Moyenne (150-300)', value: 'medium' },
-        { id: 'large', label: 'Grande (> 300)', value: 'large' }
-      ],
-      value: null
-    }
-  ];
+  filterGroups: FilterGroup[] = [];
 
   appliedFilters: AppliedFilter[] = [];
 
@@ -262,16 +226,31 @@ export class TheaterManagementComponent implements OnInit {
         value: group.value,
         displayValue: this.getFilterDisplayValue(group)
       }));
+    
+    // Appliquer les filtres aux données
+    this.applyFiltersToData();
   }
 
   onFiltersReset(): void {
     console.log('Filtres réinitialisés');
     this.appliedFilters = [];
+    this.applyFiltersToData();
   }
 
   onFilterRemove(filter: AppliedFilter): void {
     console.log('Filtre supprimé:', filter);
     this.appliedFilters = this.appliedFilters.filter(f => f.groupId !== filter.groupId);
+    this.applyFiltersToData();
+  }
+
+  // Appliquer les filtres aux données
+  private applyFiltersToData(): void {
+    // Cette méthode sera appelée quand les filtres changent
+    // Pour l'instant, on se contente de logger les filtres appliqués
+    console.log('Filtres appliqués aux données:', this.appliedFilters);
+    
+    // Ici, vous pourriez implémenter la logique de filtrage des données
+    // en fonction des filtres appliqués
   }
 
   private getFilterDisplayValue(group: FilterGroup): string {

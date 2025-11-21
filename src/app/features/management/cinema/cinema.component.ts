@@ -82,6 +82,7 @@ export class CinemaComponent implements OnInit {
   cinemaForm: FormGroup;
   theaterForm: FormGroup;
   isLoading: boolean = false;
+  filterContext: 'cinemas' | 'theaters' | 'showtimes' | 'custom' = 'cinemas';
 
   // Données réelles
   cinemas: CinemaDto[] = [];
@@ -107,45 +108,7 @@ export class CinemaComponent implements OnInit {
     averageRating: 0
   };
 
-  filterGroups: FilterGroup[] = [
-    {
-      id: 'status',
-      label: 'Statut',
-      type: 'checkbox',
-      options: [
-        { id: 'active', label: 'Actif', value: 'active' },
-        { id: 'inactive', label: 'Inactif', value: 'inactive' },
-        { id: 'maintenance', label: 'Maintenance', value: 'maintenance' }
-      ],
-      multiple: true,
-      value: ['active']
-    },
-    {
-      id: 'facilities',
-      label: 'Équipements',
-      type: 'checkbox',
-      options: [
-        { id: '3d', label: '3D', value: '3d' },
-        { id: 'imax', label: 'IMAX', value: 'imax' },
-        { id: 'dolby', label: 'Dolby Atmos', value: 'dolby' },
-        { id: 'handicap', label: 'Accès handicapé', value: 'handicap' }
-      ],
-      multiple: true,
-      value: []
-    },
-    {
-      id: 'rating',
-      label: 'Note',
-      type: 'select',
-      options: [
-        { id: '4+', label: '4 étoiles et plus', value: 4 },
-        { id: '3+', label: '3 étoiles et plus', value: 3 },
-        { id: '2+', label: '2 étoiles et plus', value: 2 },
-        { id: '1+', label: '1 étoile et plus', value: 1 }
-      ],
-      value: null
-    }
-  ];
+  filterGroups: FilterGroup[] = [];
 
   appliedFilters: AppliedFilter[] = [];
 
@@ -182,6 +145,15 @@ export class CinemaComponent implements OnInit {
   // Gestion des vues
   setView(view: 'cinemas' | 'theaters' | 'seats' | 'seat-management', cinema?: CinemaDto): void {
     this.activeView = view;
+    
+    // Mettre à jour le contexte des filtres
+    if (view === 'cinemas') {
+      this.filterContext = 'cinemas';
+    } else if (view === 'theaters') {
+      this.filterContext = 'theaters';
+    } else {
+      this.filterContext = 'custom';
+    }
     
     // Si on passe à la vue salles
     if (view === 'theaters') {
@@ -477,16 +449,32 @@ export class CinemaComponent implements OnInit {
         value: group.value,
         displayValue: this.getFilterDisplayValue(group)
       }));
+    
+    // Appliquer les filtres aux données
+    this.applyFiltersToData();
   }
 
   onFiltersReset(): void {
     console.log('Filtres réinitialisés');
     this.appliedFilters = [];
+    this.applyFiltersToData();
   }
 
   onFilterRemove(filter: AppliedFilter): void {
     console.log('Filtre supprimé:', filter);
     this.appliedFilters = this.appliedFilters.filter(f => f.groupId !== filter.groupId);
+    this.applyFiltersToData();
+  }
+
+  // Appliquer les filtres aux données
+  private applyFiltersToData(): void {
+    // Cette méthode sera appelée quand les filtres changent
+    // Pour l'instant, on se contente de logger les filtres appliqués
+    console.log('Filtres appliqués aux données:', this.appliedFilters);
+    
+    // Ici, vous pourriez implémenter la logique de filtrage des données
+    // en fonction des filtres appliqués
+    this.cdr.detectChanges();
   }
 
   private getFilterDisplayValue(group: FilterGroup): string {
