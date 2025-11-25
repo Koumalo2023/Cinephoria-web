@@ -95,7 +95,7 @@ export class UserService {
    * Créer un nouvel employé (Admin)
    */
   createEmployee(employeeData: CreateEmployeeDto): Observable<EmployeeProfileDto> {
-    return this.http.post<EmployeeProfileDto>(`${this.baseUrl}/employees`, employeeData);
+    return this.http.post<EmployeeProfileDto>(`${this.baseUrl}/register-employee`, employeeData);
   }
 
   /**
