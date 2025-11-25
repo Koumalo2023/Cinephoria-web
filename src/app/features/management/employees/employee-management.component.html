@@ -1,1 +1,338 @@
-<p>employee-management works!</p>
+<div class="employee-management">
+  <!-- En-tête avec statistiques -->
+  <header class="management-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">
+          <app-icon name="users" size="large"></app-icon>
+          Gestion des Employés
+        </h1>
+        <p class="subtitle">Gérez vos employés et leurs accès au système</p>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalEmployees }}</div>
+          <div class="stat-label">Employés</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.activeEmployees }}</div>
+          <div class="stat-label">Actifs</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.totalAdmins }}</div>
+          <div class="stat-label">Admins</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{{ stats.newEmployeesThisMonth }}</div>
+          <div class="stat-label">Nouveaux ce mois</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barre d'outils -->
+  <div class="management-toolbar">
+    <div class="toolbar-left">
+      <!-- Sélecteur de vue -->
+      <div class="view-selector">
+        <app-button 
+          [variant]="activeView === 'list' ? 'primary' : 'ghost'"
+          (clicked)="setView('list')">
+          <app-icon name="list"></app-icon>
+          Liste
+        </app-button>
+        <app-button
+          [variant]="activeView === 'registration' ? 'primary' : 'ghost'"
+          (clicked)="setView('registration')">
+          <app-icon name="user-plus"></app-icon>
+          Nouvel employé
+        </app-button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="search-container" *ngIf="activeView === 'list'">
+        <app-search-input
+          placeholder="Rechercher un employé..."
+          (search)="onSearch($event)"
+          [clearable]="true">
+        </app-search-input>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <!-- Actions principales -->
+      <app-button
+        variant="primary"
+        (clicked)="addNewEmployee()"
+        *ngIf="activeView === 'list'">
+        <app-icon name="user-plus"></app-icon>
+        Ajouter un employé
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="management-content">
+    <!-- Panneau latéral des filtres -->
+    <aside class="filters-sidebar" *ngIf="activeView === 'list'">
+      <app-filter-panel
+        [appliedFilters]="appliedFilters"
+        [showHeader]="true"
+        [showActions]="true"
+        [showAppliedFilters]="true"
+        [collapsible]="true"
+        (filtersChange)="onFiltersChange($event)"
+        (filtersApply)="onFiltersApply($event)"
+        (filtersReset)="onFiltersReset()"
+        (filterRemove)="onFilterRemove($event)">
+      </app-filter-panel>
+    </aside>
+
+    <!-- Zone de contenu principale -->
+    <main class="content-main">
+      <!-- Vue Liste des employés -->
+      <section *ngIf="activeView === 'list'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Liste des Employés</h2>
+          <div class="section-info">
+            <span class="count-badge">{{ employees.length }} employé(s)</span>
+          </div>
+        </div>
+
+        <!-- Tableau des employés -->
+        <div class="employees-table">
+          <app-admin-table
+            [data]="tableData"
+            [config]="tableConfig"
+            [actions]="tableActions"
+            [loading]="isLoading"
+            (rowSelected)="onTableRowSelected($event)"
+            (rowAction)="onTableAction($event)"
+            (selectionChanged)="onTableSelection($event)"
+            (sortChanged)="onTableSort($event)"
+            (pageChanged)="onTablePage($event)"
+            (searchChanged)="onTableSearch($event)"
+            (filterChanged)="onTableFilter($event)">
+          </app-admin-table>
+        </div>
+
+        <!-- Message vide -->
+        <div *ngIf="employees.length === 0 && !isLoading" class="empty-state">
+          <app-icon name="users" size="large"></app-icon>
+          <h3>Aucun employé trouvé</h3>
+          <p>Aucun employé ne correspond à vos critères de recherche.</p>
+          <app-button variant="primary" (clicked)="addNewEmployee()">
+            <app-icon name="user-plus"></app-icon>
+            Ajouter le premier employé
+          </app-button>
+        </div>
+      </section>
+
+      <!-- Vue Enregistrement d'employé -->
+      <section *ngIf="activeView === 'registration'" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Enregistrement d'un nouvel employé</h2>
+          <div class="section-info">
+            <app-button variant="ghost" (clicked)="setView('list')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour à la liste
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Formulaire d'enregistrement -->
+        <div class="registration-container">
+          <app-employee-registration
+            (employeeRegistered)="onEmployeeRegistered($event)"
+            (registrationCancelled)="onRegistrationCancelled()">
+          </app-employee-registration>
+        </div>
+      </section>
+
+      <!-- Vue Détails de l'employé -->
+      <section *ngIf="activeView === 'details' && selectedEmployee" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Détails de l'employé</h2>
+          <div class="section-info">
+            <app-button variant="ghost" (clicked)="setView('list')">
+              <app-icon name="arrow-left"></app-icon>
+              Retour à la liste
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Informations de l'employé -->
+        <div class="employee-details">
+          <div class="employee-header">
+            <div class="employee-avatar">
+              <app-avatar
+                [src]="selectedEmployee.profilePictureUrl"
+                [alt]="selectedEmployee.firstName + ' ' + selectedEmployee.lastName"
+                size="large">
+              </app-avatar>
+            </div>
+            <div class="employee-info">
+              <h3>{{ selectedEmployee.firstName }} {{ selectedEmployee.lastName }}</h3>
+              <p class="employee-position">{{ selectedEmployee.position }}</p>
+              <div class="employee-meta">
+                <span class="meta-item">
+                  <app-icon name="mail"></app-icon>
+                  {{ selectedEmployee.email }}
+                </span>
+                <span class="meta-item">
+                  <app-icon name="phone"></app-icon>
+                  {{ selectedEmployee.phoneNumber }}
+                </span>
+                <span class="meta-item">
+                  <app-icon name="calendar"></app-icon>
+                  Embauché le {{ selectedEmployee.hiredDate | date:'dd/MM/yyyy' }}
+                </span>
+              </div>
+            </div>
+            <div class="employee-actions">
+              <app-button variant="secondary" (clicked)="editEmployee(selectedEmployee)">
+                <app-icon name="edit"></app-icon>
+                Modifier
+              </app-button>
+              <app-button variant="secondary" (clicked)="resetEmployeePassword(selectedEmployee)">
+                <app-icon name="key"></app-icon>
+                Réinitialiser mot de passe
+              </app-button>
+              <app-button variant="danger" (clicked)="deleteEmployee(selectedEmployee)">
+                <app-icon name="trash-2"></app-icon>
+                Supprimer
+              </app-button>
+            </div>
+          </div>
+
+          <!-- Informations détaillées -->
+          <div class="employee-details-grid">
+            <div class="detail-card">
+              <h4>Informations personnelles</h4>
+              <div class="detail-list">
+                <div class="detail-item">
+                  <span class="detail-label">Nom complet:</span>
+                  <span class="detail-value">{{ selectedEmployee.firstName }} {{ selectedEmployee.lastName }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Email:</span>
+                  <span class="detail-value">{{ selectedEmployee.email }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Téléphone:</span>
+                  <span class="detail-value">{{ selectedEmployee.phoneNumber }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <h4>Informations professionnelles</h4>
+              <div class="detail-list">
+                <div class="detail-item">
+                  <span class="detail-label">Poste:</span>
+                  <span class="detail-value">{{ selectedEmployee.position }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Rôle:</span>
+                  <span class="detail-value">
+                    <app-badge [variant]="getRoleBadgeVariant(selectedEmployee.role)">
+                      {{ getRoleDisplayName(selectedEmployee.role) }}
+                    </app-badge>
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Date d'embauche:</span>
+                  <span class="detail-value">{{ selectedEmployee.hiredDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal d'édition d'employé -->
+  <div *ngIf="isEditing && selectedEmployee" class="edit-modal-overlay">
+    <div class="edit-modal">
+      <div class="modal-header">
+        <h3>Modifier l'employé</h3>
+        <app-button variant="ghost" (clicked)="cancelEdit()">
+          <app-icon name="x"></app-icon>
+        </app-button>
+      </div>
+      
+      <div class="modal-content">
+        <form [formGroup]="employeeForm" class="employee-form">
+          <div class="form-row">
+            <app-input
+              label="Prénom"
+              formControlName="firstName"
+              placeholder="Ex: Jean">
+            </app-input>
+            
+            <app-input
+              label="Nom"
+              formControlName="lastName"
+              placeholder="Ex: Dupont">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Email"
+              formControlName="email"
+              placeholder="Ex: jean.dupont@cinephoria.com">
+            </app-input>
+          </div>
+          
+          <div class="form-row">
+            <app-input
+              label="Téléphone"
+              formControlName="phoneNumber"
+              placeholder="Ex: +33 1 23 45 67 89">
+            </app-input>
+            
+            <app-input
+              label="Poste"
+              formControlName="position"
+              placeholder="Ex: Gestionnaire de salle">
+            </app-input>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-actions">
+        <app-button variant="ghost" (clicked)="cancelEdit()">
+          Annuler
+        </app-button>
+        <app-button variant="primary" (clicked)="saveEmployee()" [disabled]="!employeeForm.valid">
+          <app-icon name="save"></app-icon>
+          Sauvegarder
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de réinitialisation de mot de passe -->
+  <div *ngIf="isResettingPassword && selectedEmployee" class="edit-modal-overlay">
+    <div class="edit-modal">
+      <div class="modal-header">
+        <h3>Réinitialiser le mot de passe</h3>
+        <app-button variant="ghost" (clicked)="cancelPasswordReset()">
+          <app-icon name="x"></app-icon>
+        </app-button>
+      </div>
+      
+      <div class="modal-content">
+        <p>Réinitialisation du mot de passe pour <strong>{{ selectedEmployee.firstName }} {{ selectedEmployee.lastName }}</strong></p>
+        
+        <app-password-reset-form
+          (passwordReset)="onPasswordReset($event)"
+          (cancel)="cancelPasswordReset()">
+        </app-password-reset-form>
+      </div>
+    </div>
+  </div>
+</div>
