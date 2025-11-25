@@ -1,23 +1,27 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { of } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 
 // Composants atomiques
+import { BadgeComponent } from '../../atoms/badge/badge.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
+import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
+import { DatePickerComponent } from '../../atoms/date-picker/date-picker.component';
+import { FileUploadComponent } from '../../atoms/file-upload/file-upload.component';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { InputComponent } from '../../atoms/input/input.component';
 import { SelectComponent } from '../../atoms/select/select.component';
-import { DatePickerComponent } from '../../atoms/date-picker/date-picker.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
-import { ChipComponent } from '../../atoms/chip/chip.component';
-import { CheckboxComponent } from '../../atoms/checkbox/checkbox.component';
-import { FileUploadComponent } from '../../atoms/file-upload/file-upload.component';
 
-// Composants molécules
-import { FormFieldComponent } from '../../molecules/form-field/form-field.component';
+// Services
+import { UserService } from '../../../../core/services/api/user.service';
+import { LoadingService } from '../../../../core/services/loading.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 // Interfaces core
-import { CreateEmployeeDto, CinemaDto } from '../../../../core/interfaces/core.interfaces';
+import { UserRole } from '../../../../core/enums/user-role.enum';
+import { CinemaDto, CreateEmployeeDto, EmployeeProfileDto } from '../../../../core/interfaces/core.interfaces';
 
 export interface EmployeeRole {
   id: string;
@@ -36,11 +40,9 @@ export interface EmployeeRole {
     InputComponent,
     SelectComponent,
     DatePickerComponent,
-    BadgeComponent,
-    ChipComponent,
+    BadgeComponent, 
     CheckboxComponent,
-    FileUploadComponent,
-    FormFieldComponent
+    FileUploadComponent, 
   ],
   templateUrl: './employee-registration.component.html',
   styleUrl: './employee-registration.component.scss',
@@ -48,37 +50,23 @@ export interface EmployeeRole {
   standalone: true
 })
 export class EmployeeRegistrationComponent implements OnInit {
+  private userService = inject(UserService);
+  private loadingService = inject(LoadingService);
+  private notificationService = inject(NotificationService);
+
+  @Output() employeeRegistered = new EventEmitter<EmployeeProfileDto>();
+  @Output() registrationCancelled = new EventEmitter<void>();
+
   employeeForm: FormGroup;
   isSubmitting: boolean = false;
   currentStep: number = 1;
   totalSteps: number = 3;
 
-  // Données de démonstration
-  roles: EmployeeRole[] = [
-    {
-      id: 'manager',
-      name: 'Gestionnaire',
-      permissions: ['gestion_salles', 'gestion_employés', 'rapports'],
-      description: 'Gestion complète du cinéma'
-    },
-    {
-      id: 'projectionist',
-      name: 'Projectionniste',
-      permissions: ['gestion_séances', 'maintenance'],
-      description: 'Gestion des projections et maintenance'
-    },
-    {
-      id: 'cashier',
-      name: 'Caissier',
-      permissions: ['vente_billets', 'encaissement'],
-      description: 'Accueil et vente de billets'
-    },
-    {
-      id: 'cleaner',
-      name: 'Agent de nettoyage',
-      permissions: ['nettoyage'],
-      description: 'Entretien des salles et espaces communs'
-    }
+  // Données de démonstration (à remplacer par des appels API)
+  roles = [
+    { id: 'admin', name: 'Administrateur', description: 'Accès complet au système' },
+    { id: 'manager', name: 'Gestionnaire', description: 'Gestion du cinéma' },
+    { id: 'employee', name: 'Employé', description: 'Accès standard' }
   ];
 
   cinemas: CinemaDto[] = [
@@ -90,7 +78,6 @@ export class EmployeeRegistrationComponent implements OnInit {
       city: 'Paris',
       country: 'France',
       openingHours: '10:00-23:00',
-      showtimes: [],
       theaters: []
     },
     {
@@ -101,18 +88,6 @@ export class EmployeeRegistrationComponent implements OnInit {
       city: 'Lyon',
       country: 'France',
       openingHours: '10:00-23:00',
-      showtimes: [],
-      theaters: []
-    },
-    {
-      cinemaId: 3,
-      name: 'CineStar',
-      address: '78 Boulevard Haussmann',
-      phoneNumber: '+33 4 91 23 45 67',
-      city: 'Marseille',
-      country: 'France',
-      openingHours: '10:00-23:00',
-      showtimes: [],
       theaters: []
     }
   ];
@@ -219,12 +194,14 @@ export class EmployeeRegistrationComponent implements OnInit {
   onSubmit(): void {
     if (this.employeeForm.valid) {
       this.isSubmitting = true;
+      this.loadingService.start('employee-registration', 'Création du compte employé...');
+      
       const formData = this.employeeForm.value;
       
       // Conversion vers CreateEmployeeDto
       const employeeData: CreateEmployeeDto = {
         email: formData.personalInfo.email,
-        password: 'TempPassword123!', // Générer un mot de passe temporaire
+        password: this.generateTemporaryPassword(),
         firstName: formData.personalInfo.firstName,
         lastName: formData.personalInfo.lastName,
         phoneNumber: formData.personalInfo.phone,
@@ -232,18 +209,67 @@ export class EmployeeRegistrationComponent implements OnInit {
         hiredDate: formData.professionalInfo.hireDate
       };
 
-      console.log('Données employé:', employeeData);
+      console.log('Données employé à envoyer:', employeeData);
 
-      // Simulation d'envoi
-      setTimeout(() => {
-        this.isSubmitting = false;
-        console.log('Employé enregistré avec succès!');
-        this.employeeForm.reset();
-        this.currentStep = 1;
-      }, 2000);
+      // Appel API pour créer l'employé
+      this.userService.createEmployee(employeeData)
+        .pipe(
+          tap((createdEmployee: EmployeeProfileDto) => {
+            console.log('Employé créé avec succès:', createdEmployee);
+            this.notificationService.success('Succès', 'Employé créé avec succès');
+            this.employeeRegistered.emit(createdEmployee);
+            this.resetForm();
+          }),
+          catchError(error => {
+            console.error('Erreur création employé:', error);
+            this.notificationService.error('Erreur', 'Erreur lors de la création de l\'employé');
+            return of(null);
+          }),
+          finalize(() => {
+            this.isSubmitting = false;
+            this.loadingService.stop('employee-registration');
+          })
+        )
+        .subscribe();
     } else {
-      console.log('Formulaire invalide');
+      this.notificationService.error('Erreur', 'Veuillez remplir tous les champs obligatoires');
+      this.markAllAsTouched();
     }
+  }
+
+  // Générer un mot de passe temporaire sécurisé
+  private generateTemporaryPassword(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
+
+  // Réinitialiser le formulaire
+  private resetForm(): void {
+    this.employeeForm.reset();
+    this.currentStep = 1;
+  }
+
+  // Marquer tous les champs comme touchés pour afficher les erreurs
+  private markAllAsTouched(): void {
+    Object.keys(this.employeeForm.controls).forEach(key => {
+      const control = this.employeeForm.get(key);
+      if (control instanceof FormGroup) {
+        Object.keys(control.controls).forEach(subKey => {
+          control.get(subKey)?.markAsTouched();
+        });
+      } else {
+        control?.markAsTouched();
+      }
+    });
+  }
+
+  // Annuler l'enregistrement
+  onCancel(): void {
+    this.registrationCancelled.emit();
   }
 
   // Getters pour les options des selects
@@ -315,5 +341,19 @@ export class EmployeeRegistrationComponent implements OnInit {
   getCinemaDisplayName(cinemaId: number): string {
     const cinema = this.cinemas.find(c => c.cinemaId === cinemaId);
     return cinema ? cinema.name : 'Cinéma inconnu';
+  }
+
+  // Mapper le rôle interne vers UserRole
+  private mapRoleToUserRole(roleId: string): UserRole {
+    switch (roleId) {
+      case 'admin':
+        return UserRole.Admin;
+      case 'manager':
+        return UserRole.Employee; // Les managers sont des employés avec plus de permissions
+      case 'employee':
+        return UserRole.Employee;
+      default:
+        return UserRole.Employee;
+    }
   }
 }

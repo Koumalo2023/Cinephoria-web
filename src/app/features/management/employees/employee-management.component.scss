@@ -1,0 +1,492 @@
+@use 'src/styles/variables' as vars;
+
+.employee-management {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: vars.$gray-50;
+}
+
+// En-tête avec statistiques
+.management-header {
+  background: vars.$primary-gradient;
+  color: vars.$white;
+  padding: vars.$spacing-8 vars.$spacing-12;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .header-title {
+    .title {
+      display: flex;
+      align-items: center;
+      gap: vars.$spacing-4;
+      margin: 0 0 vars.$spacing-2 0;
+      font-size: vars.$font-size-3xl;
+      font-weight: vars.$font-weight-bold;
+    }
+    
+    .subtitle {
+      margin: 0;
+      opacity: 0.9;
+      font-size: vars.$font-size-lg;
+    }
+  }
+  
+  .header-stats {
+    display: flex;
+    gap: vars.$spacing-8;
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-value {
+        font-size: vars.$font-size-4xl;
+        font-weight: vars.$font-weight-bold;
+        line-height: 1;
+        margin-bottom: vars.$spacing-2;
+      }
+      
+      .stat-label {
+        font-size: vars.$font-size-sm;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+// Barre d'outils
+.management-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: vars.$spacing-6 vars.$spacing-12;
+  background-color: vars.$white;
+  border-bottom: 1px solid vars.$gray-200;
+  
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: vars.$spacing-8;
+    
+    .view-selector {
+      display: flex;
+      gap: vars.$spacing-2;
+    }
+    
+    .search-container {
+      min-width: 300px;
+    }
+  }
+  
+  .toolbar-right {
+    display: flex;
+    gap: vars.$spacing-4;
+  }
+}
+
+// Contenu principal
+.management-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  
+  .filters-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    background-color: vars.$white;
+    border-right: 1px solid vars.$gray-200;
+    padding: vars.$spacing-6;
+  }
+  
+  .content-main {
+    flex: 1;
+    padding: vars.$spacing-8;
+    overflow-y: auto;
+  }
+}
+
+// Section de vue
+.view-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: vars.$spacing-8;
+    
+    .section-title {
+      margin: 0;
+      font-size: vars.$font-size-xl;
+      font-weight: vars.$font-weight-semibold;
+      color: vars.$gray-800;
+    }
+    
+    .section-info {
+      display: flex;
+      align-items: center;
+      gap: vars.$spacing-4;
+      
+      .count-badge {
+        background-color: rgba(vars.$primary-color, 0.1);
+        color: vars.$primary-color;
+        padding: vars.$spacing-2 vars.$spacing-4;
+        border-radius: vars.$border-radius-full;
+        font-size: vars.$font-size-sm;
+        font-weight: vars.$font-weight-medium;
+      }
+    }
+  }
+}
+
+// Tableau des employés
+.employees-table {
+  background-color: vars.$white;
+  border-radius: vars.$border-radius-lg;
+  border: 1px solid vars.$gray-200;
+  overflow: hidden;
+}
+
+// État vide
+.empty-state {
+  text-align: center;
+  padding: vars.$spacing-12;
+  background-color: vars.$white;
+  border-radius: vars.$border-radius-lg;
+  border: 1px solid vars.$gray-200;
+  
+  h3 {
+    margin: vars.$spacing-6 0 vars.$spacing-4 0;
+    color: vars.$gray-800;
+  }
+  
+  p {
+    margin: 0 0 vars.$spacing-6 0;
+    color: vars.$gray-600;
+  }
+}
+
+// Conteneur d'enregistrement
+.registration-container {
+  background-color: vars.$white;
+  border-radius: vars.$border-radius-lg;
+  border: 1px solid vars.$gray-200;
+  padding: vars.$spacing-8;
+}
+
+// Détails de l'employé
+.employee-details {
+  background-color: vars.$white;
+  border-radius: vars.$border-radius-lg;
+  border: 1px solid vars.$gray-200;
+  overflow: hidden;
+  
+  .employee-header {
+    display: flex;
+    align-items: flex-start;
+    gap: vars.$spacing-8;
+    padding: vars.$spacing-8;
+    border-bottom: 1px solid vars.$gray-200;
+    
+    .employee-avatar {
+      flex-shrink: 0;
+    }
+    
+    .employee-info {
+      flex: 1;
+      
+      h3 {
+        margin: 0 0 vars.$spacing-2 0;
+        font-size: vars.$font-size-xl;
+        font-weight: vars.$font-weight-semibold;
+        color: vars.$gray-800;
+      }
+      
+      .employee-position {
+        margin: 0 0 vars.$spacing-4 0;
+        font-size: vars.$font-size-lg;
+        color: vars.$gray-600;
+      }
+      
+      .employee-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: vars.$spacing-6;
+        
+        .meta-item {
+          display: flex;
+          align-items: center;
+          gap: vars.$spacing-2;
+          font-size: vars.$font-size-sm;
+          color: vars.$gray-600;
+        }
+      }
+    }
+    
+    .employee-actions {
+      display: flex;
+      gap: vars.$spacing-4;
+      flex-shrink: 0;
+    }
+  }
+  
+  .employee-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: vars.$spacing-8;
+    padding: vars.$spacing-8;
+    
+    .detail-card {
+      background-color: vars.$gray-50;
+      border-radius: vars.$border-radius-md;
+      padding: vars.$spacing-6;
+      
+      h4 {
+        margin: 0 0 vars.$spacing-6 0;
+        font-size: vars.$font-size-lg;
+        font-weight: vars.$font-weight-semibold;
+        color: vars.$gray-800;
+      }
+      
+      .detail-list {
+        .detail-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: vars.$spacing-4 0;
+          border-bottom: 1px solid vars.$gray-200;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .detail-label {
+            font-weight: vars.$font-weight-medium;
+            color: vars.$gray-600;
+          }
+          
+          .detail-value {
+            color: vars.$gray-800;
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Modals
+.edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: vars.$spacing-8;
+  
+  .edit-modal {
+    background-color: vars.$white;
+    border-radius: vars.$border-radius-lg;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: vars.$shadow-xl;
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: vars.$spacing-8;
+      border-bottom: 1px solid vars.$gray-200;
+      
+      h3 {
+        margin: 0;
+        font-size: vars.$font-size-xl;
+        font-weight: vars.$font-weight-semibold;
+        color: vars.$gray-800;
+      }
+    }
+    
+    .modal-content {
+      padding: vars.$spacing-8;
+      
+      .employee-form {
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: vars.$spacing-6;
+          margin-bottom: vars.$spacing-6;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+    
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: vars.$spacing-4;
+      padding: vars.$spacing-8;
+      border-top: 1px solid vars.$gray-200;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .management-header {
+    padding: vars.$spacing-6;
+    
+    .header-content {
+      flex-direction: column;
+      gap: vars.$spacing-6;
+    }
+    
+    .header-stats {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+  
+  .management-toolbar {
+    padding: vars.$spacing-4 vars.$spacing-6;
+    
+    .toolbar-left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: vars.$spacing-4;
+      
+      .search-container {
+        min-width: 100%;
+      }
+    }
+  }
+  
+  .management-content {
+    flex-direction: column;
+    
+    .filters-sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid vars.$gray-200;
+    }
+    
+    .content-main {
+      padding: vars.$spacing-6;
+    }
+  }
+  
+  .employee-details {
+    .employee-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: vars.$spacing-6;
+      
+      .employee-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+    
+    .employee-details-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .edit-modal-overlay {
+    padding: vars.$spacing-4;
+    
+    .edit-modal {
+      .modal-content {
+        .employee-form {
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+    
+    .stat-item {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+  
+  .employee-meta {
+    flex-direction: column;
+    gap: vars.$spacing-4 !important;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-section {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.edit-modal {
+  animation: fadeIn 0.2s ease-out;
+}
+
+// États de chargement
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: vars.$spacing-12;
+  background-color: vars.$white;
+  border-radius: vars.$border-radius-lg;
+  border: 1px solid vars.$gray-200;
+}
+
+// États d'erreur
+.error-state {
+  text-align: center;
+  padding: vars.$spacing-12;
+  background-color: rgba(vars.$error-color, 0.1);
+  border: 1px solid vars.$error-color;
+  border-radius: vars.$border-radius-lg;
+  color: vars.$error-color;
+  
+  h3 {
+    margin: 0 0 vars.$spacing-4 0;
+  }
+}
