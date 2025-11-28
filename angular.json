@@ -41,6 +41,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -70,36 +76,29 @@
               "sourceMap": true,
               "namedChunks": true
             },
-            "aws": {
-              "budgets": [
+            "staging": {
+              "fileReplacements": [
                 {
-                  "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "20kb",
-                  "maximumError": "30kb"
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.staging.ts"
                 }
               ],
+              "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "optimization": {
-                "scripts": true,
-                "styles": {
-                  "minify": true,
-                  "inlineCritical": false
-                },
-                "fonts": true
-              },
-              "aot": true,
+              "extractCss": true,
               "namedChunks": false,
+              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "serviceWorker": true,
-              "ngswConfigPath": "ngsw-config.json"
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -112,6 +111,9 @@
             },
             "development": {
               "buildTarget": "cinephoria-web:build:development"
+            },
+            "staging": {
+              "buildTarget": "cinephoria-web:build:staging"
             },
             "aws": {
               "buildTarget": "cinephoria-web:build:aws"
