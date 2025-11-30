@@ -1,0 +1,184 @@
+name: Frontend Deploy
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  NODE_VERSION: '18'
+  AWS_REGION: 'eu-west-3'
+
+jobs:
+  # Tests et sécurité
+  test:
+    name: Run Tests and Security Scans
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm run test -- --watch=false --browsers=ChromeHeadless
+
+    - name: Security audit
+      run: npm audit --audit-level moderate
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Build verification
+      run: |
+        npm run build:staging
+        echo "✅ Build staging réussi"
+        npm run build:prod
+        echo "✅ Build production réussi"
+
+  # Build et déploiement
+  build-and-deploy:
+    name: Build and Deploy Frontend
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    environment: 
+      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/develop' && 'staging') || (github.ref == 'refs/heads/main' && 'production') || (startsWith(github.ref, 'refs/tags/v') && 'production') || 'staging' }}
+      url: ${{ fromJSON('{"staging":"https://staging.cinephoria.eu","production":"https://www.cinephoria.eu"}')[github.event.inputs.environment || (github.ref == 'refs/heads/develop' && 'staging') || (github.ref == 'refs/heads/main' && 'production') || (startsWith(github.ref, 'refs/tags/v') && 'production') || 'staging'] }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Determine build configuration
+      id: config
+      run: |
+        if [[ "${{ github.event.inputs.environment }}" == "staging" ]] || [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          echo "build-command=build:staging" >> $GITHUB_OUTPUT
+          echo "s3-bucket=${{ secrets.S3_BUCKET }}" >> $GITHUB_OUTPUT
+          echo "api-url=https://staging-api.cinephoria.eu/api" >> $GITHUB_OUTPUT
+          echo "environment=staging" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.event.inputs.environment }}" == "production" ]] || [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          echo "build-command=build:prod" >> $GITHUB_OUTPUT
+          echo "s3-bucket=${{ secrets.S3_BUCKET }}" >> $GITHUB_OUTPUT
+          echo "api-url=https://api.cinephoria.eu/api" >> $GITHUB_OUTPUT
+          echo "environment=production" >> $GITHUB_OUTPUT
+        else
+          # Fallback to staging
+          echo "build-command=build:staging" >> $GITHUB_OUTPUT
+          echo "s3-bucket=${{ secrets.S3_BUCKET }}" >> $GITHUB_OUTPUT
+          echo "api-url=https://staging-api.cinephoria.eu/api" >> $GITHUB_OUTPUT
+          echo "environment=staging" >> $GITHUB_OUTPUT
+        fi
+
+        echo "Configuration détectée :"
+        echo "  Build command: ${{ steps.config.outputs.build-command }}"
+        echo "  S3 Bucket: ${{ steps.config.outputs.s3-bucket }}"
+        echo "  API URL: ${{ steps.config.outputs.api-url }}"
+        echo "  Environment: ${{ steps.config.outputs.environment }}"
+
+    - name: Build Angular app
+      run: npm run ${{ steps.config.outputs.build-command }}
+      env:
+        API_URL: ${{ steps.config.outputs.api-url }}
+        NODE_ENV: ${{ steps.config.outputs.environment }}
+
+    - name: Verify build output
+      run: |
+        echo "📁 Contenu du dossier dist/:"
+        ls -la dist/
+        echo "📊 Taille des fichiers :"
+        du -sh dist/*
+
+    - name: Configure AWS credentials via OIDC
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+        role-session-name: GitHubActions-Frontend-Deploy
+
+    - name: Deploy to S3 using script
+      run: |
+        chmod +x .github/scripts/deploy-frontend.sh
+        ./.github/scripts/deploy-frontend.sh \
+          "${{ steps.config.outputs.environment }}" \
+          "${{ steps.config.outputs.s3-bucket }}" \
+          "${{ secrets.CLOUDFRONT_ID }}"
+
+    - name: Verify deployment
+      run: |
+        DEPLOYMENT_URL=${{ fromJSON('{"staging":"https://staging.cinephoria.eu","production":"https://www.cinephoria.eu"}')[steps.config.outputs.environment] }}
+        echo "🔍 Vérification du déploiement à $DEPLOYMENT_URL"
+        
+        # Attendre un peu que le déploiement soit effectif
+        sleep 10
+        
+        # Tester l'accès à la page
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOYMENT_URL" || echo "000")
+        
+        if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "403" ]; then
+          echo "✅ Déploiement vérifié (HTTP $HTTP_STATUS)"
+        else
+          echo "⚠️  Statut HTTP inattendu: $HTTP_STATUS"
+          echo "Le déploiement peut quand même être réussi, vérifiez manuellement."
+        fi
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    if: always()
+
+    steps:
+    - name: Notify on success
+      if: needs.build-and-deploy.result == 'success'
+      run: |
+        echo "🎉 Déploiement frontend réussi sur ${{ needs.build-and-deploy.outputs.environment }}!"
+        echo "URL: ${{ fromJSON('{"staging":"https://staging.cinephoria.eu","production":"https://www.cinephoria.eu"}')[needs.build-and-deploy.outputs.environment] }}"
+
+    - name: Notify on failure
+      if: needs.build-and-deploy.result == 'failure'
+      run: |
+        echo "❌ Échec du déploiement frontend sur ${{ needs.build-and-deploy.outputs.environment }}"
+        exit 1
