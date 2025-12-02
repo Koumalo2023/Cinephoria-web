@@ -75,6 +75,8 @@ jobs:
       contents: read
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -89,7 +91,8 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
+        cache-dependency-path: package-lock.json
+      working-directory: Cinephoria-web
 
     - name: Install dependencies
       working-directory: Cinephoria-web
