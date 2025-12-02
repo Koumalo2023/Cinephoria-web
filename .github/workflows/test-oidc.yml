@@ -86,12 +86,14 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: package-lock.json
+        cache-dependency-path: Cinephoria-web/package-lock.json
 
     - name: Install dependencies
+      working-directory: Cinephoria-web
       run: npm ci
 
     - name: Test Angular build configuration
+      working-directory: Cinephoria-web
       run: |
         echo "🔍 Testing Angular build configuration..."
         ENVIRONMENT=${{ github.event.inputs.environment }}
