@@ -91,7 +91,8 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: 'Cinephoria-web/package-lock.json'
+        cache-dependency-path: package-lock.json
+      working-directory: Cinephoria-web
 
     - name: Install dependencies
       working-directory: Cinephoria-web
