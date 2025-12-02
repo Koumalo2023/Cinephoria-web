@@ -151,3 +151,5 @@ jobs:
         echo "- Add S3_BUCKET secret to GitHub Environments"
         echo "- Implement full deployment workflow"
         echo "- Test actual S3 deployment"
+
+# Workflow version 1.0

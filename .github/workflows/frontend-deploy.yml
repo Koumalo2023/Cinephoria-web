@@ -192,3 +192,4 @@ jobs:
       run: |
         echo "❌ Échec du déploiement frontend sur ${{ needs.build-and-deploy.outputs.environment }}"
         exit 1
+# Workflow version 1.0
