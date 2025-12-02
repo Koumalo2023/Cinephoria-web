@@ -80,6 +80,7 @@ jobs:
       with:
         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
         aws-region: ${{ env.AWS_REGION }}
+        role-session-name: GitHubActions-OIDC-Test-Frontend-Deployment
     - name: List Cinephoria-web directory contents
       run: ls -la Cinephoria-web/
 
@@ -88,7 +89,7 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: Cinephoria-web/package-lock.json
+        cache-dependency-path: 'Cinephoria-web/package-lock.json'
 
     - name: Install dependencies
       working-directory: Cinephoria-web
