@@ -80,7 +80,7 @@ fi
 echo "✅ Frontend déployé avec succès sur $ENVIRONMENT!"
 echo "🌐 URL d'accès :"
 if [ "$ENVIRONMENT" = "staging" ]; then
-    echo "   - https://staging.cinephoria.eu"
+    echo "   - https://staging-app.cinephoria.eu"
 else
     echo "   - https://www.cinephoria.eu"
 fi

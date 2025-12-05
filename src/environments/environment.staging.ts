@@ -3,7 +3,7 @@ export const environment = {
   apiUrl: 'https://staging-api.cinephoria.eu/api',
   appName: 'Cinephoria Web - Staging',
   version: '1.0.0-staging',
-  domain: 'staging.cinephoria.eu',
+  domain: 'staging-app.cinephoria.eu',
   // Configuration SEO
   seo: {
     title: 'Cinephoria Staging - Votre cinéma en ligne',
