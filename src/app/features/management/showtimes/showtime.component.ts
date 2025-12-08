@@ -62,7 +62,6 @@ export interface ShowtimeStats {
     RouterModule,
     ReactiveFormsModule,
     ButtonComponent,
-    SearchBarComponent,
     PaginationComponent,
     BadgeComponent,
     SpinnerComponent,
@@ -70,8 +69,7 @@ export interface ShowtimeStats {
     FilterPanelComponent,
     FormFieldComponent,
     SelectComponent,
-    DatePickerComponent,
-    TimePickerComponent
+    DatePickerComponent 
   ],
   templateUrl: './showtime.component.html',
   styleUrl: './showtime.component.scss',
